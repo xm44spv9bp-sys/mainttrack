@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#2C2C2A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="MaintTrack">
+<title>MaintTrack</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#1a1a18;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+:root{
+  --amber:#EF9F27;--amber-dark:#BA7517;--amber-light:#FAEEDA;--amber-deep:#633806;
+  --dark:#2C2C2A;--dark2:#3a3a38;--dark3:#1a1a18;
+  --gray:#888780;--gray2:#444441;
+  --bg:#ffffff;--bg2:#f5f5f3;--bg3:#eeede8;
+  --text:#1a1a18;--text2:#5F5E5A;
+  --border:#D3D1C7;--border2:#B4B2A9;
+  --green-bg:#EAF3DE;--green-text:#3B6D11;
+  --yellow-bg:#FAEEDA;--yellow-text:#854F0B;
+  --red-bg:#FCEBEB;--red-text:#A32D2D;
+  --blue-bg:#E6F1FB;--blue-text:#185FA5;
+  --radius:10px;--radiuslg:14px;--radiusxl:20px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#2C2C2A;--bg2:#3a3a38;--bg3:#1a1a18;
+    --text:#f5f5f3;--text2:#888780;
+    --border:#444441;--border2:#5F5E5A;
+  }
+}
+#app{height:100dvh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;position:relative;overflow:hidden;background:var(--bg3)}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg3);transition:transform 0.3s cubic-bezier(.4,0,.2,1),opacity 0.3s;will-change:transform}
+.screen.hidden{transform:translateX(100%);pointer-events:none}
+.screen.slide-left{transform:translateX(-30%);opacity:0;pointer-events:none}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--dark);padding:env(safe-area-inset-top,12px) 16px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0;min-height:56px}
+.topbar-back{background:none;border:none;color:var(--amber);font-size:22px;cursor:pointer;padding:4px;line-height:1;flex-shrink:0}
+.topbar-logo{display:flex;align-items:center;gap:8px}
+.topbar-gear{width:30px;height:30px;background:var(--amber);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.topbar-title{font-size:16px;font-weight:600;color:var(--amber);flex:1}
+.topbar-sub{font-size:11px;color:var(--gray);margin-top:1px}
+.topbar-right{margin-left:auto;font-size:12px;color:var(--gray);cursor:pointer;padding:6px;border:1px solid var(--gray2);border-radius:8px;background:none;color:var(--amber)}
+
+/* ── LOGIN ── */
+#login{background:var(--dark3)}
+.login-hero{background:var(--dark);padding:48px 24px 36px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.login-icon{width:72px;height:72px;background:var(--amber);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:38px}
+.login-appname{font-size:26px;font-weight:700;color:var(--amber);letter-spacing:-0.5px}
+.login-tagline{font-size:13px;color:var(--gray);text-align:center}
+.login-form{padding:28px 20px;flex:1;display:flex;flex-direction:column;gap:16px}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:7px}
+.field input{width:100%;padding:14px 16px;border:1.5px solid #444;border-radius:var(--radius);background:#3a3a38;color:#f5f5f3;font-size:16px;outline:none;transition:border-color .2s}
+.field input:focus{border-color:var(--amber)}
+.field input::placeholder{color:#666}
+.login-btn{width:100%;padding:16px;background:var(--amber);color:var(--dark);border:none;border-radius:var(--radius);font-size:16px;font-weight:700;cursor:pointer;transition:opacity .15s;margin-top:4px}
+.login-btn:active{opacity:.85}
+.login-hint{background:#3a3a38;border-radius:var(--radius);padding:12px 14px;font-size:12px;color:var(--gray);border-left:3px solid var(--amber)}
+.login-hint strong{color:var(--amber)}
+
+/* ── HOME ── */
+.home-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px}
+.scan-card{background:var(--dark);border-radius:var(--radiuslg);padding:20px;margin-bottom:20px;display:flex;flex-direction:column;align-items:center;gap:12px;cursor:pointer;border:2px dashed var(--gray2);transition:border-color .2s}
+.scan-card:active{border-color:var(--amber)}
+.scan-qr-icon{width:80px;height:80px;display:flex;align-items:center;justify-content:center;position:relative}
+.scan-qr-icon svg{width:70px;height:70px;color:var(--amber)}
+.scan-pulse{position:absolute;inset:0;border-radius:50%;border:2px solid var(--amber);animation:pulse 2s infinite}
+@keyframes pulse{0%{transform:scale(.8);opacity:1}100%{transform:scale(1.3);opacity:0}}
+.scan-title{font-size:17px;font-weight:600;color:#f5f5f3}
+.scan-sub{font-size:13px;color:var(--gray);text-align:center}
+.scan-btn-pill{background:var(--amber);color:var(--dark);padding:10px 28px;border-radius:30px;font-size:14px;font-weight:700}
+
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.section-label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em}
+.section-count{font-size:11px;color:var(--gray);background:var(--bg2);padding:2px 8px;border-radius:20px}
+
+.machine-card{background:var(--bg);border-radius:var(--radiuslg);border:1px solid var(--border);margin-bottom:10px;display:flex;align-items:center;padding:14px 16px;gap:14px;cursor:pointer;transition:border-color .15s,transform .1s}
+.machine-card:active{transform:scale(.98);border-color:var(--amber-dark)}
+.machine-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.icon-ok{background:var(--green-bg)}
+.icon-warn{background:var(--yellow-bg)}
+.icon-err{background:var(--red-bg)}
+.machine-info{flex:1;min-width:0}
+.machine-name{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.machine-loc{font-size:12px;color:var(--text2);margin-top:2px}
+.machine-status{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;flex-shrink:0}
+.st-ok{background:var(--green-bg);color:var(--green-text)}
+.st-warn{background:var(--yellow-bg);color:var(--yellow-text)}
+.st-err{background:var(--red-bg);color:var(--red-text)}
+.machine-arrow{color:var(--border2);font-size:18px;flex-shrink:0}
+
+/* ── QR SCANNER SCREEN ── */
+#scanner-screen{background:#000;z-index:50}
+.scanner-topbar{background:rgba(0,0,0,.7);padding:env(safe-area-inset-top,12px) 16px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+#qr-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.scanner-overlay-ui{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+.scanner-frame-wrap{position:relative;width:240px;height:240px}
+.scanner-border{position:absolute;inset:0;border-radius:16px}
+.corner{position:absolute;width:28px;height:28px;border-color:var(--amber);border-style:solid;border-width:3px}
+.corner.tl{top:0;left:0;border-right:none;border-bottom:none;border-radius:10px 0 0 0}
+.corner.tr{top:0;right:0;border-left:none;border-bottom:none;border-radius:0 10px 0 0}
+.corner.bl{bottom:0;left:0;border-right:none;border-top:none;border-radius:0 0 0 10px}
+.corner.br{bottom:0;right:0;border-left:none;border-top:none;border-radius:0 0 10px 0}
+.scanner-line{position:absolute;left:4px;right:4px;height:2px;background:linear-gradient(90deg,transparent,var(--amber),transparent);animation:scanline 2s ease-in-out infinite}
+@keyframes scanline{0%{top:8px}50%{top:calc(100% - 8px)}100%{top:8px}}
+.scanner-text{margin-top:24px;font-size:14px;color:rgba(255,255,255,.8);text-align:center;padding:0 24px}
+.scanner-bottom{position:absolute;bottom:0;left:0;right:0;padding:24px;background:linear-gradient(transparent,rgba(0,0,0,.8));display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:all}
+.scanner-demo-label{font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.1em}
+.scanner-demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.demo-qr-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:10px;text-align:center;cursor:pointer;transition:background .15s}
+.demo-qr-btn:active{background:rgba(239,159,39,.3);border-color:var(--amber)}
+.demo-qr-code{font-size:10px;color:var(--amber);font-family:monospace;margin-bottom:3px}
+.demo-qr-name{font-size:12px;color:#fff;font-weight:500}
+.scanner-close-btn{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:10px 32px;border-radius:30px;font-size:14px;cursor:pointer}
+#qr-canvas{display:none}
+
+/* ── MACHINE DETAIL ── */
+.detail-hero{background:var(--dark);padding:16px 16px 0;flex-shrink:0}
+.detail-code{font-size:11px;color:var(--amber);font-family:monospace;font-weight:600;margin-bottom:4px}
+.detail-name{font-size:20px;font-weight:700;color:#fff;margin-bottom:4px;line-height:1.2}
+.detail-loc{font-size:13px;color:var(--gray);margin-bottom:12px}
+.detail-tags{display:flex;gap:8px;flex-wrap:wrap;padding-bottom:16px}
+.dtag{font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px}
+.dtag-ok{background:rgba(99,153,34,.2);color:#C0DD97}
+.dtag-warn{background:rgba(186,117,23,.25);color:#FAC775}
+.dtag-err{background:rgba(163,45,45,.25);color:#F09595}
+.dtag-info{background:rgba(24,95,165,.2);color:#85B7EB}
+
+.tabs-bar{background:var(--dark);display:flex;flex-shrink:0;border-bottom:1px solid var(--gray2)}
+.tab-btn{flex:1;padding:12px 4px;font-size:11px;font-weight:600;color:var(--gray);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s;white-space:nowrap;letter-spacing:.02em}
+.tab-btn.active{color:var(--amber);border-bottom-color:var(--amber)}
+
+.tab-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.tab-pane{display:none;padding:16px}
+.tab-pane.active{display:block}
+
+.info-list{background:var(--bg);border-radius:var(--radiuslg);border:1px solid var(--border);overflow:hidden}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);gap:12px}
+.info-row:last-child{border-bottom:none}
+.info-key{font-size:13px;color:var(--text2);flex-shrink:0}
+.info-val{font-size:13px;font-weight:600;color:var(--text);text-align:right}
+
+.doc-item{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color .15s}
+.doc-item:active{border-color:var(--amber-dark)}
+.doc-icon-wrap{width:42px;height:42px;background:var(--bg2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.doc-info{flex:1;min-width:0}
+.doc-name{font-size:14px;font-weight:600;color:var(--text)}
+.doc-meta{font-size:12px;color:var(--text2);margin-top:2px}
+.doc-arr{color:var(--border2);font-size:20px}
+
+.proc-step{display:flex;gap:14px;margin-bottom:16px}
+.step-num{width:32px;height:32px;border-radius:50%;background:var(--dark);border:2px solid var(--amber);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--amber);flex-shrink:0}
+.step-body{flex:1}
+.step-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:5px}
+.step-desc{font-size:13px;color:var(--text2);line-height:1.55}
+.step-warn{margin-top:8px;padding:8px 12px;background:var(--yellow-bg);border-left:3px solid #EF9F27;border-radius:0 8px 8px 0;font-size:12px;color:var(--yellow-text);line-height:1.4}
+.step-danger{margin-top:8px;padding:8px 12px;background:var(--red-bg);border-left:3px solid #E24B4A;border-radius:0 8px 8px 0;font-size:12px;color:var(--red-text);line-height:1.4}
+
+.parts-header{display:grid;grid-template-columns:1fr auto auto;gap:8px;padding:8px 14px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em}
+.part-item{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px}
+.part-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px}
+.part-name{font-size:13px;font-weight:600;color:var(--text);flex:1}
+.part-stock{font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;flex-shrink:0}
+.pst-ok{background:var(--green-bg);color:var(--green-text)}
+.pst-low{background:var(--yellow-bg);color:var(--yellow-text)}
+.pst-out{background:var(--red-bg);color:var(--red-text)}
+.part-bottom{display:flex;justify-content:space-between;align-items:center}
+.part-pn{font-size:11px;color:var(--text2);font-family:monospace}
+.part-qty{font-size:12px;color:var(--text2)}
+
+/* install banner */
+.install-banner{display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--dark);border-top:1px solid var(--gray2);padding:14px 20px;z-index:200;align-items:center;gap:12px}
+.install-banner.show{display:flex}
+.install-text{flex:1;font-size:13px;color:#f5f5f3}
+.install-text span{color:var(--amber);font-weight:600}
+.install-btn{background:var(--amber);color:var(--dark);border:none;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.install-x{background:none;border:none;color:var(--gray);font-size:20px;cursor:pointer;padding:4px}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ═══ LOGIN ═══ -->
+<div id="login" class="screen">
+  <div class="login-hero">
+    <div class="login-icon">⚙️</div>
+    <div class="login-appname">MaintTrack</div>
+    <div class="login-tagline">Systém správy a evidencie údržby</div>
+  </div>
+  <div class="login-form">
+    <div class="field">
+      <label>Používateľské meno</label>
+      <input type="text" id="inp-user" placeholder="napr. novak.peter" autocomplete="username" autocapitalize="none">
+    </div>
+    <div class="field">
+      <label>Heslo</label>
+      <input type="password" id="inp-pass" placeholder="Vaše heslo" autocomplete="current-password">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Prihlásiť sa →</button>
+    <div class="login-hint">
+      <strong>Demo režim:</strong> zadajte akékoľvek meno a heslo (min. 3 znaky) a prihláste sa.
+    </div>
+  </div>
+</div>
+
+<!-- ═══ HOME ═══ -->
+<div id="home" class="screen hidden">
+  <div class="topbar">
+    <div class="topbar-logo">
+      <div class="topbar-gear">⚙️</div>
+      <div>
+        <div class="topbar-title">MaintTrack</div>
+        <div class="topbar-sub" id="home-user">Načítavanie...</div>
+      </div>
+    </div>
+    <button class="topbar-right" onclick="doLogout()">Odhlásiť</button>
+  </div>
+  <div class="home-scroll">
+    <div class="scan-card" onclick="openScanner()">
+      <div class="scan-qr-icon">
+        <div class="scan-pulse"></div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 17h2M19 15v2M15 21h6M21 19v2M8 5v2M5 8h2M18 5v2M17 8h2M5 18h2M8 17v2"/>
+        </svg>
+      </div>
+      <div class="scan-title">Skenovať QR kód stroja</div>
+      <div class="scan-sub">Namierte kameru na QR štítok alebo zvoľte demo stroj</div>
+      <div class="scan-btn-pill">Otvoriť skener</div>
+    </div>
+
+    <div class="section-header">
+      <div class="section-label">Stroje v prevádzke</div>
+      <div class="section-count">4 stroje</div>
+    </div>
+    <div id="machine-list"></div>
+  </div>
+</div>
+
+<!-- ═══ QR SCANNER ═══ -->
+<div id="scanner-screen" class="screen hidden">
+  <div class="scanner-topbar">
+    <button class="topbar-back" onclick="closeScanner()">✕</button>
+    <div style="font-size:15px;font-weight:600;color:var(--amber)">Skener QR kódu</div>
+  </div>
+  <video id="qr-video" autoplay playsinline muted></video>
+  <canvas id="qr-canvas"></canvas>
+  <div class="scanner-overlay-ui">
+    <div class="scanner-frame-wrap">
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+      <div class="scanner-line"></div>
+    </div>
+    <div class="scanner-text">Namierte kameru na QR kód stroja</div>
+  </div>
+  <div class="scanner-bottom">
+    <div class="scanner-demo-label">Demo — kliknite na QR kód</div>
+    <div class="scanner-demo-grid" id="demo-qr-grid"></div>
+    <button class="scanner-close-btn" onclick="closeScanner()">Zrušiť</button>
+  </div>
+</div>
+
+<!-- ═══ MACHINE DETAIL ═══ -->
+<div id="detail" class="screen hidden">
+  <div class="topbar" style="padding-bottom:0">
+    <button class="topbar-back" onclick="goBack()">←</button>
+    <div>
+      <div class="topbar-title" id="d-topbar-name">Stroj</div>
+      <div class="topbar-sub" id="d-topbar-loc"></div>
+    </div>
+  </div>
+  <div class="detail-hero">
+    <div class="detail-code" id="d-code"></div>
+    <div class="detail-name" id="d-name"></div>
+    <div class="detail-loc" id="d-loc"></div>
+    <div class="detail-tags" id="d-tags"></div>
+  </div>
+  <div class="tabs-bar">
+    <button class="tab-btn active" onclick="switchTab('info')">Info</button>
+    <button class="tab-btn" onclick="switchTab('docs')">Dokumenty</button>
+    <button class="tab-btn" onclick="switchTab('proc')">Postup</button>
+    <button class="tab-btn" onclick="switchTab('parts')">Diely</button>
+  </div>
+  <div class="tab-body">
+    <div class="tab-pane active" id="tab-info"></div>
+    <div class="tab-pane" id="tab-docs"></div>
+    <div class="tab-pane" id="tab-proc"></div>
+    <div class="tab-pane" id="tab-parts"></div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<!-- PWA Install Banner -->
+<div class="install-banner" id="install-banner">
+  <div class="install-text">Pridajte <span>MaintTrack</span> na plochu telefónu</div>
+  <button class="install-btn" id="install-btn">Inštalovať</button>
+  <button class="install-x" onclick="document.getElementById('install-banner').classList.remove('show')">×</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script>
+// ── DATA ──
+const MACHINES = {
+  'CNC-001':{
+    id:'CNC-001',name:'CNC Frézka TF-300',loc:'Hala A — Pozícia A12',
+    status:'ok',statusLabel:'Prevádzkyschopná',
+    icon:'🔩',
+    tags:[{t:'Prevádzkyschopná',c:'dtag-ok'},{t:'Ročná revízia: 03/2027',c:'dtag-info'}],
+    info:[
+      ['Výrobca','TechnoFréz s.r.o.'],['Model','TF-300 Pro'],['Rok výroby','2019'],
+      ['Výrobné číslo','TF300-29847'],['Max. otáčky','8 000 ot/min'],['Výkon','15 kW'],
+      ['Hmotnosť','2 400 kg'],['Posledná údržba','10.03.2026'],['Zodpovedný technik','Ing. Novák P.'],
+    ],
+    docs:[
+      {icon:'📄',name:'Technický manuál TF-300',meta:'PDF · 4,2 MB'},
+      {icon:'📋',name:'Protokol o revízii 2025',meta:'PDF · 380 kB'},
+      {icon:'📐',name:'Výkresová dokumentácia',meta:'ZIP · 12,1 MB'},
+      {icon:'⚠️',name:'Bezpečnostný list',meta:'PDF · 1,1 MB'},
+    ],
+    proc:[
+      {t:'Odstavenie stroja',d:'Prepnite stroj do režimu STOP a počkajte na úplné zastavenie vretena. Minimálne 3 minúty.',w:'',danger:false},
+      {t:'LOTO zaistenie',d:'Otočte hlavný vypínač do polohy 0. Zaistite LOTO zámkom a uschovajte kľúč.',w:'POVINNÉ — vstup bez LOTO zaistenia je zakázaný! Hrozí úraz elektrickým prúdom.',danger:true},
+      {t:'Čistenie pracovného priestoru',d:'Odstráňte triesky stieračkou a priemyselným vysávačom. Nepoužívajte stlačený vzduch na triesky.',w:''},
+      {t:'Kontrola hladín olejov',d:'Skontrolujte hladinu hydraulického oleja (min/max na indikátori). Doplňte olej ISO VG 46 ak je pod min.',w:''},
+      {t:'Mazanie lineárnych vedení',d:'Naneste mazivo NLGI 2 na všetky mazacie miesta podľa schémy v manuáli (str. 34). Každé 500 prevádzkových hodín.',w:''},
+      {t:'Záznam a podpis',d:'Vyplňte servisný protokol, zaznamenajte všetky odchýlky a čas vykonania údržby.',w:''},
+    ],
+    parts:[
+      {n:'Olejový filter F-12',pn:'TF-F12-OIL',q:'2 ks',stock:'Na sklade',sc:'pst-ok'},
+      {n:'Vreteno horné ložisko',pn:'SKF-6205-2RS',q:'1 ks',stock:'3 ks',sc:'pst-ok'},
+      {n:'Hydraulická pumpa HP-80',pn:'TF-HP80-REP',q:'1 ks',stock:'Posledný kus',sc:'pst-low'},
+      {n:'Chladiaca kvapalina 5L',pn:'COOL-ISO-5L',q:'5 L',stock:'Na sklade',sc:'pst-ok'},
+      {n:'Remeň pohonu V-75',pn:'BELT-V75-A',q:'1 ks',stock:'Nie je skladom',sc:'pst-out'},
+    ]
+  },
+  'KOMP-02':{
+    id:'KOMP-02',name:'Kompresor Atlas K-50',loc:'Strojovňa — Pozícia S3',
+    status:'warn',statusLabel:'Vyžaduje kontrolu',
+    icon:'⚡',
+    tags:[{t:'Vyžaduje kontrolu',c:'dtag-warn'},{t:'Posledná revízia: 11/2025',c:'dtag-info'}],
+    info:[
+      ['Výrobca','Atlas Copco'],['Model','GA-50 VSD+'],['Rok výroby','2021'],
+      ['Výrobné číslo','AC50-84521'],['Max. tlak','13 bar'],['Výkon motora','45 kW'],
+      ['Objem vzduchu','285 m³/hod'],['Posledná údržba','15.11.2025'],['Zodpovedný','M. Horváth'],
+    ],
+    docs:[
+      {icon:'📄',name:'Prevádzkový manuál GA-50',meta:'PDF · 6,8 MB'},
+      {icon:'📋',name:'Servisná správa 2025',meta:'PDF · 520 kB'},
+      {icon:'⚠️',name:'Bezpečnostné predpisy',meta:'PDF · 2,0 MB'},
+    ],
+    proc:[
+      {t:'Kontrola pred spustením',d:'Vizuálna kontrola netesností oleja a vzduchu. Skontrolujte hladinu oleja na olejomere.',w:''},
+      {t:'Kontrola prevádzkového tlaku',d:'Po spustení sledujte manometer — prevádzkový tlak 8–10 bar. Ak je mimo rozsahu, zastavte.',w:'Tlak nad 13 bar je KRITICKÝ! Okamžite zastavte stroj a ohláste vedúcemu.',danger:true},
+      {t:'Odvod kondenzátu',d:'Otvorte vypúšťací ventil, nechajte odtiecť kondenzát cca 30 sekúnd. Zatvorte ventil.',w:''},
+      {t:'Kontrola vzduchového filtra',d:'Skontrolujte zanesenie filtrového indikátora. Červená = vymeňte filter okamžite.',w:'Zanesený filter poškodí kompresor — nikdy nespúšťajte s červeným indikátorom.',danger:false},
+      {t:'Záznam hodnôt',d:'Zapíšte tlak, teplotu oleja a stav hodinomera do servisného protokolu.',w:''},
+    ],
+    parts:[
+      {n:'Vzduchový filter AF-50',pn:'AC-AF50-STD',q:'1 ks',stock:'2 ks',sc:'pst-ok'},
+      {n:'Olejový filter OF-50',pn:'AC-OF50-VSD',q:'1 ks',stock:'Posledný kus',sc:'pst-low'},
+      {n:'Kompresorový olej 4L',pn:'AC-OIL-4L',q:'4 L',stock:'Na sklade',sc:'pst-ok'},
+      {n:'Odvzdušňovací ventil',pn:'AC-VALVE-DV',q:'1 ks',stock:'Nie je skladom',sc:'pst-out'},
+    ]
+  },
+  'CONV-03':{
+    id:'CONV-03',name:'Dopravný pás DP-12',loc:'Hala B — Linka 3',
+    status:'err',statusLabel:'PORUCHA',
+    icon:'🔄',
+    tags:[{t:'⚠ PORUCHA',c:'dtag-err'},{t:'Výroba zastavená',c:'dtag-warn'}],
+    info:[
+      ['Výrobca','ConveyTech GmbH'],['Model','DP-12/B'],['Rok výroby','2018'],
+      ['Výrobné číslo','CT12B-11234'],['Dĺžka pásu','12 m'],['Rýchlosť pásu','0,3–1,5 m/s'],
+      ['Nosnosť','800 kg/m'],['Posledná údržba','02.01.2026'],['Zodpovedný','P. Kováč'],
+    ],
+    docs:[
+      {icon:'📄',name:'Technická dokumentácia DP-12',meta:'PDF · 3,5 MB'},
+      {icon:'📋',name:'Havarijný protokol 04/2026',meta:'PDF · 210 kB'},
+      {icon:'📐',name:'Elektrická schéma zapojenia',meta:'PDF · 1,8 MB'},
+    ],
+    proc:[
+      {t:'NÚDZOVÉ ZASTAVENIE',d:'Stlačte červené STOP tlačidlo na ovládacom paneli. Zablokujte prístup žltou páskou.',w:'VSTUP do oblasti pásu bez LOTO zaistenia je ZAKÁZANÝ!',danger:true},
+      {t:'Diagnostika — chybový kód',d:'Zapíšte chybový kód z displeja. Bežné kódy: E01=pás zosklzol, E02=porucha motora, E05=chyba senzora.',w:''},
+      {t:'Vizuálna kontrola pásu',d:'Skontrolujte pás na prítomnosť trhlín, prietrží alebo zosklznutia z vodiaceho valca.',w:''},
+      {t:'Kontrola pohonu',d:'Skontrolujte napätie na frekvenčnom meniči. Skontrolujte spojku medzi motorom a prevodovkou.',w:''},
+      {t:'Oprava alebo eskalácia',d:'Menšie závady opravte podľa manuálu. Väčšie závady ihneď nahláste vedúcemu údržby.',w:''},
+    ],
+    parts:[
+      {n:'Dopravný pás 12m PVC',pn:'CT-BELT-12PVC',q:'1 ks',stock:'Objednané',sc:'pst-low'},
+      {n:'Ložisko vodiaceho valca',pn:'SKF-6210-ZZ',q:'4 ks',stock:'Na sklade',sc:'pst-ok'},
+      {n:'Frekvenčný menič 5,5kW',pn:'SEW-MDX60-55',q:'1 ks',stock:'Nie je skladom',sc:'pst-out'},
+      {n:'Snímač polohy indukčný',pn:'SICK-IMS-C',q:'2 ks',stock:'1 ks',sc:'pst-low'},
+    ]
+  },
+  'SVAR-04':{
+    id:'SVAR-04',name:'Zvárací robot WR-200',loc:'Hala C — Pozícia C07',
+    status:'ok',statusLabel:'Prevádzkyschopný',
+    icon:'🤖',
+    tags:[{t:'Prevádzkyschopný',c:'dtag-ok'},{t:'Kalibrácia: 01/2026',c:'dtag-info'}],
+    info:[
+      ['Výrobca','Yaskawa Europe'],['Model','Motoman MA2010'],['Rok výroby','2022'],
+      ['Výrobné číslo','YSK-MA2010-7741'],['Dosah ramena','2 010 mm'],['Nosnosť','10 kg'],
+      ['Presnosť','±0,07 mm'],['Posledná údržba','18.01.2026'],['Zodpovedný','Ing. Blaho'],
+    ],
+    docs:[
+      {icon:'📄',name:'Manuál Motoman MA2010',meta:'PDF · 9,1 MB'},
+      {icon:'📋',name:'Kalibračný protokol 2026',meta:'PDF · 670 kB'},
+      {icon:'⚠️',name:'Bezpečnosť pri robotoch',meta:'PDF · 3,3 MB'},
+      {icon:'📐',name:'Programovacia príručka',meta:'PDF · 5,0 MB'},
+    ],
+    proc:[
+      {t:'Kontrola bezpečnostnej zóny',d:'Pred vstupom skontrolujte, či je aktivovaný laserový bezpečnostný skener a ochranné ploty.',w:'VSTUP do pracovnej zóny robota počas prevádzky je SMRTEĽNE NEBEZPEČNÝ!',danger:true},
+      {t:'Kontrola zváracej hlavice',d:'Skontrolujte opotrebenie kontaktnej špičky a ochranného skla. Vymeňte ak je nad 50% opotrebenia.',w:''},
+      {t:'Kontrola káblov a hadíc',d:'Vizuálne skontrolujte všetky káble robota. Hľadajte zárezy, ohyby a poškodenie izolácie.',w:''},
+      {t:'Mazanie osí',d:'Spustite mazací program "GREASE-ROUTINE" z ovládacieho panela. Program trvá cca 8 minút.',w:''},
+      {t:'Test nulovej polohy',d:'Spustite sekvenciu "ZERO-CHECK". Overte, či robot dosiahne všetky referenčné body s presnosťou.',w:''},
+    ],
+    parts:[
+      {n:'Kontaktná špička M8×1.0',pn:'YSK-TIP-M8',q:'10 ks',stock:'Na sklade',sc:'pst-ok'},
+      {n:'Ochranné sklo zvárania',pn:'YSK-GLASS-WR',q:'5 ks',stock:'Na sklade',sc:'pst-ok'},
+      {n:'Mazivo Molywhite RE Nr.2',pn:'YSK-GREASE-MW',q:'1 tuba',stock:'2 ks',sc:'pst-ok'},
+      {n:'Servo motor osi 1',pn:'YSK-SERVO-A1',q:'1 ks',stock:'Nie je skladom',sc:'pst-out'},
+    ]
+  }
+};
+
+// ── STATE ──
+let currentUser = '';
+let currentScreen = 'login';
+let scannerStream = null;
+let scannerAnimFrame = null;
+
+// ── INIT ──
+window.addEventListener('load', () => {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  }
+  renderMachineList();
+  renderDemoQR();
+
+  const saved = localStorage.getItem('mt_user');
+  if (saved) {
+    currentUser = saved;
+    showScreen('home');
+    document.getElementById('home-user').textContent = 'Prihlásený: ' + currentUser;
+  }
+});
+
+// ── PWA INSTALL ──
+let deferredInstall = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstall = e;
+  document.getElementById('install-banner').classList.add('show');
+});
+document.getElementById('install-btn').addEventListener('click', () => {
+  if (deferredInstall) {
+    deferredInstall.prompt();
+    deferredInstall.userChoice.then(() => {
+      document.getElementById('install-banner').classList.remove('show');
+    });
+  }
+});
+
+// ── SCREENS ──
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.add('hidden');
+    s.classList.remove('slide-left');
+  });
+  document.getElementById(id).classList.remove('hidden');
+  currentScreen = id;
+}
+
+// ── LOGIN ──
+function doLogin() {
+  const u = document.getElementById('inp-user').value.trim();
+  const p = document.getElementById('inp-pass').value.trim();
+  if (u.length < 3 || p.length < 3) {
+    alert('Zadajte aspoň 3 znaky pre meno aj heslo.');
+    return;
+  }
+  currentUser = u;
+  localStorage.setItem('mt_user', u);
+  document.getElementById('home-user').textContent = 'Prihlásený: ' + u;
+  showScreen('home');
+}
+document.getElementById('inp-pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+function doLogout() {
+  localStorage.removeItem('mt_user');
+  showScreen('login');
+}
+
+// ── MACHINE LIST ──
+function renderMachineList() {
+  const container = document.getElementById('machine-list');
+  container.innerHTML = Object.values(MACHINES).map(m => {
+    const iconClass = m.status === 'ok' ? 'icon-ok' : m.status === 'warn' ? 'icon-warn' : 'icon-err';
+    const stClass = m.status === 'ok' ? 'st-ok' : m.status === 'warn' ? 'st-warn' : 'st-err';
+    return `<div class="machine-card" onclick="openMachine('${m.id}')">
+      <div class="machine-icon ${iconClass}">${m.icon}</div>
+      <div class="machine-info">
+        <div class="machine-name">${m.name}</div>
+        <div class="machine-loc">${m.loc}</div>
+      </div>
+      <span class="machine-status ${stClass}">${m.statusLabel}</span>
+      <span class="machine-arrow">›</span>
+    </div>`;
+  }).join('');
+}
+
+// ── QR SCANNER ──
+function renderDemoQR() {
+  document.getElementById('demo-qr-grid').innerHTML = Object.values(MACHINES).map(m =>
+    `<div class="demo-qr-btn" onclick="onQRScanned('${m.id}')">
+      <div class="demo-qr-code">${m.id}</div>
+      <div class="demo-qr-name">${m.name.split(' ').slice(0,2).join(' ')}</div>
+    </div>`
+  ).join('');
+}
+
+async function openScanner() {
+  showScreen('scanner-screen');
+  try {
+    scannerStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+    });
+    const video = document.getElementById('qr-video');
+    video.srcObject = scannerStream;
+    video.play();
+    video.addEventListener('loadedmetadata', startQRLoop);
+  } catch (err) {
+    // camera not available — demo mode only
+  }
+}
+
+function startQRLoop() {
+  const video = document.getElementById('qr-video');
+  const canvas = document.getElementById('qr-canvas');
+  const ctx = canvas.getContext('2d');
+
+  function tick() {
+    if (currentScreen !== 'scanner-screen') return;
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0);
+      const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      if (window.jsQR) {
+        const code = jsQR(img.data, img.width, img.height);
+        if (code && MACHINES[code.data]) {
+          onQRScanned(code.data);
+          return;
+        }
+      }
+    }
+    scannerAnimFrame = requestAnimationFrame(tick);
+  }
+  scannerAnimFrame = requestAnimationFrame(tick);
+}
+
+function stopScanner() {
+  if (scannerAnimFrame) cancelAnimationFrame(scannerAnimFrame);
+  if (scannerStream) {
+    scannerStream.getTracks().forEach(t => t.stop());
+    scannerStream = null;
+  }
+  document.getElementById('qr-video').srcObject = null;
+}
+
+function closeScanner() {
+  stopScanner();
+  showScreen('home');
+}
+
+function onQRScanned(id) {
+  stopScanner();
+  openMachine(id);
+}
+
+// ── MACHINE DETAIL ──
+function openMachine(id) {
+  const m = MACHINES[id];
+  if (!m) return;
+
+  document.getElementById('d-topbar-name').textContent = m.name;
+  document.getElementById('d-topbar-loc').textContent = m.loc;
+  document.getElementById('d-code').textContent = m.id;
+  document.getElementById('d-name').textContent = m.name;
+  document.getElementById('d-loc').textContent = m.loc;
+  document.getElementById('d-tags').innerHTML = m.tags.map(t =>
+    `<span class="dtag ${t.c}">${t.t}</span>`).join('');
+
+  // Info tab
+  document.getElementById('tab-info').innerHTML =
+    `<div class="info-list">${m.info.map(r =>
+      `<div class="info-row"><span class="info-key">${r[0]}</span><span class="info-val">${r[1]}</span></div>`
+    ).join('')}</div>`;
+
+  // Docs tab
+  document.getElementById('tab-docs').innerHTML = m.docs.map(d =>
+    `<div class="doc-item">
+      <div class="doc-icon-wrap">${d.icon}</div>
+      <div class="doc-info"><div class="doc-name">${d.name}</div><div class="doc-meta">${d.meta}</div></div>
+      <span class="doc-arr">›</span>
+    </div>`
+  ).join('');
+
+  // Procedure tab
+  document.getElementById('tab-proc').innerHTML = m.proc.map((s, i) => {
+    const warn = s.w ? `<div class="${s.danger?'step-danger':'step-warn'}">⚠ ${s.w}</div>` : '';
+    return `<div class="proc-step">
+      <div class="step-num">${i+1}</div>
+      <div class="step-body">
+        <div class="step-title">${s.t}</div>
+        <div class="step-desc">${s.d}</div>
+        ${warn}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Parts tab
+  document.getElementById('tab-parts').innerHTML = m.parts.map(p =>
+    `<div class="part-item">
+      <div class="part-top">
+        <div class="part-name">${p.n}</div>
+        <span class="part-stock ${p.sc}">${p.stock}</span>
+      </div>
+      <div class="part-bottom">
+        <div class="part-pn">${p.pn}</div>
+        <div class="part-qty">Potreba: ${p.q}</div>
+      </div>
+    </div>`
+  ).join('');
+
+  switchTab('info');
+  showScreen('detail');
+}
+
+function goBack() {
+  showScreen('home');
+}
+
+function switchTab(name) {
+  const names = ['info','docs','proc','parts'];
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', names[i]===name));
+  document.querySelectorAll('.tab-pane').forEach((p,i) => p.classList.toggle('active', names[i]===name));
+}
+</script>
+</body>
+</html>
