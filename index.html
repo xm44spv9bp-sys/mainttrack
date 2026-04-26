@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#2A3F28">
+<meta name="theme-color" content="#1B4D1E">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Zeo Údržba">
@@ -12,331 +12,487 @@
 <link rel="apple-touch-icon" href="/icon-192.png">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden;background:#1C2B1A;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 :root{
-  --green:#3D6B38;--green-mid:#5A8C54;--green-light:#8FBF88;--green-pale:#D6EBD3;--green-dark:#2A3F28;--green-deep:#1C2B1A;
-  --white:#FFFFFF;--off-white:#F4F9F3;--light-gray:#E8F0E6;--mid-gray:#BCCFBA;--text-gray:#5A7558;
-  --border:#C5D9C2;--border2:#9CB899;
-  --ok-bg:#DFF0D8;--ok-text:#2D6A1F;
-  --warn-bg:#FFF3CD;--warn-text:#7D5A00;
-  --err-bg:#FCDEDE;--err-text:#8B1A1A;
-  --info-bg:#D9EDF7;--info-text:#1A5F7A;
-  --radius:10px;--radiuslg:14px;
+  --g1:#2E7D32;--g2:#388E3C;--g3:#4CAF50;--gl:#E8F5E9;--gp:#C8E6C9;
+  --red:#D32F2F;--rl:#FFEBEE;
+  --ora:#F57C00;--ol:#FFF3E0;
+  --gray:#8E8E93;--gray2:#C7C7CC;--gray3:#F2F2F7;--gray4:#E5E5EA;
+  --text:#000;--text2:#3C3C43;--text3:#8E8E93;
+  --white:#fff;--border:#E5E5EA;
+  --sbot:env(safe-area-inset-bottom,0px);--stop:env(safe-area-inset-top,0px);
 }
-#app{height:100dvh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;position:relative;overflow:hidden;background:var(--off-white)}
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--off-white);transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s}
-.screen.hidden{transform:translateX(100%);pointer-events:none}
-
-/* TOPBAR */
-.topbar{background:var(--green-dark);padding:env(safe-area-inset-top,12px) 16px 12px;display:flex;align-items:center;gap:10px;flex-shrink:0;min-height:56px}
-.topbar-back{background:none;border:none;color:var(--green-light);font-size:22px;cursor:pointer;padding:4px;flex-shrink:0}
-.topbar-logo{width:34px;height:34px;border-radius:8px;overflow:hidden;flex-shrink:0;background:var(--green)}
-.topbar-logo img{width:100%;height:100%;object-fit:cover}
-.topbar-title{font-size:16px;font-weight:700;color:var(--green-pale);flex:1}
-.topbar-sub{font-size:11px;color:var(--green-light);margin-top:1px}
-.topbar-right{margin-left:auto;font-size:12px;color:var(--green-pale);cursor:pointer;padding:6px 12px;border:1px solid var(--green-mid);border-radius:20px;background:none;white-space:nowrap}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;max-width:430px;margin:0 auto;background:var(--gray3)}
+.view{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--gray3);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.view.off{transform:translateX(100%);pointer-events:none}
+.spad{height:calc(var(--stop) + 44px);background:var(--white);flex-shrink:0}
+.navbar{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-top:.5px solid var(--border);display:flex;flex-shrink:0;padding-bottom:var(--sbot);z-index:10;position:relative}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 4px;gap:3px;border:none;background:none;cursor:pointer}
+.nav-ic{font-size:22px;color:var(--gray)}
+.nav-lb{font-size:10px;font-weight:500;color:var(--gray)}
+.nav-btn.on .nav-ic,.nav-btn.on .nav-lb{color:var(--g1)}
+.nav-btn.on .nav-lb{font-weight:700}
+.phdr{background:var(--white);border-bottom:.5px solid var(--border);flex-shrink:0;padding:12px 16px;display:flex;align-items:center;gap:8px;min-height:52px}
+.ptitle{font-size:17px;font-weight:700;color:var(--text);flex:1;text-align:center}
+.hbtn{background:none;border:none;color:var(--g1);font-size:16px;font-weight:600;cursor:pointer;padding:4px 8px;min-width:44px}
+.pbody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
 /* LOGIN */
-#login{background:var(--green-deep)}
-.login-hero{background:var(--green-dark);padding:52px 24px 36px;display:flex;flex-direction:column;align-items:center;gap:10px}
-.login-icon{width:100px;height:100px;border-radius:24px;overflow:hidden;background:var(--green);display:flex;align-items:center;justify-content:center}
-.login-icon img{width:100%;height:100%;object-fit:cover}
-.login-appname{font-size:26px;font-weight:800;color:var(--green-pale);letter-spacing:-0.5px}
-.login-tagline{font-size:13px;color:var(--green-light);text-align:center}
-.login-form{padding:28px 20px;flex:1;display:flex;flex-direction:column;gap:14px}
-.field label{display:block;font-size:11px;font-weight:700;color:var(--green-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px}
-.field input{width:100%;padding:14px 16px;border:1.5px solid #3a5a38;border-radius:var(--radius);background:#2a3f28;color:#f4f9f3;font-size:16px;outline:none;transition:border-color .2s}
-.field input:focus{border-color:var(--green-light)}
-.field input::placeholder{color:#5a7558}
-.login-btn{width:100%;padding:16px;background:var(--green-mid);color:var(--white);border:none;border-radius:var(--radius);font-size:16px;font-weight:700;cursor:pointer;transition:opacity .15s}
-.login-btn:active{opacity:.85}
-.login-hint{background:#2a3f28;border-radius:var(--radius);padding:12px 14px;font-size:12px;color:var(--green-light);border-left:3px solid var(--green-mid)}
-.login-hint strong{color:var(--green-pale)}
+#vLogin{background:var(--white)}
+#vLogin .spad{background:var(--g1)}
+.lhero{background:var(--g1);padding:40px 24px 44px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.licon{width:96px;height:96px;border-radius:22px;overflow:hidden;background:rgba(255,255,255,.15)}
+.licon img{width:100%;height:100%;object-fit:cover}
+.lname{font-size:27px;font-weight:800;color:#fff;letter-spacing:-.4px}
+.ltag{font-size:14px;color:rgba(255,255,255,.75);text-align:center}
+.lform{padding:28px 20px;display:flex;flex-direction:column;gap:14px}
+.lgrp{background:var(--white);border-radius:12px;border:1px solid var(--border);overflow:hidden}
+.lfield{display:flex;align-items:center;padding:0 14px;gap:10px;border-bottom:.5px solid var(--border)}
+.lfield:last-child{border-bottom:none}
+.lfield span{font-size:18px;color:var(--gray);flex-shrink:0}
+.lfield input{flex:1;padding:14px 0;font-size:16px;border:none;outline:none;background:none;color:var(--text)}
+.lfield input::placeholder{color:var(--gray2)}
+.lbtn{width:100%;padding:16px;background:var(--g1);color:#fff;border:none;border-radius:12px;font-size:17px;font-weight:700;cursor:pointer}
+.lhint{padding:11px 14px;background:var(--gl);border-radius:10px;font-size:13px;color:var(--g1);border:1px solid var(--gp)}
 
-/* HOME */
-.home-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px}
-.scan-card{background:var(--green-dark);border-radius:var(--radiuslg);padding:20px;margin-bottom:20px;display:flex;flex-direction:column;align-items:center;gap:12px;cursor:pointer;border:2px dashed var(--green-mid);transition:border-color .2s}
-.scan-card:active{border-color:var(--green-light)}
-.scan-qr-icon{width:80px;height:80px;display:flex;align-items:center;justify-content:center;position:relative}
-.scan-qr-icon svg{width:70px;height:70px;color:var(--green-light)}
-.scan-pulse{position:absolute;inset:0;border-radius:50%;border:2px solid var(--green-light);animation:pulse 2s infinite}
-@keyframes pulse{0%{transform:scale(.8);opacity:1}100%{transform:scale(1.3);opacity:0}}
-.scan-title{font-size:17px;font-weight:700;color:var(--off-white)}
-.scan-sub{font-size:13px;color:var(--green-light);text-align:center}
-.scan-btn-pill{background:var(--green-mid);color:var(--white);padding:10px 28px;border-radius:30px;font-size:14px;font-weight:700}
-.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.section-label{font-size:11px;font-weight:700;color:var(--text-gray);text-transform:uppercase;letter-spacing:.1em}
-.section-count{font-size:11px;color:var(--text-gray);background:var(--light-gray);padding:2px 8px;border-radius:20px}
-.machine-card{background:var(--white);border-radius:var(--radiuslg);border:1px solid var(--border);margin-bottom:10px;display:flex;align-items:center;padding:14px 16px;gap:14px;cursor:pointer;transition:border-color .15s,transform .1s}
-.machine-card:active{transform:scale(.98);border-color:var(--green)}
-.machine-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-.icon-ok{background:var(--ok-bg)}.icon-warn{background:var(--warn-bg)}.icon-err{background:var(--err-bg)}
-.machine-info{flex:1;min-width:0}
-.machine-name{font-size:14px;font-weight:600;color:#1a2e18;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.machine-loc{font-size:12px;color:var(--text-gray);margin-top:2px}
-.machine-status{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;flex-shrink:0}
-.st-ok{background:var(--ok-bg);color:var(--ok-text)}.st-warn{background:var(--warn-bg);color:var(--warn-text)}.st-err{background:var(--err-bg);color:var(--err-text)}
-.machine-arrow{color:var(--border2);font-size:18px;flex-shrink:0}
+/* SCAN */
+#tScan{background:var(--white)}
+#tScan .spad{background:var(--white)}
+.scan-hdr{background:var(--white);border-bottom:.5px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.scan-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:24px}
+.scan-frame{width:230px;height:230px;position:relative}
+.sc{position:absolute;width:28px;height:28px;border-color:var(--g1);border-style:solid;border-width:3px}
+.sc.tl{top:0;left:0;border-right:none;border-bottom:none;border-radius:8px 0 0 0}
+.sc.tr{top:0;right:0;border-left:none;border-bottom:none;border-radius:0 8px 0 0}
+.sc.bl{bottom:0;left:0;border-right:none;border-top:none;border-radius:0 0 0 8px}
+.sc.br{bottom:0;right:0;border-left:none;border-top:none;border-radius:0 0 8px 0}
+.scan-inner{position:absolute;inset:10px;background:var(--gl);border-radius:6px;overflow:hidden}
+.scan-line{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--g1),transparent);animation:sl 2s ease-in-out infinite}
+@keyframes sl{0%{top:5%}50%{top:90%}100%{top:5%}}
+#qrV{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:6px}
+#qrC{display:none}
+.scan-lbl{font-size:19px;font-weight:800;color:var(--g1);text-align:center}
+.scan-sub{font-size:14px;color:var(--gray);text-align:center;line-height:1.5}
+.fab{position:absolute;bottom:28px;right:24px;width:54px;height:54px;background:var(--g1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;box-shadow:0 4px 16px rgba(46,125,50,.35);border:none;color:#fff;font-style:normal}
+.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;z-index:30}
+.sheet-bg.on{display:flex}
+.sheet{background:var(--white);border-radius:20px 20px 0 0;width:100%;padding:20px 20px calc(20px + var(--sbot));display:flex;flex-direction:column;gap:8px}
+.sheet-title{font-size:15px;font-weight:700;color:var(--text);text-align:center;margin-bottom:4px}
+.dmb{background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:13px 16px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.dmb:active{background:var(--gl);border-color:var(--g1)}
+.dmic{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--gray3);flex-shrink:0}
+.dmn{font-size:14px;font-weight:700;color:var(--text)}
+.dmc{font-size:11px;color:var(--gray);font-family:monospace;margin-top:2px}
+.sheet-cancel{background:var(--gray3);border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:700;color:var(--g1);cursor:pointer;width:100%;margin-top:4px}
 
-/* SCANNER */
-#scanner-screen{background:#000;z-index:50}
-.scanner-topbar{background:rgba(0,0,0,.7);padding:env(safe-area-inset-top,12px) 16px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0}
-#qr-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.scanner-overlay-ui{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
-.scanner-frame-wrap{position:relative;width:240px;height:240px}
-.corner{position:absolute;width:28px;height:28px;border-color:var(--green-light);border-style:solid;border-width:3px}
-.corner.tl{top:0;left:0;border-right:none;border-bottom:none;border-radius:10px 0 0 0}
-.corner.tr{top:0;right:0;border-left:none;border-bottom:none;border-radius:0 10px 0 0}
-.corner.bl{bottom:0;left:0;border-right:none;border-top:none;border-radius:0 0 0 10px}
-.corner.br{bottom:0;right:0;border-left:none;border-top:none;border-radius:0 0 10px 0}
-.scanner-line{position:absolute;left:4px;right:4px;height:2px;background:linear-gradient(90deg,transparent,var(--green-light),transparent);animation:scanline 2s ease-in-out infinite}
-@keyframes scanline{0%{top:8px}50%{top:calc(100% - 8px)}100%{top:8px}}
-.scanner-text{margin-top:24px;font-size:14px;color:rgba(255,255,255,.8);text-align:center;padding:0 24px}
-.scanner-bottom{position:absolute;bottom:0;left:0;right:0;padding:24px;background:linear-gradient(transparent,rgba(0,0,0,.85));display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:all}
-.scanner-demo-label{font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.1em}
-.scanner-demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
-.demo-qr-btn{background:rgba(61,107,56,.3);border:1px solid rgba(143,191,136,.3);border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:background .15s}
-.demo-qr-btn:active{background:rgba(61,107,56,.6);border-color:var(--green-light)}
-.demo-qr-code{font-size:10px;color:var(--green-light);font-family:monospace;margin-bottom:3px}
-.demo-qr-name{font-size:12px;color:#fff;font-weight:500}
-.scanner-close-btn{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:10px 32px;border-radius:30px;font-size:14px;cursor:pointer}
-#qr-canvas{display:none}
+/* MACHINES */
+.srch-wrap{padding:8px 16px;background:var(--white);border-bottom:.5px solid var(--border);flex-shrink:0}
+.srch{background:var(--gray3);border-radius:10px;display:flex;align-items:center;gap:8px;padding:8px 12px}
+.srch input{border:none;background:none;font-size:15px;color:var(--text);flex:1;outline:none}
+.srch input::placeholder{color:var(--gray)}
+.mlist{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px}
+.mc{background:var(--white);border-radius:14px;border:1.5px solid var(--border);padding:14px 16px;cursor:pointer}
+.mc:active{background:var(--gl);border-color:var(--g1)}
+.mc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px}
+.mc-name{font-size:15px;font-weight:700;color:var(--text);flex:1}
+.badge{font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;flex-shrink:0;letter-spacing:.04em}
+.ba{background:var(--g1);color:#fff}
+.bm{background:var(--ol);color:var(--ora);border:1px solid var(--ora)}
+.be{background:var(--red);color:#fff}
+.mc-model{font-size:13px;color:var(--gray);margin-bottom:2px}
+.mc-loc{font-size:13px;color:var(--gray)}
 
 /* DETAIL */
-.detail-hero{background:var(--green-dark);padding:16px 16px 0;flex-shrink:0}
-.detail-code{font-size:11px;color:var(--green-light);font-family:monospace;font-weight:700;margin-bottom:4px}
-.detail-name{font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;line-height:1.2}
-.detail-loc{font-size:13px;color:var(--green-light);margin-bottom:12px}
-.detail-tags{display:flex;gap:8px;flex-wrap:wrap;padding-bottom:16px}
-.dtag{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px}
-.dtag-ok{background:rgba(45,106,31,.25);color:#A8D8A0}
-.dtag-warn{background:rgba(125,90,0,.25);color:#FFD97D}
-.dtag-err{background:rgba(139,26,26,.25);color:#F0A0A0}
-.dtag-info{background:rgba(26,95,122,.2);color:#90CADF}
-.tabs-bar{background:var(--green-dark);display:flex;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.1)}
-.tab-btn{flex:1;padding:12px 4px;font-size:11px;font-weight:700;color:var(--green-light);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s;white-space:nowrap;letter-spacing:.02em}
-.tab-btn.active{color:var(--green-pale);border-bottom-color:var(--green-pale)}
-.tab-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
-.tab-pane{display:none;padding:16px}.tab-pane.active{display:block}
-.info-list{background:var(--white);border-radius:var(--radiuslg);border:1px solid var(--border);overflow:hidden}
-.info-row{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);gap:12px}
-.info-row:last-child{border-bottom:none}
-.info-key{font-size:13px;color:var(--text-gray);flex-shrink:0}
-.info-val{font-size:13px;font-weight:600;color:#1a2e18;text-align:right}
-.doc-item{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;cursor:pointer}
-.doc-item:active{border-color:var(--green)}
-.doc-icon-wrap{width:42px;height:42px;background:var(--light-gray);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-.doc-info{flex:1;min-width:0}
-.doc-name{font-size:14px;font-weight:600;color:#1a2e18}
-.doc-meta{font-size:12px;color:var(--text-gray);margin-top:2px}
-.doc-arr{color:var(--border2);font-size:20px}
-.proc-step{display:flex;gap:14px;margin-bottom:16px}
-.step-num{width:32px;height:32px;border-radius:50%;background:var(--green-dark);border:2px solid var(--green-mid);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--green-pale);flex-shrink:0}
-.step-body{flex:1}
-.step-title{font-size:14px;font-weight:700;color:#1a2e18;margin-bottom:5px}
-.step-desc{font-size:13px;color:var(--text-gray);line-height:1.55}
-.step-warn{margin-top:8px;padding:8px 12px;background:var(--warn-bg);border-left:3px solid #e6a817;border-radius:0 8px 8px 0;font-size:12px;color:var(--warn-text);line-height:1.4}
-.step-danger{margin-top:8px;padding:8px 12px;background:var(--err-bg);border-left:3px solid #c0392b;border-radius:0 8px 8px 0;font-size:12px;color:var(--err-text);line-height:1.4}
-.part-item{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px}
-.part-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px}
-.part-name{font-size:13px;font-weight:600;color:#1a2e18;flex:1}
-.part-stock{font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;flex-shrink:0}
-.pst-ok{background:var(--ok-bg);color:var(--ok-text)}.pst-low{background:var(--warn-bg);color:var(--warn-text)}.pst-out{background:var(--err-bg);color:var(--err-text)}
-.part-bottom{display:flex;justify-content:space-between;align-items:center}
-.part-pn{font-size:11px;color:var(--text-gray);font-family:monospace}
-.part-qty{font-size:12px;color:var(--text-gray)}
-.install-banner{display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--green-dark);border-top:1px solid var(--green);padding:14px 20px;z-index:200;align-items:center;gap:12px}
-.install-banner.show{display:flex}
-.install-text{flex:1;font-size:13px;color:var(--off-white)}
-.install-text span{color:var(--green-pale);font-weight:700}
-.install-btn{background:var(--green-mid);color:#fff;border:none;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer}
-.install-x{background:none;border:none;color:var(--green-light);font-size:20px;cursor:pointer;padding:4px}
+.dmc-card{background:var(--white);margin:12px 16px;border-radius:14px;border:1.5px solid var(--border);padding:14px 16px;display:flex;gap:14px;align-items:center}
+.dmc-img{width:64px;height:64px;border-radius:12px;background:var(--gray3);display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0}
+.dmc-name{font-size:16px;font-weight:800;color:var(--text);margin-bottom:2px}
+.dmc-model{font-size:13px;color:var(--gray);margin-bottom:2px}
+.dmc-loc{font-size:13px;color:var(--gray);margin-bottom:6px}
+.seg{margin:0 16px 12px;background:var(--gray4);border-radius:10px;padding:2px;display:flex}
+.seg-b{flex:1;padding:8px;font-size:13px;font-weight:700;color:var(--gray);border:none;background:none;border-radius:8px;cursor:pointer;transition:all .2s}
+.seg-b.on{background:var(--white);color:var(--g1);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.dsec{background:var(--white);margin:0 16px 12px;border-radius:14px;border:1.5px solid var(--border);overflow:hidden}
+.dsh{padding:13px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.dsh-title{font-size:15px;font-weight:700;color:var(--text)}
+.dsh-arr{font-size:13px;color:var(--gray);transition:transform .2s}
+.dsh-arr.op{transform:rotate(180deg)}
+.dsb{border-top:.5px solid var(--border)}
+.drow{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-bottom:.5px solid var(--border);gap:12px}
+.drow:last-child{border-bottom:none}
+.drk{font-size:14px;color:var(--text2)}
+.drv{font-size:14px;font-weight:700;color:var(--text);text-align:right}
+.docrow{display:flex;align-items:center;padding:12px 16px;border-bottom:.5px solid var(--border);gap:12px;cursor:pointer}
+.docrow:last-child{border-bottom:none}
+.docic{width:36px;height:36px;border-radius:8px;background:var(--rl);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.docname{flex:1;font-size:14px;font-weight:500;color:var(--text)}
+.mbtn{display:block;margin:0 16px 10px;padding:14px;border-radius:14px;font-size:15px;font-weight:700;text-align:center;cursor:pointer;border:none;width:calc(100% - 32px)}
+.mbtn-p{background:var(--g1);color:#fff}
+.mbtn-s{background:var(--white);color:var(--g1);border:1.5px solid var(--g1)}
+
+/* PARTS */
+.ptabs{margin:0 16px 12px;background:var(--gray4);border-radius:10px;padding:2px;display:flex}
+.ptab-b{flex:1;padding:8px;font-size:13px;font-weight:700;color:var(--gray);border:none;background:none;border-radius:8px;cursor:pointer;transition:all .2s}
+.ptab-b.on{background:var(--white);color:var(--g1);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.pcard{background:var(--white);margin:0 16px 10px;border-radius:14px;border:1.5px solid var(--border);overflow:hidden}
+.pcard-top{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:.5px solid var(--border)}
+.pimg{width:52px;height:52px;border-radius:10px;background:var(--gray3);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.pname{font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px}
+.ppn{font-size:12px;color:var(--gray);font-family:monospace}
+.pstock{display:flex;align-items:center;gap:4px;margin-top:4px;font-size:12px;font-weight:700}
+.sok{color:var(--g1)}.slow{color:var(--ora)}.sout{color:var(--red)}
+.pacts{display:flex;gap:8px;padding:10px 14px}
+.pact{flex:1;padding:9px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:none}
+.pact-p{background:var(--g1);color:#fff}
+.pact-s{background:var(--white);color:var(--g1);border:1.5px solid var(--g1)}
+
+/* TASKS */
+.tk-sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 6px}
+.tk-sec-title{font-size:17px;font-weight:800;color:var(--text)}
+.add-tk-btn{background:var(--g1);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer}
+.tkcard{background:var(--white);margin:0 16px 10px;border-radius:14px;border:1.5px solid var(--border);padding:14px 16px}
+.tk-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+.tkbox{width:22px;height:22px;border-radius:6px;border:2px solid var(--border);background:var(--white);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .15s}
+.tkbox.ck{background:var(--g1);border-color:var(--g1)}
+.tkbox span{font-size:14px;color:#fff;display:none;font-weight:700}
+.tkbox.ck span{display:block}
+.tk-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px}
+.tk-sub{font-size:13px;color:var(--gray)}
+.tk-acts{display:flex;gap:16px}
+.tk-act{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--g1);font-weight:600;background:none;border:none;cursor:pointer;padding:0}
+
+/* GLOBAL TASKS */
+.filter-row{display:flex;gap:8px;padding:10px 16px;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.filter-row::-webkit-scrollbar{display:none}
+.chip{padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;border:1.5px solid var(--border);background:var(--white);color:var(--text2);cursor:pointer;white-space:nowrap;flex-shrink:0}
+.chip.on{background:var(--g1);color:#fff;border-color:var(--g1)}
+
+/* PROFILE */
+.phero{background:var(--white);padding:24px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;border-bottom:.5px solid var(--border);margin-bottom:12px}
+.pav{width:80px;height:80px;border-radius:50%;background:var(--gl);display:flex;align-items:center;justify-content:center;font-size:36px;border:3px solid var(--gp)}
+.pname{font-size:20px;font-weight:800;color:var(--text)}
+.prole{font-size:14px;color:var(--gray)}
+.pgrp{background:var(--white);margin:0 16px 12px;border-radius:14px;border:1.5px solid var(--border);overflow:hidden}
+.prow{display:flex;align-items:center;padding:14px 16px;border-bottom:.5px solid var(--border);gap:14px;cursor:pointer}
+.prow:last-child{border-bottom:none}
+.pric{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.prg{background:var(--gl)}.prb{background:#E3F2FD}.prr{background:var(--rl)}
+.prlbl{flex:1;font-size:15px;font-weight:500;color:var(--text)}
+.lout-btn{display:block;margin:4px 16px 24px;padding:14px;background:var(--rl);color:var(--red);border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;width:calc(100% - 32px)}
 </style>
 </head>
 <body>
 <div id="app">
 
 <!-- LOGIN -->
-<div id="login" class="screen">
-  <div class="login-hero">
-    <div class="login-icon"><img id="login-logo-img" src="logo.png" alt="Zeo Údržba"></div>
-    <div class="login-appname">Zeo Údržba</div>
-    <div class="login-tagline">Systém správy a evidencie údržby</div>
-  </div>
-  <div class="login-form">
-    <div class="field"><label>Používateľské meno</label><input type="text" id="inp-user" placeholder="napr. novak.peter" autocomplete="username" autocapitalize="none"></div>
-    <div class="field"><label>Heslo</label><input type="password" id="inp-pass" placeholder="Vaše heslo" autocomplete="current-password"></div>
-    <button class="login-btn" onclick="doLogin()">Prihlásiť sa →</button>
-    <div class="login-hint"><strong>Demo režim:</strong> zadajte akékoľvek meno a heslo (min. 3 znaky).</div>
-  </div>
-</div>
-
-<!-- HOME -->
-<div id="home" class="screen hidden">
-  <div class="topbar">
-    <div class="topbar-logo"><img id="home-logo-img" src="logo.png" alt="logo"></div>
-    <div>
-      <div class="topbar-title">Zeo Údržba</div>
-      <div class="topbar-sub" id="home-user">Načítavanie...</div>
+<div id="vLogin" class="view">
+  <div class="spad"></div>
+  <div class="pbody">
+    <div class="lhero">
+      <div class="licon"><img src="logo.png" alt="logo"></div>
+      <div class="lname">Zeo Údržba</div>
+      <div class="ltag">Systém správy a evidencie údržby strojov</div>
     </div>
-    <button class="topbar-right" onclick="doLogout()">Odhlásiť</button>
-  </div>
-  <div class="home-scroll">
-    <div class="scan-card" onclick="openScanner()">
-      <div class="scan-qr-icon">
-        <div class="scan-pulse"></div>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 17h2M19 15v2M15 21h6M21 19v2M8 5v2M5 8h2M18 5v2M17 8h2M5 18h2M8 17v2"/>
-        </svg>
+    <div class="lform">
+      <div class="lgrp">
+        <div class="lfield"><span>👤</span><input id="iUser" type="text" placeholder="Používateľské meno" autocapitalize="none" autocomplete="username"></div>
+        <div class="lfield"><span>🔒</span><input id="iPass" type="password" placeholder="Heslo" autocomplete="current-password"></div>
       </div>
-      <div class="scan-title">Skenovať QR kód stroja</div>
-      <div class="scan-sub">Namierte kameru na QR štítok stroja</div>
-      <div class="scan-btn-pill">Otvoriť skener</div>
+      <button class="lbtn" onclick="doLogin()">Prihlásiť sa</button>
+      <div class="lhint"><strong>Demo:</strong> akékoľvek meno a heslo (min. 3 znaky)</div>
     </div>
-    <div class="section-header">
-      <div class="section-label">Stroje v prevádzke</div>
-      <div class="section-count">4 stroje</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="vMain" class="view off" style="background:var(--gray3)">
+  <div style="flex:1;position:relative;overflow:hidden">
+
+    <!-- SCAN -->
+    <div id="tScan" class="view" style="background:var(--white)">
+      <div class="spad" style="background:var(--white)"></div>
+      <div class="scan-hdr"><div style="font-size:17px;font-weight:700">Skenovanie</div></div>
+      <div class="scan-body">
+        <div class="scan-lbl">Skenovať QR kód stroja</div>
+        <div class="scan-frame">
+          <div class="sc tl"></div><div class="sc tr"></div><div class="sc bl"></div><div class="sc br"></div>
+          <div class="scan-inner"><video id="qrV" autoplay playsinline muted></video><div class="scan-line"></div></div>
+        </div>
+        <canvas id="qrC"></canvas>
+        <div class="scan-sub">Namieste kameru na QR kód vo vnútri rámu,<br>aby ste získali prístup k detailom stroja.</div>
+      </div>
+      <button class="fab" onclick="openSheet()">🔧</button>
+      <div class="sheet-bg" id="sheet"><div class="sheet"><div class="sheet-title">Vyberte demo stroj</div><div id="demoBtns"></div><button class="sheet-cancel" onclick="closeSheet()">Zrušiť</button></div></div>
     </div>
-    <div id="machine-list"></div>
-  </div>
-</div>
 
-<!-- SCANNER -->
-<div id="scanner-screen" class="screen hidden">
-  <div class="scanner-topbar">
-    <button class="topbar-back" onclick="closeScanner()">✕</button>
-    <div style="font-size:15px;font-weight:700;color:var(--green-pale)">Skener QR kódu</div>
-  </div>
-  <video id="qr-video" autoplay playsinline muted></video>
-  <canvas id="qr-canvas"></canvas>
-  <div class="scanner-overlay-ui">
-    <div class="scanner-frame-wrap">
-      <div class="corner tl"></div><div class="corner tr"></div>
-      <div class="corner bl"></div><div class="corner br"></div>
-      <div class="scanner-line"></div>
+    <!-- MACHINES -->
+    <div id="tMachines" class="view off" style="flex-direction:column">
+      <div class="spad" style="background:var(--white)"></div>
+      <div style="background:var(--white);border-bottom:.5px solid var(--border);flex-shrink:0">
+        <div class="phdr"><div style="width:44px"></div><div class="ptitle">Stroje</div><div style="width:44px"></div></div>
+        <div class="srch-wrap"><div class="srch"><span style="font-size:16px;color:var(--gray)">🔍</span><input type="search" id="srchInp" placeholder="Hľadať..." oninput="filterM(this.value)"></div></div>
+      </div>
+      <div class="mlist" id="mList"></div>
     </div>
-    <div class="scanner-text">Namierte kameru na QR kód stroja</div>
+
+    <!-- TASKS -->
+    <div id="tTasks" class="view off" style="flex-direction:column">
+      <div class="spad" style="background:var(--white)"></div>
+      <div class="phdr" style="background:var(--white);border-bottom:.5px solid var(--border)"><div style="width:44px"></div><div class="ptitle">Úlohy</div><div style="width:44px"></div></div>
+      <div class="filter-row">
+        <div class="chip on" onclick="fTasks('all',this)">Všetky</div>
+        <div class="chip" onclick="fTasks('open',this)">Otvorené</div>
+        <div class="chip" onclick="fTasks('done',this)">Dokončené</div>
+        <div class="chip" onclick="fTasks('urgent',this)">Urgentné</div>
+      </div>
+      <div class="pbody" id="gTaskList"></div>
+    </div>
+
+    <!-- PROFILE -->
+    <div id="tProfile" class="view off" style="flex-direction:column">
+      <div class="spad" style="background:var(--white)"></div>
+      <div class="phdr" style="background:var(--white);border-bottom:.5px solid var(--border)"><div style="width:44px"></div><div class="ptitle">Profil</div><div style="width:44px"></div></div>
+      <div class="pbody">
+        <div class="phero"><div class="pav">👷</div><div class="pname" id="pName">—</div><div class="prole">Strojný údržbár</div></div>
+        <div class="pgrp">
+          <div class="prow"><div class="pric prg">📊</div><div class="prlbl">Moje úlohy</div><span style="color:var(--gray2);font-size:18px">›</span></div>
+          <div class="prow"><div class="pric prg">🔔</div><div class="prlbl">Notifikácie</div><span style="color:var(--gray2);font-size:18px">›</span></div>
+          <div class="prow"><div class="pric prb">📱</div><div class="prlbl">Verzia aplikácie</div><span style="font-size:13px;color:var(--gray)">1.0.0</span></div>
+        </div>
+        <div class="pgrp">
+          <div class="prow"><div class="pric prg">⚙️</div><div class="prlbl">Nastavenia</div><span style="color:var(--gray2);font-size:18px">›</span></div>
+          <div class="prow"><div class="pric prb">❓</div><div class="prlbl">Pomoc a podpora</div><span style="color:var(--gray2);font-size:18px">›</span></div>
+        </div>
+        <button class="lout-btn" onclick="doLogout()">Odhlásiť sa</button>
+      </div>
+    </div>
+
+    <!-- DETAIL -->
+    <div id="vDetail" class="view off" style="flex-direction:column">
+      <div class="spad" style="background:var(--white)"></div>
+      <div class="phdr" style="background:var(--white);border-bottom:.5px solid var(--border)">
+        <button class="hbtn" onclick="closeDetail()">‹ Späť</button>
+        <div class="ptitle">Detail stroja</div>
+        <div style="width:60px"></div>
+      </div>
+      <div class="pbody" id="detailBody"></div>
+    </div>
+
   </div>
-  <div class="scanner-bottom">
-    <div class="scanner-demo-label">Demo — kliknite na QR kód</div>
-    <div class="scanner-demo-grid" id="demo-qr-grid"></div>
-    <button class="scanner-close-btn" onclick="closeScanner()">Zrušiť</button>
-  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="navbar">
+    <button class="nav-btn on" id="nScan" onclick="goTab('scan')"><span class="nav-ic">⊡</span><span class="nav-lb">Skenovať</span></button>
+    <button class="nav-btn" id="nMachines" onclick="goTab('machines')"><span class="nav-ic">⚙</span><span class="nav-lb">Stroje</span></button>
+    <button class="nav-btn" id="nTasks" onclick="goTab('tasks')"><span class="nav-ic">☑</span><span class="nav-lb">Úlohy</span></button>
+    <button class="nav-btn" id="nProfile" onclick="goTab('profile')"><span class="nav-ic">👤</span><span class="nav-lb">Profil</span></button>
+  </nav>
 </div>
 
-<!-- DETAIL -->
-<div id="detail" class="screen hidden">
-  <div class="topbar" style="padding-bottom:0">
-    <button class="topbar-back" onclick="goBack()">←</button>
-    <div><div class="topbar-title" id="d-topbar-name">Stroj</div><div class="topbar-sub" id="d-topbar-loc"></div></div>
-  </div>
-  <div class="detail-hero">
-    <div class="detail-code" id="d-code"></div>
-    <div class="detail-name" id="d-name"></div>
-    <div class="detail-loc" id="d-loc"></div>
-    <div class="detail-tags" id="d-tags"></div>
-  </div>
-  <div class="tabs-bar">
-    <button class="tab-btn active" onclick="switchTab('info')">Info</button>
-    <button class="tab-btn" onclick="switchTab('docs')">Dokumenty</button>
-    <button class="tab-btn" onclick="switchTab('proc')">Postup</button>
-    <button class="tab-btn" onclick="switchTab('parts')">Diely</button>
-  </div>
-  <div class="tab-body">
-    <div class="tab-pane active" id="tab-info"></div>
-    <div class="tab-pane" id="tab-docs"></div>
-    <div class="tab-pane" id="tab-proc"></div>
-    <div class="tab-pane" id="tab-parts"></div>
-  </div>
 </div>
-
-</div>
-<div class="install-banner" id="install-banner">
-  <div class="install-text">Pridajte <span>Zeo Údržba</span> na plochu telefónu</div>
-  <button class="install-btn" id="install-btn">Inštalovať</button>
-  <button class="install-x" onclick="document.getElementById('install-banner').classList.remove('show')">×</button>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
-// Logo loaded directly from file
-
-const MACHINES = {
-  'CNC-001':{id:'CNC-001',name:'CNC Frézka TF-300',loc:'Hala A — Pozícia A12',status:'ok',statusLabel:'Prevádzkyschopná',icon:'🔩',tags:[{t:'Prevádzkyschopná',c:'dtag-ok'},{t:'Revízia: 03/2027',c:'dtag-info'}],info:[['Výrobca','TechnoFréz s.r.o.'],['Model','TF-300 Pro'],['Rok výroby','2019'],['Výrobné číslo','TF300-29847'],['Max. otáčky','8 000 ot/min'],['Výkon','15 kW'],['Hmotnosť','2 400 kg'],['Posledná údržba','10.03.2026'],['Zodpovedný','Ing. Novák P.']],docs:[{icon:'📄',name:'Technický manuál TF-300',meta:'PDF · 4,2 MB'},{icon:'📋',name:'Protokol o revízii 2025',meta:'PDF · 380 kB'},{icon:'📐',name:'Výkresová dokumentácia',meta:'ZIP · 12,1 MB'},{icon:'⚠️',name:'Bezpečnostný list',meta:'PDF · 1,1 MB'}],proc:[{t:'Odstavenie stroja',d:'Prepnite stroj do režimu STOP a počkajte na úplné zastavenie vretena. Minimálne 3 minúty.',w:'',danger:false},{t:'LOTO zaistenie',d:'Otočte hlavný vypínač do polohy 0. Zaistite LOTO zámkom.',w:'POVINNÉ — bez LOTO zaistenia hrozí úraz elektrickým prúdom!',danger:true},{t:'Čistenie pracovného priestoru',d:'Odstráňte triesky stieračkou a priemyselným vysávačom.',w:''},{t:'Kontrola hladín olejov',d:'Skontrolujte hladinu hydraulického oleja. Doplňte ISO VG 46.',w:''},{t:'Mazanie lineárnych vedení',d:'Naneste mazivo NLGI 2 podľa schémy (manuál str. 34). Každých 500 hod.',w:''},{t:'Záznam a podpis',d:'Vyplňte servisný protokol, zaznamenajte odchýlky a čas údržby.',w:''}],parts:[{n:'Olejový filter F-12',pn:'TF-F12-OIL',q:'2 ks',stock:'Na sklade',sc:'pst-ok'},{n:'Vreteno horné ložisko',pn:'SKF-6205-2RS',q:'1 ks',stock:'3 ks',sc:'pst-ok'},{n:'Hydraulická pumpa HP-80',pn:'TF-HP80-REP',q:'1 ks',stock:'Posledný kus',sc:'pst-low'},{n:'Chladiaca kvapalina 5L',pn:'COOL-ISO-5L',q:'5 L',stock:'Na sklade',sc:'pst-ok'},{n:'Remeň pohonu V-75',pn:'BELT-V75-A',q:'1 ks',stock:'Nie je skladom',sc:'pst-out'}]},
-  'KOMP-02':{id:'KOMP-02',name:'Kompresor Atlas K-50',loc:'Strojovňa — Pozícia S3',status:'warn',statusLabel:'Vyžaduje kontrolu',icon:'⚡',tags:[{t:'Vyžaduje kontrolu',c:'dtag-warn'},{t:'Revízia: 11/2025',c:'dtag-info'}],info:[['Výrobca','Atlas Copco'],['Model','GA-50 VSD+'],['Rok výroby','2021'],['Výrobné číslo','AC50-84521'],['Max. tlak','13 bar'],['Výkon motora','45 kW'],['Objem vzduchu','285 m³/hod'],['Posledná údržba','15.11.2025'],['Zodpovedný','M. Horváth']],docs:[{icon:'📄',name:'Prevádzkový manuál GA-50',meta:'PDF · 6,8 MB'},{icon:'📋',name:'Servisná správa 2025',meta:'PDF · 520 kB'},{icon:'⚠️',name:'Bezpečnostné predpisy',meta:'PDF · 2,0 MB'}],proc:[{t:'Kontrola pred spustením',d:'Vizuálna kontrola netesností oleja a vzduchu. Skontrolujte hladinu oleja.',w:''},{t:'Kontrola prevádzkového tlaku',d:'Po spustení sledujte manometer — prevádzkový tlak 8–10 bar.',w:'Tlak nad 13 bar je KRITICKÝ! Okamžite zastavte stroj.',danger:true},{t:'Odvod kondenzátu',d:'Otvorte vypúšťací ventil, nechajte odtiecť kondenzát 30 sekúnd.',w:''},{t:'Kontrola vzduchového filtra',d:'Červená na indikátori = okamžitá výmena filtra.',w:'Nikdy nespúšťajte s červeným indikátorom!',danger:false},{t:'Záznam hodnôt',d:'Zapíšte tlak, teplotu oleja a stav hodinomera do protokolu.',w:''}],parts:[{n:'Vzduchový filter AF-50',pn:'AC-AF50-STD',q:'1 ks',stock:'2 ks',sc:'pst-ok'},{n:'Olejový filter OF-50',pn:'AC-OF50-VSD',q:'1 ks',stock:'Posledný kus',sc:'pst-low'},{n:'Kompresorový olej 4L',pn:'AC-OIL-4L',q:'4 L',stock:'Na sklade',sc:'pst-ok'},{n:'Odvzdušňovací ventil',pn:'AC-VALVE-DV',q:'1 ks',stock:'Nie je skladom',sc:'pst-out'}]},
-  'CONV-03':{id:'CONV-03',name:'Dopravný pás DP-12',loc:'Hala B — Linka 3',status:'err',statusLabel:'PORUCHA',icon:'🔄',tags:[{t:'⚠ PORUCHA',c:'dtag-err'},{t:'Výroba zastavená',c:'dtag-warn'}],info:[['Výrobca','ConveyTech GmbH'],['Model','DP-12/B'],['Rok výroby','2018'],['Výrobné číslo','CT12B-11234'],['Dĺžka pásu','12 m'],['Rýchlosť pásu','0,3–1,5 m/s'],['Nosnosť','800 kg/m'],['Posledná údržba','02.01.2026'],['Zodpovedný','P. Kováč']],docs:[{icon:'📄',name:'Technická dokumentácia DP-12',meta:'PDF · 3,5 MB'},{icon:'📋',name:'Havarijný protokol 04/2026',meta:'PDF · 210 kB'},{icon:'📐',name:'Elektrická schéma zapojenia',meta:'PDF · 1,8 MB'}],proc:[{t:'NÚDZOVÉ ZASTAVENIE',d:'Stlačte červené STOP tlačidlo na ovládacom paneli. Zablokujte prístup.',w:'VSTUP do oblasti pásu bez LOTO zaistenia je ZAKÁZANÝ!',danger:true},{t:'Diagnostika — chybový kód',d:'Zapíšte kód z displeja. E01=pás, E02=motor, E05=senzor.',w:''},{t:'Vizuálna kontrola pásu',d:'Skontrolujte trhliny, prietržia alebo zosklznutie z vodiaceho valca.',w:''},{t:'Kontrola pohonu',d:'Skontrolujte napätie na frekvenčnom meniči a spojku.',w:''},{t:'Oprava alebo eskalácia',d:'Menšie závady opravte podľa manuálu. Väčšie nahláste vedúcemu.',w:''}],parts:[{n:'Dopravný pás 12m PVC',pn:'CT-BELT-12PVC',q:'1 ks',stock:'Objednané',sc:'pst-low'},{n:'Ložisko vodiaceho valca',pn:'SKF-6210-ZZ',q:'4 ks',stock:'Na sklade',sc:'pst-ok'},{n:'Frekvenčný menič 5,5kW',pn:'SEW-MDX60-55',q:'1 ks',stock:'Nie je skladom',sc:'pst-out'},{n:'Snímač polohy indukčný',pn:'SICK-IMS-C',q:'2 ks',stock:'1 ks',sc:'pst-low'}]},
-  'SVAR-04':{id:'SVAR-04',name:'Zvárací robot WR-200',loc:'Hala C — Pozícia C07',status:'ok',statusLabel:'Prevádzkyschopný',icon:'🤖',tags:[{t:'Prevádzkyschopný',c:'dtag-ok'},{t:'Kalibrácia: 01/2026',c:'dtag-info'}],info:[['Výrobca','Yaskawa Europe'],['Model','Motoman MA2010'],['Rok výroby','2022'],['Výrobné číslo','YSK-MA2010-7741'],['Dosah ramena','2 010 mm'],['Nosnosť','10 kg'],['Presnosť','±0,07 mm'],['Posledná údržba','18.01.2026'],['Zodpovedný','Ing. Blaho']],docs:[{icon:'📄',name:'Manuál Motoman MA2010',meta:'PDF · 9,1 MB'},{icon:'📋',name:'Kalibračný protokol 2026',meta:'PDF · 670 kB'},{icon:'⚠️',name:'Bezpečnosť pri robotoch',meta:'PDF · 3,3 MB'},{icon:'📐',name:'Programovacia príručka',meta:'PDF · 5,0 MB'}],proc:[{t:'Kontrola bezpečnostnej zóny',d:'Skontrolujte laserový skener a ochranné ploty pred vstupom.',w:'VSTUP do zóny robota počas prevádzky je SMRTEĽNE NEBEZPEČNÝ!',danger:true},{t:'Kontrola zváracej hlavice',d:'Skontrolujte opotrebenie kontaktnej špičky a ochranného skla.',w:''},{t:'Kontrola káblov a hadíc',d:'Vizuálne skontrolujte zárezy, ohyby a poškodenie izolácie.',w:''},{t:'Mazanie osí',d:'Spustite program "GREASE-ROUTINE" z ovládacieho panela. Trvá ~8 minút.',w:''},{t:'Test nulovej polohy',d:'Spustite "ZERO-CHECK" a overte presnosť referenčných bodov.',w:''}],parts:[{n:'Kontaktná špička M8×1.0',pn:'YSK-TIP-M8',q:'10 ks',stock:'Na sklade',sc:'pst-ok'},{n:'Ochranné sklo zvárania',pn:'YSK-GLASS-WR',q:'5 ks',stock:'Na sklade',sc:'pst-ok'},{n:'Mazivo Molywhite RE Nr.2',pn:'YSK-GREASE-MW',q:'1 tuba',stock:'2 ks',sc:'pst-ok'},{n:'Servo motor osi 1',pn:'YSK-SERVO-A1',q:'1 ks',stock:'Nie je skladom',sc:'pst-out'}]}
+const DB={
+  'CNC-001':{id:'CNC-001',name:'CNC Frézka TF-300',model:'TechnoFréz TF-300 Pro',loc:'Hala A — Pozícia A12',st:'a',stl:'AKTÍVNA',ic:'🔩',
+    specs:[['Výrobca','TechnoFréz s.r.o.'],['Rok výroby','2019'],['Výr. číslo','TF300-29847'],['Max. otáčky','8 000 ot/min'],['Výkon','15 kW'],['Hmotnosť','2 400 kg']],
+    hist:[['Posledná údržba','10.03.2026'],['Najbliž. revízia','10.03.2027'],['Zodpovedný','Ing. Novák P.'],['Prev. hodiny','4 820 h']],
+    docs:[{i:'📄',n:'Technický manuál TF-300'},{i:'📋',n:'Protokol revízie 2025'},{i:'📐',n:'Výkresová dokumentácia'},{i:'⚠️',n:'Bezpečnostný list'}],
+    parts:[{i:'🔧',n:'Olejový filter F-12',pn:'TF-F12-OIL',s:'ok',sl:'NA SKLADE'},{i:'⚙️',n:'Vreteno horné ložisko',pn:'SKF-6205-2RS',s:'ok',sl:'3 KS'},{i:'🔩',n:'Hydraulická pumpa HP-80',pn:'TF-HP80-REP',s:'low',sl:'POSLEDNÝ KUS'},{i:'🧴',n:'Chladiaca kvapalina 5L',pn:'COOL-ISO-5L',s:'ok',sl:'NA SKLADE'},{i:'⛓',n:'Remeň pohonu V-75',pn:'BELT-V75-A',s:'out',sl:'NEDOSTUPNÝ'}],
+    tasks:[{id:'t1',n:'Výmena olejového filtra',s:'Pravidelná · Každých 500 h',done:false,u:false},{id:'t2',n:'Kontrola hladiny oleja',s:'Týždenná kontrola',done:true,u:false},{id:'t3',n:'Mazanie lineárnych vedení',s:'Urgentné · Do 24 hod',done:false,u:true}]},
+  'KOMP-02':{id:'KOMP-02',name:'Kompresor Atlas K-50',model:'Atlas Copco GA-50 VSD+',loc:'Strojovňa — Pozícia S3',st:'m',stl:'ÚDRŽBA',ic:'⚡',
+    specs:[['Výrobca','Atlas Copco'],['Rok výroby','2021'],['Výr. číslo','AC50-84521'],['Max. tlak','13 bar'],['Výkon','45 kW'],['Objem vzduchu','285 m³/hod']],
+    hist:[['Posledná údržba','15.11.2025'],['Najbliž. revízia','15.11.2026'],['Zodpovedný','M. Horváth'],['Prev. hodiny','6 210 h']],
+    docs:[{i:'📄',n:'Prevádzkový manuál GA-50'},{i:'📋',n:'Servisná správa 2025'},{i:'⚠️',n:'Bezpečnostné predpisy'}],
+    parts:[{i:'🌬️',n:'Vzduchový filter AF-50',pn:'AC-AF50-STD',s:'ok',sl:'2 KS'},{i:'🔧',n:'Olejový filter OF-50',pn:'AC-OF50-VSD',s:'low',sl:'POSLEDNÝ KUS'},{i:'🧴',n:'Kompresorový olej 4L',pn:'AC-OIL-4L',s:'ok',sl:'NA SKLADE'},{i:'🔩',n:'Odvzdušňovací ventil',pn:'AC-VALVE-DV',s:'out',sl:'NEDOSTUPNÝ'}],
+    tasks:[{id:'t4',n:'Odvod kondenzátu',s:'Denná kontrola',done:false,u:false},{id:'t5',n:'Kontrola prevádzkového tlaku',s:'Urgentné · Ihneď',done:false,u:true},{id:'t6',n:'Výmena vzduchového filtra',s:'Mesačná údržba',done:true,u:false}]},
+  'CONV-03':{id:'CONV-03',name:'Dopravný pás DP-12',model:'ConveyTech DP-12/B',loc:'Hala B — Linka 3',st:'e',stl:'PORUCHA',ic:'🔄',
+    specs:[['Výrobca','ConveyTech GmbH'],['Rok výroby','2018'],['Výr. číslo','CT12B-11234'],['Dĺžka pásu','12 m'],['Rýchlosť','0,3–1,5 m/s'],['Nosnosť','800 kg/m']],
+    hist:[['Posledná údržba','02.01.2026'],['Porucha od','14.04.2026'],['Zodpovedný','P. Kováč'],['Stav','Čaká na opravu']],
+    docs:[{i:'📄',n:'Technická dokumentácia DP-12'},{i:'📋',n:'Havarijný protokol 04/2026'},{i:'📐',n:'Elektrická schéma zapojenia'}],
+    parts:[{i:'⛓',n:'Dopravný pás 12m PVC',pn:'CT-BELT-12PVC',s:'low',sl:'OBJEDNANÉ'},{i:'⚙️',n:'Ložisko vodiaceho valca',pn:'SKF-6210-ZZ',s:'ok',sl:'4 KS'},{i:'⚡',n:'Frekvenčný menič 5,5kW',pn:'SEW-MDX60-55',s:'out',sl:'NEDOSTUPNÝ'},{i:'📡',n:'Snímač polohy indukčný',pn:'SICK-IMS-C',s:'low',sl:'1 KS'}],
+    tasks:[{id:'t7',n:'LOTO zaistenie stroja',s:'Urgentné · Ihneď',done:true,u:true},{id:'t8',n:'Výmena dopravného pásu',s:'Čaká na dodanie dielu',done:false,u:false},{id:'t9',n:'Diagnostika frekvenčného meniča',s:'Urgentné · Do 24 hod',done:false,u:true}]},
+  'SVAR-04':{id:'SVAR-04',name:'Zvárací robot WR-200',model:'Yaskawa Motoman MA2010',loc:'Hala C — Pozícia C07',st:'a',stl:'AKTÍVNY',ic:'🤖',
+    specs:[['Výrobca','Yaskawa Europe'],['Rok výroby','2022'],['Výr. číslo','YSK-MA2010-7741'],['Dosah ramena','2 010 mm'],['Nosnosť','10 kg'],['Presnosť','±0,07 mm']],
+    hist:[['Posledná údržba','18.01.2026'],['Kalibrácia','12.01.2026'],['Zodpovedný','Ing. Blaho'],['Prev. hodiny','2 140 h']],
+    docs:[{i:'📄',n:'Manuál Motoman MA2010'},{i:'📋',n:'Kalibračný protokol 2026'},{i:'⚠️',n:'Bezpečnosť pri robotoch'},{i:'📐',n:'Programovacia príručka'}],
+    parts:[{i:'🔩',n:'Kontaktná špička M8×1.0',pn:'YSK-TIP-M8',s:'ok',sl:'10 KS'},{i:'🔍',n:'Ochranné sklo zvárania',pn:'YSK-GLASS-WR',s:'ok',sl:'5 KS'},{i:'🧴',n:'Mazivo Molywhite RE Nr.2',pn:'YSK-GREASE-MW',s:'ok',sl:'2 TUBY'},{i:'⚡',n:'Servo motor osi 1',pn:'YSK-SERVO-A1',s:'out',sl:'NEDOSTUPNÝ'}],
+    tasks:[{id:'t10',n:'Mazanie osí robota',s:'Mesačná údržba',done:false,u:false},{id:'t11',n:'Test nulovej polohy',s:'Týždenná kontrola',done:true,u:false},{id:'t12',n:'Kontrola kontaktných špičiek',s:'Denná kontrola',done:false,u:false}]}
 };
-
-let currentUser='',currentScreen='login',scannerStream=null,scannerAnimFrame=null;
+const TK={};
+let CU='',CT='scan',SS=null,SA=null;
 
 window.addEventListener('load',()=>{
-  if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
-  renderMachineList(); renderDemoQR();
-  const saved=localStorage.getItem('zeo_user');
-  if(saved){currentUser=saved;showScreen('home');document.getElementById('home-user').textContent='Prihlásený: '+currentUser;}
+  if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  const sv=localStorage.getItem('zeo_u');
+  if(sv){CU=sv;boot();}
+  renderDemos();
 });
 
-let deferredInstall=null;
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;document.getElementById('install-banner').classList.add('show');});
-document.getElementById('install-btn').addEventListener('click',()=>{if(deferredInstall){deferredInstall.prompt();deferredInstall.userChoice.then(()=>document.getElementById('install-banner').classList.remove('show'));}});
-
-function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');currentScreen=id;}
-function doLogin(){const u=document.getElementById('inp-user').value.trim(),p=document.getElementById('inp-pass').value.trim();if(u.length<3||p.length<3){alert('Min. 3 znaky pre meno aj heslo.');return;}currentUser=u;localStorage.setItem('zeo_user',u);document.getElementById('home-user').textContent='Prihlásený: '+u;showScreen('home');}
-document.getElementById('inp-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
-function doLogout(){localStorage.removeItem('zeo_user');showScreen('login');}
-
-function renderMachineList(){
-  document.getElementById('machine-list').innerHTML=Object.values(MACHINES).map(m=>{
-    const ic=m.status==='ok'?'icon-ok':m.status==='warn'?'icon-warn':'icon-err';
-    const sc=m.status==='ok'?'st-ok':m.status==='warn'?'st-warn':'st-err';
-    return `<div class="machine-card" onclick="openMachine('${m.id}')"><div class="machine-icon ${ic}">${m.icon}</div><div class="machine-info"><div class="machine-name">${m.name}</div><div class="machine-loc">${m.loc}</div></div><span class="machine-status ${sc}">${m.statusLabel}</span><span class="machine-arrow">›</span></div>`;
-  }).join('');
+function bc(s){return s==='a'?'ba':s==='m'?'bm':'be';}
+function doLogin(){
+  const u=document.getElementById('iUser').value.trim(),p=document.getElementById('iPass').value.trim();
+  if(u.length<3||p.length<3){alert('Min. 3 znaky pre meno aj heslo.');return;}
+  CU=u;localStorage.setItem('zeo_u',u);boot();
+}
+document.getElementById('iPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+function doLogout(){localStorage.removeItem('zeo_u');stopScan();document.getElementById('vMain').classList.add('off');document.getElementById('vLogin').classList.remove('off');}
+function boot(){
+  document.getElementById('vLogin').classList.add('off');
+  document.getElementById('vMain').classList.remove('off');
+  document.getElementById('pName').textContent=CU;
+  renderML(Object.values(DB));
+  renderGT('all');
+  goTab('scan');startScan();
 }
 
-function renderDemoQR(){
-  document.getElementById('demo-qr-grid').innerHTML=Object.values(MACHINES).map(m=>
-    `<div class="demo-qr-btn" onclick="onQRScanned('${m.id}')"><div class="demo-qr-code">${m.id}</div><div class="demo-qr-name">${m.name.split(' ').slice(0,2).join(' ')}</div></div>`
+function goTab(t){
+  ['scan','machines','tasks','profile'].forEach(x=>{
+    document.getElementById('t'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('off',x!==t);
+    document.getElementById('n'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('on',x===t);
+  });
+  document.getElementById('vDetail').classList.add('off');
+  CT=t;
+  if(t==='scan')startScan();else stopScan();
+}
+
+// SCAN
+function openSheet(){document.getElementById('sheet').classList.add('on');}
+function closeSheet(){document.getElementById('sheet').classList.remove('on');}
+function renderDemos(){
+  document.getElementById('demoBtns').innerHTML=Object.values(DB).map(m=>
+    `<div class="dmb" onclick="closeSheet();openDetail('${m.id}')"><div class="dmic">${m.ic}</div><div><div class="dmn">${m.name}</div><div class="dmc">${m.id}</div></div><span class="badge ${bc(m.st)}" style="margin-left:auto">${m.stl}</span></div>`
   ).join('');
 }
-
-async function openScanner(){
-  showScreen('scanner-screen');
+async function startScan(){
+  if(SS)return;
   try{
-    scannerStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}});
-    const v=document.getElementById('qr-video');v.srcObject=scannerStream;v.play();
-    v.addEventListener('loadedmetadata',startQRLoop);
+    SS=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    const v=document.getElementById('qrV');v.srcObject=SS;v.play();
+    v.addEventListener('loadedmetadata',scanLoop,{once:true});
   }catch(e){}
 }
-function startQRLoop(){
-  const v=document.getElementById('qr-video'),c=document.getElementById('qr-canvas'),ctx=c.getContext('2d');
+function scanLoop(){
+  const v=document.getElementById('qrV'),c=document.getElementById('qrC'),ctx=c.getContext('2d');
   function tick(){
-    if(currentScreen!=='scanner-screen')return;
-    if(v.readyState===v.HAVE_ENOUGH_DATA){c.width=v.videoWidth;c.height=v.videoHeight;ctx.drawImage(v,0,0);const img=ctx.getImageData(0,0,c.width,c.height);if(window.jsQR){const code=jsQR(img.data,img.width,img.height);if(code&&MACHINES[code.data]){onQRScanned(code.data);return;}}}
-    scannerAnimFrame=requestAnimationFrame(tick);
+    if(CT!=='scan')return;
+    if(v.readyState===v.HAVE_ENOUGH_DATA){
+      c.width=v.videoWidth;c.height=v.videoHeight;ctx.drawImage(v,0,0);
+      if(window.jsQR){const r=jsQR(ctx.getImageData(0,0,c.width,c.height).data,c.width,c.height);if(r&&DB[r.data]){openDetail(r.data);return;}}
+    }
+    SA=requestAnimationFrame(tick);
   }
-  scannerAnimFrame=requestAnimationFrame(tick);
+  SA=requestAnimationFrame(tick);
 }
-function stopScanner(){if(scannerAnimFrame)cancelAnimationFrame(scannerAnimFrame);if(scannerStream){scannerStream.getTracks().forEach(t=>t.stop());scannerStream=null;}document.getElementById('qr-video').srcObject=null;}
-function closeScanner(){stopScanner();showScreen('home');}
-function onQRScanned(id){stopScanner();openMachine(id);}
+function stopScan(){if(SA){cancelAnimationFrame(SA);SA=null;}if(SS){SS.getTracks().forEach(t=>t.stop());SS=null;}document.getElementById('qrV').srcObject=null;}
 
-function openMachine(id){
-  const m=MACHINES[id];if(!m)return;
-  document.getElementById('d-topbar-name').textContent=m.name;
-  document.getElementById('d-topbar-loc').textContent=m.loc;
-  document.getElementById('d-code').textContent=m.id;
-  document.getElementById('d-name').textContent=m.name;
-  document.getElementById('d-loc').textContent=m.loc;
-  document.getElementById('d-tags').innerHTML=m.tags.map(t=>`<span class="dtag ${t.c}">${t.t}</span>`).join('');
-  document.getElementById('tab-info').innerHTML=`<div class="info-list">${m.info.map(r=>`<div class="info-row"><span class="info-key">${r[0]}</span><span class="info-val">${r[1]}</span></div>`).join('')}</div>`;
-  document.getElementById('tab-docs').innerHTML=m.docs.map(d=>`<div class="doc-item"><div class="doc-icon-wrap">${d.icon}</div><div class="doc-info"><div class="doc-name">${d.name}</div><div class="doc-meta">${d.meta}</div></div><span class="doc-arr">›</span></div>`).join('');
-  document.getElementById('tab-proc').innerHTML=m.proc.map((s,i)=>`<div class="proc-step"><div class="step-num">${i+1}</div><div class="step-body"><div class="step-title">${s.t}</div><div class="step-desc">${s.d}</div>${s.w?`<div class="${s.danger?'step-danger':'step-warn'}">⚠ ${s.w}</div>`:''}</div></div>`).join('');
-  document.getElementById('tab-parts').innerHTML=m.parts.map(p=>`<div class="part-item"><div class="part-top"><div class="part-name">${p.n}</div><span class="part-stock ${p.sc}">${p.stock}</span></div><div class="part-bottom"><div class="part-pn">${p.pn}</div><div class="part-qty">Potreba: ${p.q}</div></div></div>`).join('');
-  switchTab('info');showScreen('detail');
+// MACHINES
+function renderML(list){
+  document.getElementById('mList').innerHTML=list.map(m=>
+    `<div class="mc" onclick="goTab('machines');openDetail('${m.id}')"><div class="mc-top"><div class="mc-name">${m.name}</div><span class="badge ${bc(m.st)}">${m.stl}</span></div><div class="mc-model">${m.model}</div><div class="mc-loc">${m.loc}</div></div>`
+  ).join('');
 }
-function goBack(){showScreen('home');}
-function switchTab(name){const names=['info','docs','proc','parts'];document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',names[i]===name));document.querySelectorAll('.tab-pane').forEach((p,i)=>p.classList.toggle('active',names[i]===name));}
+function filterM(q){renderML(Object.values(DB).filter(m=>m.name.toLowerCase().includes(q.toLowerCase())||m.model.toLowerCase().includes(q.toLowerCase())||m.loc.toLowerCase().includes(q.toLowerCase())));}
+
+// DETAIL
+function openDetail(id){
+  const m=DB[id];if(!m)return;
+  stopScan();
+  document.getElementById('vDetail').classList.remove('off');
+  document.getElementById('detailBody').innerHTML=buildDetail(m);
+}
+function closeDetail(){document.getElementById('vDetail').classList.add('off');if(CT==='scan')startScan();}
+
+function buildDetail(m){
+  const bclass=bc(m.st);
+  return `
+  <div class="dmc-card">
+    <div class="dmc-img">${m.ic}</div>
+    <div style="flex:1;min-width:0">
+      <div class="dmc-name">${m.name}</div>
+      <div class="dmc-model">${m.model}</div>
+      <div class="dmc-loc">${m.loc}</div>
+      <span class="badge ${bclass}">${m.stl}</span>
+    </div>
+  </div>
+  <div class="seg">
+    <button class="seg-b on" id="segSpec" onclick="swSeg('spec')">Špecifikácie</button>
+    <button class="seg-b" id="segParts" onclick="swSeg('parts')">Diely &amp; Úlohy</button>
+  </div>
+  <div id="pSpec">
+    <div class="dsec">
+      <div class="dsh" onclick="togSec(this)"><div class="dsh-title">Parametre</div><div class="dsh-arr op">▾</div></div>
+      <div class="dsb">${m.specs.map(r=>`<div class="drow"><div class="drk">${r[0]}</div><div class="drv">${r[1]}</div></div>`).join('')}</div>
+    </div>
+    <div class="dsec">
+      <div class="dsh" onclick="togSec(this)"><div class="dsh-title">História údržby</div><div class="dsh-arr op">▾</div></div>
+      <div class="dsb">${m.hist.map(r=>`<div class="drow"><div class="drk">${r[0]}</div><div class="drv">${r[1]}</div></div>`).join('')}</div>
+    </div>
+    <div class="dsec">
+      <div class="dsh" onclick="togSec(this)"><div class="dsh-title">Dokumentácia</div><div class="dsh-arr op">▾</div></div>
+      <div class="dsb">${m.docs.map(d=>`<div class="docrow"><div class="docic">${d.i}</div><div class="docname">${d.n}</div><span style="color:var(--gray2);font-size:18px">›</span></div>`).join('')}</div>
+    </div>
+    <div style="height:8px"></div>
+    <button class="mbtn mbtn-p">Naplánovaná údržba<br><small style="font-weight:400;font-size:12px">${m.hist[0]?.[1]??'—'}</small></button>
+    <button class="mbtn mbtn-s">Posledný servis<br><small style="font-weight:400;font-size:12px">${m.hist[0]?.[1]??'—'}</small></button>
+    <div style="height:16px"></div>
+  </div>
+  <div id="pParts" style="display:none">
+    <div class="ptabs">
+      <button class="ptab-b on" id="ptParts" onclick="swPT('parts')">Náhradné diely</button>
+      <button class="ptab-b" id="ptTasks" onclick="swPT('tasks')">Úlohy</button>
+    </div>
+    <div id="ppParts">${m.parts.map(p=>{const sc=p.s==='ok'?'sok':p.s==='low'?'slow':'sout';const si=p.s==='ok'?'✅':p.s==='low'?'⚠️':'❌';return`<div class="pcard"><div class="pcard-top"><div class="pimg">${p.i}</div><div style="flex:1;min-width:0"><div class="pname">${p.n}</div><div class="ppn">P/N: ${p.pn}</div><div class="pstock ${sc}">${si} ${p.sl}</div></div><span style="color:var(--gray2);font-size:20px">›</span></div><div class="pacts"><button class="pact pact-p">Označiť ako použitý</button><button class="pact pact-s">Požiadať o náhradu</button></div></div>`;}).join('')}<div style="height:16px"></div></div>
+    <div id="ppTasks" style="display:none">
+      <div class="tk-sec-hdr"><div class="tk-sec-title">Úlohy</div><button class="add-tk-btn">+ Pridať</button></div>
+      ${buildTasks(m.tasks)}
+      <div style="height:16px"></div>
+    </div>
+  </div>`;
+}
+
+function swSeg(t){
+  document.getElementById('segSpec').classList.toggle('on',t==='spec');
+  document.getElementById('segParts').classList.toggle('on',t==='parts');
+  document.getElementById('pSpec').style.display=t==='spec'?'':'none';
+  document.getElementById('pParts').style.display=t==='parts'?'':'none';
+}
+function swPT(t){
+  document.getElementById('ptParts').classList.toggle('on',t==='parts');
+  document.getElementById('ptTasks').classList.toggle('on',t==='tasks');
+  document.getElementById('ppParts').style.display=t==='parts'?'':'none';
+  document.getElementById('ppTasks').style.display=t==='tasks'?'':'none';
+}
+function togSec(hdr){
+  const b=hdr.nextElementSibling,a=hdr.querySelector('.dsh-arr'),op=a.classList.contains('op');
+  b.style.display=op?'none':'';a.classList.toggle('op',!op);
+}
+
+// TASKS
+function buildTasks(tasks){
+  return tasks.map(t=>{const d=TK[t.id]??t.done;return`<div class="tkcard" id="tkc-${t.id}"><div class="tk-top"><div class="tkbox${d?' ck':''}" onclick="togTK('${t.id}')"><span>${d?'✓':''}</span></div><div><div class="tk-name">${t.n}${t.u?' 🔴':''}</div><div class="tk-sub">${t.s}</div></div></div><div class="tk-acts"><button class="tk-act">✏️ Pridať poznámku</button><button class="tk-act">📷 Priložiť foto</button></div></div>`;}).join('');
+}
+function togTK(id){
+  const cb=document.querySelector(`#tkc-${id} .tkbox`),d=cb.classList.contains('ck');
+  TK[id]=!d;cb.classList.toggle('ck',!d);
+  const sp=cb.querySelector('span');if(sp)sp.textContent=!d?'✓':'';
+}
+
+function renderGT(f){
+  const all=Object.values(DB).flatMap(m=>m.tasks.map(t=>({...t,mn:m.name})));
+  let list=all;
+  if(f==='open')list=all.filter(t=>!(TK[t.id]??t.done));
+  if(f==='done')list=all.filter(t=>TK[t.id]??t.done);
+  if(f==='urgent')list=all.filter(t=>t.u);
+  document.getElementById('gTaskList').innerHTML='<div style="padding:0 0 8px">'+list.map(t=>{const d=TK[t.id]??t.done;return`<div class="tkcard" id="gtk-${t.id}"><div style="font-size:11px;color:var(--gray);margin-bottom:6px;font-weight:600">${t.mn}</div><div class="tk-top"><div class="tkbox${d?' ck':''}" onclick="togGTK('${t.id}')"><span>${d?'✓':''}</span></div><div><div class="tk-name">${t.n}${t.u?' 🔴':''}</div><div class="tk-sub">${t.s}</div></div></div><div class="tk-acts"><button class="tk-act">✏️ Pridať poznámku</button><button class="tk-act">📷 Priložiť foto</button></div></div>`;}).join('')+'</div><div style="height:8px"></div>';
+}
+function togGTK(id){
+  const cb=document.querySelector(`#gtk-${id} .tkbox`),d=cb.classList.contains('ck');
+  TK[id]=!d;cb.classList.toggle('ck',!d);
+  const sp=cb.querySelector('span');if(sp)sp.textContent=!d?'✓':'';
+}
+function fTasks(f,el){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');renderGT(f);
+}
 </script>
 </body>
 </html>
