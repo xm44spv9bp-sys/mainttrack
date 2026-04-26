@@ -14,34 +14,33 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 :root{
-  --g1:#2E7D32;--g2:#388E3C;--g3:#4CAF50;--gl:#E8F5E9;--gp:#C8E6C9;
+  --g1:#2E7D32;--g2:#388E3C;--gl:#E8F5E9;--gp:#C8E6C9;
   --red:#D32F2F;--rl:#FFEBEE;
   --ora:#F57C00;--ol:#FFF3E0;
   --gray:#8E8E93;--gray2:#C7C7CC;--gray3:#F2F2F7;--gray4:#E5E5EA;
-  --text:#000;--text2:#3C3C43;--text3:#8E8E93;
-  --white:#fff;--border:#E5E5EA;
+  --text:#000;--text2:#3C3C43;--white:#fff;--border:#E5E5EA;
   --sbot:env(safe-area-inset-bottom,0px);--stop:env(safe-area-inset-top,0px);
 }
 #app{position:fixed;inset:0;display:flex;flex-direction:column;max-width:430px;margin:0 auto;background:var(--gray3)}
 .view{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--gray3);transition:transform .3s cubic-bezier(.4,0,.2,1)}
 .view.off{transform:translateX(100%);pointer-events:none}
 .spad{height:calc(var(--stop) + 44px);background:var(--white);flex-shrink:0}
-.navbar{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-top:.5px solid var(--border);display:flex;flex-shrink:0;padding-bottom:var(--sbot);z-index:10;position:relative}
+.navbar{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-top:.5px solid var(--border);display:flex;flex-shrink:0;padding-bottom:var(--sbot);z-index:10}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 4px;gap:3px;border:none;background:none;cursor:pointer}
 .nav-ic{font-size:22px;color:var(--gray)}
 .nav-lb{font-size:10px;font-weight:500;color:var(--gray)}
 .nav-btn.on .nav-ic,.nav-btn.on .nav-lb{color:var(--g1)}
 .nav-btn.on .nav-lb{font-weight:700}
-.phdr{background:var(--white);border-bottom:.5px solid var(--border);flex-shrink:0;padding:12px 16px;display:flex;align-items:center;gap:8px;min-height:52px}
+.phdr{background:var(--white);border-bottom:.5px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:8px;min-height:52px;flex-shrink:0}
 .ptitle{font-size:17px;font-weight:700;color:var(--text);flex:1;text-align:center}
 .hbtn{background:none;border:none;color:var(--g1);font-size:16px;font-weight:600;cursor:pointer;padding:4px 8px;min-width:44px}
 .pbody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
-/* LOGIN */
+/* ── LOGIN ── */
 #vLogin{background:var(--white)}
 #vLogin .spad{background:var(--g1)}
 .lhero{background:var(--g1);padding:40px 24px 44px;display:flex;flex-direction:column;align-items:center;gap:14px}
-.licon{width:96px;height:96px;border-radius:22px;overflow:hidden;background:rgba(255,255,255,.15)}
+.licon{width:96px;height:96px;border-radius:22px;overflow:hidden}
 .licon img{width:100%;height:100%;object-fit:cover}
 .lname{font-size:27px;font-weight:800;color:#fff;letter-spacing:-.4px}
 .ltag{font-size:14px;color:rgba(255,255,255,.75);text-align:center}
@@ -53,12 +52,12 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
 .lfield input{flex:1;padding:14px 0;font-size:16px;border:none;outline:none;background:none;color:var(--text)}
 .lfield input::placeholder{color:var(--gray2)}
 .lbtn{width:100%;padding:16px;background:var(--g1);color:#fff;border:none;border-radius:12px;font-size:17px;font-weight:700;cursor:pointer}
-.lhint{padding:11px 14px;background:var(--gl);border-radius:10px;font-size:13px;color:var(--g1);border:1px solid var(--gp)}
+.lhint{padding:11px 14px;background:var(--gl);border-radius:10px;font-size:12px;color:var(--g1);border:1px solid var(--gp);line-height:1.5}
 
-/* SCAN */
+/* ── SCAN ── */
 #tScan{background:var(--white)}
 #tScan .spad{background:var(--white)}
-.scan-hdr{background:var(--white);border-bottom:.5px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.scan-hdr{background:var(--white);border-bottom:.5px solid var(--border);padding:12px 16px;text-align:center;font-size:17px;font-weight:700;flex-shrink:0}
 .scan-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:24px}
 .scan-frame{width:230px;height:230px;position:relative}
 .sc{position:absolute;width:28px;height:28px;border-color:var(--g1);border-style:solid;border-width:3px}
@@ -73,10 +72,10 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
 #qrC{display:none}
 .scan-lbl{font-size:19px;font-weight:800;color:var(--g1);text-align:center}
 .scan-sub{font-size:14px;color:var(--gray);text-align:center;line-height:1.5}
-.fab{position:absolute;bottom:28px;right:24px;width:54px;height:54px;background:var(--g1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;box-shadow:0 4px 16px rgba(46,125,50,.35);border:none;color:#fff;font-style:normal}
+.fab{position:absolute;bottom:28px;right:24px;width:54px;height:54px;background:var(--g1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;box-shadow:0 4px 16px rgba(46,125,50,.35);border:none}
 .sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;z-index:30}
 .sheet-bg.on{display:flex}
-.sheet{background:var(--white);border-radius:20px 20px 0 0;width:100%;padding:20px 20px calc(20px + var(--sbot));display:flex;flex-direction:column;gap:8px}
+.sheet{background:var(--white);border-radius:20px 20px 0 0;width:100%;padding:20px 20px calc(20px + var(--sbot));display:flex;flex-direction:column;gap:8px;max-height:80vh;overflow-y:auto}
 .sheet-title{font-size:15px;font-weight:700;color:var(--text);text-align:center;margin-bottom:4px}
 .dmb{background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:13px 16px;display:flex;align-items:center;gap:12px;cursor:pointer}
 .dmb:active{background:var(--gl);border-color:var(--g1)}
@@ -85,29 +84,23 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
 .dmc{font-size:11px;color:var(--gray);font-family:monospace;margin-top:2px}
 .sheet-cancel{background:var(--gray3);border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:700;color:var(--g1);cursor:pointer;width:100%;margin-top:4px}
 
-/* MACHINES */
+/* ── MACHINES ── */
 .srch-wrap{padding:8px 16px;background:var(--white);border-bottom:.5px solid var(--border);flex-shrink:0}
 .srch{background:var(--gray3);border-radius:10px;display:flex;align-items:center;gap:8px;padding:8px 12px}
 .srch input{border:none;background:none;font-size:15px;color:var(--text);flex:1;outline:none}
-.srch input::placeholder{color:var(--gray)}
 .mlist{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px}
 .mc{background:var(--white);border-radius:14px;border:1.5px solid var(--border);padding:14px 16px;cursor:pointer}
 .mc:active{background:var(--gl);border-color:var(--g1)}
 .mc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px}
 .mc-name{font-size:15px;font-weight:700;color:var(--text);flex:1}
-.badge{font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;flex-shrink:0;letter-spacing:.04em}
-.ba{background:var(--g1);color:#fff}
-.bm{background:var(--ol);color:var(--ora);border:1px solid var(--ora)}
-.be{background:var(--red);color:#fff}
+.badge{font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;flex-shrink:0}
+.ba{background:var(--g1);color:#fff}.bm{background:var(--ol);color:var(--ora);border:1px solid var(--ora)}.be{background:var(--red);color:#fff}
 .mc-model{font-size:13px;color:var(--gray);margin-bottom:2px}
 .mc-loc{font-size:13px;color:var(--gray)}
 
-/* DETAIL */
+/* ── DETAIL ── */
 .dmc-card{background:var(--white);margin:12px 16px;border-radius:14px;border:1.5px solid var(--border);padding:14px 16px;display:flex;gap:14px;align-items:center}
 .dmc-img{width:64px;height:64px;border-radius:12px;background:var(--gray3);display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0}
-.dmc-name{font-size:16px;font-weight:800;color:var(--text);margin-bottom:2px}
-.dmc-model{font-size:13px;color:var(--gray);margin-bottom:2px}
-.dmc-loc{font-size:13px;color:var(--gray);margin-bottom:6px}
 .seg{margin:0 16px 12px;background:var(--gray4);border-radius:10px;padding:2px;display:flex}
 .seg-b{flex:1;padding:8px;font-size:13px;font-weight:700;color:var(--gray);border:none;background:none;border-radius:8px;cursor:pointer;transition:all .2s}
 .seg-b.on{background:var(--white);color:var(--g1);box-shadow:0 1px 4px rgba(0,0,0,.1)}
@@ -124,12 +117,8 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
 .docrow{display:flex;align-items:center;padding:12px 16px;border-bottom:.5px solid var(--border);gap:12px;cursor:pointer}
 .docrow:last-child{border-bottom:none}
 .docic{width:36px;height:36px;border-radius:8px;background:var(--rl);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.docname{flex:1;font-size:14px;font-weight:500;color:var(--text)}
 .mbtn{display:block;margin:0 16px 10px;padding:14px;border-radius:14px;font-size:15px;font-weight:700;text-align:center;cursor:pointer;border:none;width:calc(100% - 32px)}
-.mbtn-p{background:var(--g1);color:#fff}
-.mbtn-s{background:var(--white);color:var(--g1);border:1.5px solid var(--g1)}
-
-/* PARTS */
+.mbtn-p{background:var(--g1);color:#fff}.mbtn-s{background:var(--white);color:var(--g1);border:1.5px solid var(--g1)}
 .ptabs{margin:0 16px 12px;background:var(--gray4);border-radius:10px;padding:2px;display:flex}
 .ptab-b{flex:1;padding:8px;font-size:13px;font-weight:700;color:var(--gray);border:none;background:none;border-radius:8px;cursor:pointer;transition:all .2s}
 .ptab-b.on{background:var(--white);color:var(--g1);box-shadow:0 1px 4px rgba(0,0,0,.1)}
@@ -142,16 +131,13 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
 .sok{color:var(--g1)}.slow{color:var(--ora)}.sout{color:var(--red)}
 .pacts{display:flex;gap:8px;padding:10px 14px}
 .pact{flex:1;padding:9px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:none}
-.pact-p{background:var(--g1);color:#fff}
-.pact-s{background:var(--white);color:var(--g1);border:1.5px solid var(--g1)}
-
-/* TASKS */
+.pact-p{background:var(--g1);color:#fff}.pact-s{background:var(--white);color:var(--g1);border:1.5px solid var(--g1)}
 .tk-sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 6px}
 .tk-sec-title{font-size:17px;font-weight:800;color:var(--text)}
 .add-tk-btn{background:var(--g1);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer}
 .tkcard{background:var(--white);margin:0 16px 10px;border-radius:14px;border:1.5px solid var(--border);padding:14px 16px}
 .tk-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
-.tkbox{width:22px;height:22px;border-radius:6px;border:2px solid var(--border);background:var(--white);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .15s}
+.tkbox{width:22px;height:22px;border-radius:6px;border:2px solid var(--border);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .15s}
 .tkbox.ck{background:var(--g1);border-color:var(--g1)}
 .tkbox span{font-size:14px;color:#fff;display:none;font-weight:700}
 .tkbox.ck span{display:block}
@@ -159,18 +145,12 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
 .tk-sub{font-size:13px;color:var(--gray)}
 .tk-acts{display:flex;gap:16px}
 .tk-act{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--g1);font-weight:600;background:none;border:none;cursor:pointer;padding:0}
-
-/* GLOBAL TASKS */
 .filter-row{display:flex;gap:8px;padding:10px 16px;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
 .filter-row::-webkit-scrollbar{display:none}
 .chip{padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;border:1.5px solid var(--border);background:var(--white);color:var(--text2);cursor:pointer;white-space:nowrap;flex-shrink:0}
 .chip.on{background:var(--g1);color:#fff;border-color:var(--g1)}
-
-/* PROFILE */
 .phero{background:var(--white);padding:24px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;border-bottom:.5px solid var(--border);margin-bottom:12px}
 .pav{width:80px;height:80px;border-radius:50%;background:var(--gl);display:flex;align-items:center;justify-content:center;font-size:36px;border:3px solid var(--gp)}
-.pname{font-size:20px;font-weight:800;color:var(--text)}
-.prole{font-size:14px;color:var(--gray)}
 .pgrp{background:var(--white);margin:0 16px 12px;border-radius:14px;border:1.5px solid var(--border);overflow:hidden}
 .prow{display:flex;align-items:center;padding:14px 16px;border-bottom:.5px solid var(--border);gap:14px;cursor:pointer}
 .prow:last-child{border-bottom:none}
@@ -178,6 +158,54 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
 .prg{background:var(--gl)}.prb{background:#E3F2FD}.prr{background:var(--rl)}
 .prlbl{flex:1;font-size:15px;font-weight:500;color:var(--text)}
 .lout-btn{display:block;margin:4px 16px 24px;padding:14px;background:var(--rl);color:var(--red);border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;width:calc(100% - 32px)}
+
+/* ══ ADMIN ══ */
+.admin-badge{background:#7B1FA2;color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;margin-left:8px;vertical-align:middle}
+.admin-topbar{background:#1a1a2e;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.admin-topbar-title{font-size:16px;font-weight:700;color:#CE93D8;flex:1}
+.admin-section{background:var(--white);margin:12px 16px;border-radius:14px;border:1.5px solid var(--border);overflow:hidden}
+.admin-section-title{font-size:13px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.08em;padding:12px 16px 6px}
+.admin-row{display:flex;align-items:center;padding:13px 16px;border-bottom:.5px solid var(--border);gap:12px;cursor:pointer}
+.admin-row:last-child{border-bottom:none}
+.admin-row:active{background:var(--gray3)}
+.admin-row-ic{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.aic-purple{background:#F3E5F5}.aic-blue{background:#E3F2FD}.aic-green{background:var(--gl)}.aic-orange{background:var(--ol)}.aic-red{background:var(--rl)}
+.admin-row-info{flex:1}
+.admin-row-title{font-size:15px;font-weight:600;color:var(--text)}
+.admin-row-sub{font-size:12px;color:var(--gray);margin-top:2px}
+.admin-machine-item{display:flex;align-items:center;padding:13px 16px;border-bottom:.5px solid var(--border);gap:12px}
+.admin-machine-item:last-child{border-bottom:none}
+.ami-info{flex:1;min-width:0}
+.ami-name{font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ami-sub{font-size:12px;color:var(--gray);margin-top:2px}
+.ami-btns{display:flex;gap:6px;flex-shrink:0}
+.ami-btn{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:none}
+.ami-edit{background:var(--gl);color:var(--g1)}.ami-del{background:var(--rl);color:var(--red)}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;align-items:flex-end;max-width:430px;margin:0 auto}
+.modal-bg.on{display:flex}
+.modal{background:var(--white);border-radius:20px 20px 0 0;width:100%;padding:20px;padding-bottom:calc(20px + var(--sbot));max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+.modal-title{font-size:18px;font-weight:800;color:var(--text);text-align:center}
+.modal-field{display:flex;flex-direction:column;gap:6px}
+.modal-label{font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em}
+.modal-input{padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;color:var(--text);outline:none;background:var(--white);width:100%}
+.modal-input:focus{border-color:var(--g1)}
+.modal-select{padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;color:var(--text);outline:none;background:var(--white);width:100%;appearance:none}
+.modal-row{display:flex;gap:10px}
+.modal-row .modal-field{flex:1}
+.modal-save{width:100%;padding:15px;background:var(--g1);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:4px}
+.modal-cancel{width:100%;padding:14px;background:var(--gray3);color:var(--gray);border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer}
+.sub-list-item{display:flex;align-items:center;padding:10px 0;border-bottom:.5px solid var(--border);gap:10px}
+.sub-list-item:last-child{border-bottom:none}
+.sub-item-text{flex:1;font-size:14px;color:var(--text)}
+.sub-del-btn{background:var(--rl);color:var(--red);border:none;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0}
+.add-sub-row{display:flex;gap:8px;margin-top:6px}
+.add-sub-inp{flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;color:var(--text)}
+.add-sub-inp:focus{border-color:var(--g1)}
+.add-sub-btn{padding:10px 16px;background:var(--g1);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0}
+.toast{position:fixed;bottom:calc(80px + var(--sbot));left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
 </style>
 </head>
 <body>
@@ -185,7 +213,7 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
 
 <!-- LOGIN -->
 <div id="vLogin" class="view">
-  <div class="spad"></div>
+  <div class="spad" style="background:var(--g1)"></div>
   <div class="pbody">
     <div class="lhero">
       <div class="licon"><img src="logo.png" alt="logo"></div>
@@ -198,19 +226,22 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
         <div class="lfield"><span>🔒</span><input id="iPass" type="password" placeholder="Heslo" autocomplete="current-password"></div>
       </div>
       <button class="lbtn" onclick="doLogin()">Prihlásiť sa</button>
-      <div class="lhint"><strong>Demo:</strong> akékoľvek meno a heslo (min. 3 znaky)</div>
+      <div class="lhint">
+        <strong>Údržbár:</strong> akékoľvek meno + heslo (min. 3 znaky)<br>
+        <strong>Admin:</strong> meno <code>admin</code> + heslo <code>admin123</code>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- MAIN -->
-<div id="vMain" class="view off" style="background:var(--gray3)">
+<!-- MAIN (User) -->
+<div id="vMain" class="view off">
   <div style="flex:1;position:relative;overflow:hidden">
 
     <!-- SCAN -->
     <div id="tScan" class="view" style="background:var(--white)">
       <div class="spad" style="background:var(--white)"></div>
-      <div class="scan-hdr"><div style="font-size:17px;font-weight:700">Skenovanie</div></div>
+      <div class="scan-hdr">Skenovanie</div>
       <div class="scan-body">
         <div class="scan-lbl">Skenovať QR kód stroja</div>
         <div class="scan-frame">
@@ -218,10 +249,16 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
           <div class="scan-inner"><video id="qrV" autoplay playsinline muted></video><div class="scan-line"></div></div>
         </div>
         <canvas id="qrC"></canvas>
-        <div class="scan-sub">Namieste kameru na QR kód vo vnútri rámu,<br>aby ste získali prístup k detailom stroja.</div>
+        <div class="scan-sub">Namieste kameru na QR kód vo vnútri rámu</div>
       </div>
       <button class="fab" onclick="openSheet()">🔧</button>
-      <div class="sheet-bg" id="sheet"><div class="sheet"><div class="sheet-title">Vyberte demo stroj</div><div id="demoBtns"></div><button class="sheet-cancel" onclick="closeSheet()">Zrušiť</button></div></div>
+      <div class="sheet-bg" id="sheet">
+        <div class="sheet">
+          <div class="sheet-title">Vyberte demo stroj</div>
+          <div id="demoBtns"></div>
+          <button class="sheet-cancel" onclick="closeSheet()">Zrušiť</button>
+        </div>
+      </div>
     </div>
 
     <!-- MACHINES -->
@@ -252,15 +289,10 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
       <div class="spad" style="background:var(--white)"></div>
       <div class="phdr" style="background:var(--white);border-bottom:.5px solid var(--border)"><div style="width:44px"></div><div class="ptitle">Profil</div><div style="width:44px"></div></div>
       <div class="pbody">
-        <div class="phero"><div class="pav">👷</div><div class="pname" id="pName">—</div><div class="prole">Strojný údržbár</div></div>
+        <div class="phero"><div class="pav">👷</div><div style="font-size:20px;font-weight:800" id="pName">—</div><div style="font-size:14px;color:var(--gray)">Strojný údržbár</div></div>
         <div class="pgrp">
           <div class="prow"><div class="pric prg">📊</div><div class="prlbl">Moje úlohy</div><span style="color:var(--gray2);font-size:18px">›</span></div>
-          <div class="prow"><div class="pric prg">🔔</div><div class="prlbl">Notifikácie</div><span style="color:var(--gray2);font-size:18px">›</span></div>
           <div class="prow"><div class="pric prb">📱</div><div class="prlbl">Verzia aplikácie</div><span style="font-size:13px;color:var(--gray)">1.0.0</span></div>
-        </div>
-        <div class="pgrp">
-          <div class="prow"><div class="pric prg">⚙️</div><div class="prlbl">Nastavenia</div><span style="color:var(--gray2);font-size:18px">›</span></div>
-          <div class="prow"><div class="pric prb">❓</div><div class="prlbl">Pomoc a podpora</div><span style="color:var(--gray2);font-size:18px">›</span></div>
         </div>
         <button class="lout-btn" onclick="doLogout()">Odhlásiť sa</button>
       </div>
@@ -276,10 +308,8 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
       </div>
       <div class="pbody" id="detailBody"></div>
     </div>
-
   </div>
 
-  <!-- BOTTOM NAV -->
   <nav class="navbar">
     <button class="nav-btn on" id="nScan" onclick="goTab('scan')"><span class="nav-ic">⊡</span><span class="nav-lb">Skenovať</span></button>
     <button class="nav-btn" id="nMachines" onclick="goTab('machines')"><span class="nav-ic">⚙</span><span class="nav-lb">Stroje</span></button>
@@ -288,111 +318,315 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
   </nav>
 </div>
 
+<!-- ADMIN PANEL -->
+<div id="vAdmin" class="view off" style="flex-direction:column">
+  <div style="height:var(--stop);background:#1a1a2e;min-height:44px;flex-shrink:0"></div>
+  <div class="admin-topbar">
+    <span style="font-size:24px">⚙️</span>
+    <div class="admin-topbar-title">Admin Panel <span class="admin-badge">ADMIN</span></div>
+    <button onclick="doLogout()" style="background:none;border:1px solid #7B1FA2;color:#CE93D8;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">Odhlásiť</button>
+  </div>
+
+  <div style="flex:1;position:relative;overflow:hidden">
+    <!-- ADMIN HOME -->
+    <div id="aHome" class="view" style="flex-direction:column;background:var(--gray3)">
+      <div class="pbody">
+        <div style="padding:16px 16px 4px;font-size:13px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.08em">Správa obsahu</div>
+        <div class="admin-section">
+          <div class="admin-row" onclick="aGoTo('aMachines')">
+            <div class="admin-row-ic aic-purple">🏭</div>
+            <div class="admin-row-info"><div class="admin-row-title">Stroje</div><div class="admin-row-sub">Pridať, upraviť alebo odstrániť stroje</div></div>
+            <span style="color:var(--gray2);font-size:18px">›</span>
+          </div>
+          <div class="admin-row" onclick="aGoTo('aDocs')">
+            <div class="admin-row-ic aic-blue">📄</div>
+            <div class="admin-row-info"><div class="admin-row-title">Technická dokumentácia</div><div class="admin-row-sub">Manuály, schémy, bezpečnostné listy</div></div>
+            <span style="color:var(--gray2);font-size:18px">›</span>
+          </div>
+          <div class="admin-row" onclick="aGoTo('aParts')">
+            <div class="admin-row-ic aic-green">🔩</div>
+            <div class="admin-row-info"><div class="admin-row-title">Náhradné diely</div><div class="admin-row-sub">Správa skladových zásob a dielov</div></div>
+            <span style="color:var(--gray2);font-size:18px">›</span>
+          </div>
+          <div class="admin-row" onclick="aGoTo('aTasks')">
+            <div class="admin-row-ic aic-orange">☑️</div>
+            <div class="admin-row-info"><div class="admin-row-title">Úlohy a postupy</div><div class="admin-row-sub">Pridať servisné úlohy a pracovné postupy</div></div>
+            <span style="color:var(--gray2);font-size:18px">›</span>
+          </div>
+        </div>
+        <div style="padding:0 16px 4px;font-size:13px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.08em">Štatistiky</div>
+        <div class="admin-section">
+          <div class="admin-row" style="cursor:default">
+            <div class="admin-row-ic aic-purple">🏭</div>
+            <div class="admin-row-info"><div class="admin-row-title">Počet strojov</div></div>
+            <span id="stat-machines" style="font-size:18px;font-weight:800;color:var(--g1)">0</span>
+          </div>
+          <div class="admin-row" style="cursor:default">
+            <div class="admin-row-ic aic-red">⚠️</div>
+            <div class="admin-row-info"><div class="admin-row-title">Poruchy</div></div>
+            <span id="stat-errors" style="font-size:18px;font-weight:800;color:var(--red)">0</span>
+          </div>
+          <div class="admin-row" style="cursor:default">
+            <div class="admin-row-ic aic-orange">☑️</div>
+            <div class="admin-row-info"><div class="admin-row-title">Otvorené úlohy</div></div>
+            <span id="stat-tasks" style="font-size:18px;font-weight:800;color:var(--ora)">0</span>
+          </div>
+        </div>
+        <div style="height:24px"></div>
+      </div>
+    </div>
+
+    <!-- ADMIN MACHINES -->
+    <div id="aMachines" class="view off" style="flex-direction:column;background:var(--gray3)">
+      <div class="phdr" style="background:#1a1a2e;border-bottom:none">
+        <button class="hbtn" style="color:#CE93D8" onclick="aGoHome()">‹ Späť</button>
+        <div class="ptitle" style="color:#CE93D8">Stroje</div>
+        <button onclick="openAddMachine()" style="background:#7B1FA2;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer">+ Pridať</button>
+      </div>
+      <div class="pbody"><div id="adminMachineList" style="padding:12px 16px;display:flex;flex-direction:column;gap:10px"></div></div>
+    </div>
+
+    <!-- ADMIN DOCS -->
+    <div id="aDocs" class="view off" style="flex-direction:column;background:var(--gray3)">
+      <div class="phdr" style="background:#1a1a2e;border-bottom:none">
+        <button class="hbtn" style="color:#CE93D8" onclick="aGoHome()">‹ Späť</button>
+        <div class="ptitle" style="color:#CE93D8">Dokumentácia</div>
+        <div style="width:60px"></div>
+      </div>
+      <div class="pbody"><div id="adminDocsList" style="padding:12px 16px"></div></div>
+    </div>
+
+    <!-- ADMIN PARTS -->
+    <div id="aParts" class="view off" style="flex-direction:column;background:var(--gray3)">
+      <div class="phdr" style="background:#1a1a2e;border-bottom:none">
+        <button class="hbtn" style="color:#CE93D8" onclick="aGoHome()">‹ Späť</button>
+        <div class="ptitle" style="color:#CE93D8">Náhradné diely</div>
+        <div style="width:60px"></div>
+      </div>
+      <div class="pbody"><div id="adminPartsList" style="padding:12px 16px"></div></div>
+    </div>
+
+    <!-- ADMIN TASKS -->
+    <div id="aTasks" class="view off" style="flex-direction:column;background:var(--gray3)">
+      <div class="phdr" style="background:#1a1a2e;border-bottom:none">
+        <button class="hbtn" style="color:#CE93D8" onclick="aGoHome()">‹ Späť</button>
+        <div class="ptitle" style="color:#CE93D8">Úlohy</div>
+        <div style="width:60px"></div>
+      </div>
+      <div class="pbody"><div id="adminTasksList" style="padding:12px 16px"></div></div>
+    </div>
+  </div>
 </div>
+
+<!-- MODALS -->
+<!-- Add Machine -->
+<div class="modal-bg" id="modalMachine">
+  <div class="modal">
+    <div class="modal-title" id="modalMachineTitle">Pridať stroj</div>
+    <input type="hidden" id="mEditId">
+    <div class="modal-field"><div class="modal-label">Názov stroja *</div><input class="modal-input" id="mName" placeholder="napr. CNC Frézka TF-300"></div>
+    <div class="modal-field"><div class="modal-label">Model / Typ *</div><input class="modal-input" id="mModel" placeholder="napr. TechnoFréz TF-300 Pro"></div>
+    <div class="modal-field"><div class="modal-label">Umiestnenie *</div><input class="modal-input" id="mLoc" placeholder="napr. Hala A — Pozícia A12"></div>
+    <div class="modal-row">
+      <div class="modal-field"><div class="modal-label">Ikona</div><input class="modal-input" id="mIcon" placeholder="🔩" style="text-align:center;font-size:24px"></div>
+      <div class="modal-field"><div class="modal-label">Stav *</div>
+        <select class="modal-select" id="mStatus">
+          <option value="a">✅ Aktívny</option>
+          <option value="m">🔧 Údržba</option>
+          <option value="e">❌ Porucha</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-field"><div class="modal-label">Výrobca</div><input class="modal-input" id="mVyrobca" placeholder="napr. Siemens AG"></div>
+    <div class="modal-row">
+      <div class="modal-field"><div class="modal-label">Rok výroby</div><input class="modal-input" id="mRok" placeholder="2022" type="number"></div>
+      <div class="modal-field"><div class="modal-label">Výrobné číslo</div><input class="modal-input" id="mSN" placeholder="SN-12345"></div>
+    </div>
+    <div class="modal-field"><div class="modal-label">Zodpovedný technik</div><input class="modal-input" id="mTech" placeholder="Ing. Novák P."></div>
+    <button class="modal-save" onclick="saveMachine()">Uložiť stroj</button>
+    <button class="modal-cancel" onclick="closeModal('modalMachine')">Zrušiť</button>
+  </div>
+</div>
+
+<!-- Add Doc -->
+<div class="modal-bg" id="modalDoc">
+  <div class="modal">
+    <div class="modal-title">Pridať dokumentáciu</div>
+    <div class="modal-field"><div class="modal-label">Stroj</div>
+      <select class="modal-select" id="dMachine"></select>
+    </div>
+    <div class="modal-field"><div class="modal-label">Názov dokumentu *</div><input class="modal-input" id="dName" placeholder="napr. Technický manuál"></div>
+    <div class="modal-row">
+      <div class="modal-field"><div class="modal-label">Ikona</div><input class="modal-input" id="dIcon" placeholder="📄" style="text-align:center;font-size:24px"></div>
+      <div class="modal-field"><div class="modal-label">Veľkosť</div><input class="modal-input" id="dSize" placeholder="PDF · 4,2 MB"></div>
+    </div>
+    <button class="modal-save" onclick="saveDoc()">Uložiť dokument</button>
+    <button class="modal-cancel" onclick="closeModal('modalDoc')">Zrušiť</button>
+  </div>
+</div>
+
+<!-- Add Part -->
+<div class="modal-bg" id="modalPart">
+  <div class="modal">
+    <div class="modal-title">Pridať náhradný diel</div>
+    <div class="modal-field"><div class="modal-label">Stroj</div>
+      <select class="modal-select" id="ptMachine"></select>
+    </div>
+    <div class="modal-field"><div class="modal-label">Názov dielu *</div><input class="modal-input" id="ptName" placeholder="napr. Olejový filter"></div>
+    <div class="modal-row">
+      <div class="modal-field"><div class="modal-label">Ikona</div><input class="modal-input" id="ptIcon" placeholder="🔧" style="text-align:center;font-size:24px"></div>
+      <div class="modal-field"><div class="modal-label">Part Number</div><input class="modal-input" id="ptPN" placeholder="napr. SKF-6205"></div>
+    </div>
+    <div class="modal-row">
+      <div class="modal-field"><div class="modal-label">Stav skladu</div>
+        <select class="modal-select" id="ptStock">
+          <option value="ok">✅ Na sklade</option>
+          <option value="low">⚠️ Posledné kusy</option>
+          <option value="out">❌ Nedostupný</option>
+        </select>
+      </div>
+      <div class="modal-field"><div class="modal-label">Popis skladu</div><input class="modal-input" id="ptSL" placeholder="napr. 5 KS"></div>
+    </div>
+    <button class="modal-save" onclick="savePart()">Uložiť diel</button>
+    <button class="modal-cancel" onclick="closeModal('modalPart')">Zrušiť</button>
+  </div>
+</div>
+
+<!-- Add Task -->
+<div class="modal-bg" id="modalTask">
+  <div class="modal">
+    <div class="modal-title">Pridať úlohu</div>
+    <div class="modal-field"><div class="modal-label">Stroj</div>
+      <select class="modal-select" id="tkMachine"></select>
+    </div>
+    <div class="modal-field"><div class="modal-label">Názov úlohy *</div><input class="modal-input" id="tkName" placeholder="napr. Výmena filtra"></div>
+    <div class="modal-field"><div class="modal-label">Popis / Frekvencia</div><input class="modal-input" id="tkSub" placeholder="napr. Mesačná údržba"></div>
+    <div class="modal-field"><div class="modal-label">Priorita</div>
+      <select class="modal-select" id="tkUrgent">
+        <option value="0">Normálna</option>
+        <option value="1">🔴 Urgentná</option>
+      </select>
+    </div>
+    <button class="modal-save" onclick="saveTask()">Uložiť úlohu</button>
+    <button class="modal-cancel" onclick="closeModal('modalTask')">Zrušiť</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
-const DB={
-  'CNC-001':{id:'CNC-001',name:'CNC Frézka TF-300',model:'TechnoFréz TF-300 Pro',loc:'Hala A — Pozícia A12',st:'a',stl:'AKTÍVNA',ic:'🔩',
-    specs:[['Výrobca','TechnoFréz s.r.o.'],['Rok výroby','2019'],['Výr. číslo','TF300-29847'],['Max. otáčky','8 000 ot/min'],['Výkon','15 kW'],['Hmotnosť','2 400 kg']],
-    hist:[['Posledná údržba','10.03.2026'],['Najbliž. revízia','10.03.2027'],['Zodpovedný','Ing. Novák P.'],['Prev. hodiny','4 820 h']],
-    docs:[{i:'📄',n:'Technický manuál TF-300'},{i:'📋',n:'Protokol revízie 2025'},{i:'📐',n:'Výkresová dokumentácia'},{i:'⚠️',n:'Bezpečnostný list'}],
-    parts:[{i:'🔧',n:'Olejový filter F-12',pn:'TF-F12-OIL',s:'ok',sl:'NA SKLADE'},{i:'⚙️',n:'Vreteno horné ložisko',pn:'SKF-6205-2RS',s:'ok',sl:'3 KS'},{i:'🔩',n:'Hydraulická pumpa HP-80',pn:'TF-HP80-REP',s:'low',sl:'POSLEDNÝ KUS'},{i:'🧴',n:'Chladiaca kvapalina 5L',pn:'COOL-ISO-5L',s:'ok',sl:'NA SKLADE'},{i:'⛓',n:'Remeň pohonu V-75',pn:'BELT-V75-A',s:'out',sl:'NEDOSTUPNÝ'}],
-    tasks:[{id:'t1',n:'Výmena olejového filtra',s:'Pravidelná · Každých 500 h',done:false,u:false},{id:'t2',n:'Kontrola hladiny oleja',s:'Týždenná kontrola',done:true,u:false},{id:'t3',n:'Mazanie lineárnych vedení',s:'Urgentné · Do 24 hod',done:false,u:true}]},
-  'KOMP-02':{id:'KOMP-02',name:'Kompresor Atlas K-50',model:'Atlas Copco GA-50 VSD+',loc:'Strojovňa — Pozícia S3',st:'m',stl:'ÚDRŽBA',ic:'⚡',
-    specs:[['Výrobca','Atlas Copco'],['Rok výroby','2021'],['Výr. číslo','AC50-84521'],['Max. tlak','13 bar'],['Výkon','45 kW'],['Objem vzduchu','285 m³/hod']],
-    hist:[['Posledná údržba','15.11.2025'],['Najbliž. revízia','15.11.2026'],['Zodpovedný','M. Horváth'],['Prev. hodiny','6 210 h']],
-    docs:[{i:'📄',n:'Prevádzkový manuál GA-50'},{i:'📋',n:'Servisná správa 2025'},{i:'⚠️',n:'Bezpečnostné predpisy'}],
-    parts:[{i:'🌬️',n:'Vzduchový filter AF-50',pn:'AC-AF50-STD',s:'ok',sl:'2 KS'},{i:'🔧',n:'Olejový filter OF-50',pn:'AC-OF50-VSD',s:'low',sl:'POSLEDNÝ KUS'},{i:'🧴',n:'Kompresorový olej 4L',pn:'AC-OIL-4L',s:'ok',sl:'NA SKLADE'},{i:'🔩',n:'Odvzdušňovací ventil',pn:'AC-VALVE-DV',s:'out',sl:'NEDOSTUPNÝ'}],
-    tasks:[{id:'t4',n:'Odvod kondenzátu',s:'Denná kontrola',done:false,u:false},{id:'t5',n:'Kontrola prevádzkového tlaku',s:'Urgentné · Ihneď',done:false,u:true},{id:'t6',n:'Výmena vzduchového filtra',s:'Mesačná údržba',done:true,u:false}]},
-  'CONV-03':{id:'CONV-03',name:'Dopravný pás DP-12',model:'ConveyTech DP-12/B',loc:'Hala B — Linka 3',st:'e',stl:'PORUCHA',ic:'🔄',
-    specs:[['Výrobca','ConveyTech GmbH'],['Rok výroby','2018'],['Výr. číslo','CT12B-11234'],['Dĺžka pásu','12 m'],['Rýchlosť','0,3–1,5 m/s'],['Nosnosť','800 kg/m']],
-    hist:[['Posledná údržba','02.01.2026'],['Porucha od','14.04.2026'],['Zodpovedný','P. Kováč'],['Stav','Čaká na opravu']],
-    docs:[{i:'📄',n:'Technická dokumentácia DP-12'},{i:'📋',n:'Havarijný protokol 04/2026'},{i:'📐',n:'Elektrická schéma zapojenia'}],
-    parts:[{i:'⛓',n:'Dopravný pás 12m PVC',pn:'CT-BELT-12PVC',s:'low',sl:'OBJEDNANÉ'},{i:'⚙️',n:'Ložisko vodiaceho valca',pn:'SKF-6210-ZZ',s:'ok',sl:'4 KS'},{i:'⚡',n:'Frekvenčný menič 5,5kW',pn:'SEW-MDX60-55',s:'out',sl:'NEDOSTUPNÝ'},{i:'📡',n:'Snímač polohy indukčný',pn:'SICK-IMS-C',s:'low',sl:'1 KS'}],
-    tasks:[{id:'t7',n:'LOTO zaistenie stroja',s:'Urgentné · Ihneď',done:true,u:true},{id:'t8',n:'Výmena dopravného pásu',s:'Čaká na dodanie dielu',done:false,u:false},{id:'t9',n:'Diagnostika frekvenčného meniča',s:'Urgentné · Do 24 hod',done:false,u:true}]},
-  'SVAR-04':{id:'SVAR-04',name:'Zvárací robot WR-200',model:'Yaskawa Motoman MA2010',loc:'Hala C — Pozícia C07',st:'a',stl:'AKTÍVNY',ic:'🤖',
-    specs:[['Výrobca','Yaskawa Europe'],['Rok výroby','2022'],['Výr. číslo','YSK-MA2010-7741'],['Dosah ramena','2 010 mm'],['Nosnosť','10 kg'],['Presnosť','±0,07 mm']],
-    hist:[['Posledná údržba','18.01.2026'],['Kalibrácia','12.01.2026'],['Zodpovedný','Ing. Blaho'],['Prev. hodiny','2 140 h']],
-    docs:[{i:'📄',n:'Manuál Motoman MA2010'},{i:'📋',n:'Kalibračný protokol 2026'},{i:'⚠️',n:'Bezpečnosť pri robotoch'},{i:'📐',n:'Programovacia príručka'}],
-    parts:[{i:'🔩',n:'Kontaktná špička M8×1.0',pn:'YSK-TIP-M8',s:'ok',sl:'10 KS'},{i:'🔍',n:'Ochranné sklo zvárania',pn:'YSK-GLASS-WR',s:'ok',sl:'5 KS'},{i:'🧴',n:'Mazivo Molywhite RE Nr.2',pn:'YSK-GREASE-MW',s:'ok',sl:'2 TUBY'},{i:'⚡',n:'Servo motor osi 1',pn:'YSK-SERVO-A1',s:'out',sl:'NEDOSTUPNÝ'}],
-    tasks:[{id:'t10',n:'Mazanie osí robota',s:'Mesačná údržba',done:false,u:false},{id:'t11',n:'Test nulovej polohy',s:'Týždenná kontrola',done:true,u:false},{id:'t12',n:'Kontrola kontaktných špičiek',s:'Denná kontrola',done:false,u:false}]}
+// ── DEFAULT DATA ──
+const DEFAULT_DB = {
+  'CNC-001':{id:'CNC-001',name:'CNC Frézka TF-300',model:'TechnoFréz TF-300 Pro',loc:'Hala A — Pozícia A12',st:'a',stl:'AKTÍVNA',ic:'🔩',vyrobca:'TechnoFréz s.r.o.',rok:'2019',sn:'TF300-29847',tech:'Ing. Novák P.',
+    docs:[{i:'📄',n:'Technický manuál TF-300',meta:'PDF · 4,2 MB'},{i:'📋',n:'Protokol revízie 2025',meta:'PDF · 380 kB'},{i:'⚠️',n:'Bezpečnostný list',meta:'PDF · 1,1 MB'}],
+    parts:[{i:'🔧',n:'Olejový filter F-12',pn:'TF-F12-OIL',s:'ok',sl:'NA SKLADE'},{i:'⚙️',n:'Hydraulická pumpa HP-80',pn:'TF-HP80-REP',s:'low',sl:'POSLEDNÝ KUS'},{i:'⛓',n:'Remeň pohonu V-75',pn:'BELT-V75-A',s:'out',sl:'NEDOSTUPNÝ'}],
+    tasks:[{id:'t1',n:'Výmena olejového filtra',s:'Pravidelná · Každých 500 h',done:false,u:false},{id:'t2',n:'Mazanie lineárnych vedení',s:'Urgentné · Do 24 hod',done:false,u:true}]},
+  'KOMP-02':{id:'KOMP-02',name:'Kompresor Atlas K-50',model:'Atlas Copco GA-50 VSD+',loc:'Strojovňa — Pozícia S3',st:'m',stl:'ÚDRŽBA',ic:'⚡',vyrobca:'Atlas Copco',rok:'2021',sn:'AC50-84521',tech:'M. Horváth',
+    docs:[{i:'📄',n:'Prevádzkový manuál GA-50',meta:'PDF · 6,8 MB'},{i:'⚠️',n:'Bezpečnostné predpisy',meta:'PDF · 2,0 MB'}],
+    parts:[{i:'🌬️',n:'Vzduchový filter AF-50',pn:'AC-AF50-STD',s:'ok',sl:'2 KS'},{i:'🔩',n:'Odvzdušňovací ventil',pn:'AC-VALVE-DV',s:'out',sl:'NEDOSTUPNÝ'}],
+    tasks:[{id:'t4',n:'Odvod kondenzátu',s:'Denná kontrola',done:false,u:false},{id:'t5',n:'Kontrola prevádzkového tlaku',s:'Urgentné · Ihneď',done:false,u:true}]},
+  'CONV-03':{id:'CONV-03',name:'Dopravný pás DP-12',model:'ConveyTech DP-12/B',loc:'Hala B — Linka 3',st:'e',stl:'PORUCHA',ic:'🔄',vyrobca:'ConveyTech GmbH',rok:'2018',sn:'CT12B-11234',tech:'P. Kováč',
+    docs:[{i:'📄',n:'Technická dokumentácia DP-12',meta:'PDF · 3,5 MB'},{i:'📋',n:'Havarijný protokol 04/2026',meta:'PDF · 210 kB'}],
+    parts:[{i:'⛓',n:'Dopravný pás 12m PVC',pn:'CT-BELT-12PVC',s:'low',sl:'OBJEDNANÉ'},{i:'⚡',n:'Frekvenčný menič 5,5kW',pn:'SEW-MDX60-55',s:'out',sl:'NEDOSTUPNÝ'}],
+    tasks:[{id:'t7',n:'LOTO zaistenie stroja',s:'Urgentné · Ihneď',done:true,u:true},{id:'t8',n:'Výmena dopravného pásu',s:'Čaká na dodanie dielu',done:false,u:false}]}
 };
-const TK={};
-let CU='',CT='scan',SS=null,SA=null;
 
+// ── PERSISTENCE ──
+function loadDB(){
+  try{const d=localStorage.getItem('zeo_db');return d?JSON.parse(d):JSON.parse(JSON.stringify(DEFAULT_DB));}catch(e){return JSON.parse(JSON.stringify(DEFAULT_DB));}
+}
+function saveDB(){localStorage.setItem('zeo_db',JSON.stringify(DB));}
+let DB=loadDB();
+const TK={};
+let CU='',CT='scan',SS=null,SA=null,isAdmin=false;
+
+// ── BOOT ──
 window.addEventListener('load',()=>{
   if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
-  const sv=localStorage.getItem('zeo_u');
-  if(sv){CU=sv;boot();}
+  const sv=localStorage.getItem('zeo_u'),sa=localStorage.getItem('zeo_admin');
+  if(sv){CU=sv;isAdmin=sa==='1';bootApp();}
   renderDemos();
 });
 
 function bc(s){return s==='a'?'ba':s==='m'?'bm':'be';}
+function stLabel(s){return s==='a'?'AKTÍVNA':s==='m'?'ÚDRŽBA':'PORUCHA';}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+
+// ── AUTH ──
 function doLogin(){
-  const u=document.getElementById('iUser').value.trim(),p=document.getElementById('iPass').value.trim();
+  const u=document.getElementById('iUser').value.trim();
+  const p=document.getElementById('iPass').value.trim();
+  if(u==='admin'&&p==='admin123'){CU='Admin';isAdmin=true;localStorage.setItem('zeo_u','Admin');localStorage.setItem('zeo_admin','1');bootApp();return;}
   if(u.length<3||p.length<3){alert('Min. 3 znaky pre meno aj heslo.');return;}
-  CU=u;localStorage.setItem('zeo_u',u);boot();
+  CU=u;isAdmin=false;localStorage.setItem('zeo_u',u);localStorage.removeItem('zeo_admin');bootApp();
 }
 document.getElementById('iPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
-function doLogout(){localStorage.removeItem('zeo_u');stopScan();document.getElementById('vMain').classList.add('off');document.getElementById('vLogin').classList.remove('off');}
-function boot(){
+function doLogout(){
+  localStorage.removeItem('zeo_u');localStorage.removeItem('zeo_admin');
+  stopScan();
+  document.getElementById('vMain').classList.add('off');
+  document.getElementById('vAdmin').classList.add('off');
+  document.getElementById('vLogin').classList.remove('off');
+}
+function bootApp(){
   document.getElementById('vLogin').classList.add('off');
-  document.getElementById('vMain').classList.remove('off');
-  document.getElementById('pName').textContent=CU;
-  renderML(Object.values(DB));
-  renderGT('all');
-  goTab('scan');startScan();
+  if(isAdmin){
+    document.getElementById('vAdmin').classList.remove('off');
+    renderAdminStats();renderAdminMachines();renderAdminDocs();renderAdminParts();renderAdminTasks();
+  } else {
+    document.getElementById('vMain').classList.remove('off');
+    document.getElementById('pName').textContent=CU;
+    renderML(Object.values(DB));renderGT('all');goTab('scan');startScan();
+  }
 }
 
+// ── USER TABS ──
 function goTab(t){
   ['scan','machines','tasks','profile'].forEach(x=>{
-    document.getElementById('t'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('off',x!==t);
-    document.getElementById('n'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('on',x===t);
+    const el=document.getElementById('t'+x.charAt(0).toUpperCase()+x.slice(1));
+    if(el)el.classList.toggle('off',x!==t);
+    const nb=document.getElementById('n'+x.charAt(0).toUpperCase()+x.slice(1));
+    if(nb)nb.classList.toggle('on',x===t);
   });
   document.getElementById('vDetail').classList.add('off');
   CT=t;
   if(t==='scan')startScan();else stopScan();
 }
 
-// SCAN
+// ── SCAN ──
 function openSheet(){document.getElementById('sheet').classList.add('on');}
 function closeSheet(){document.getElementById('sheet').classList.remove('on');}
 function renderDemos(){
   document.getElementById('demoBtns').innerHTML=Object.values(DB).map(m=>
-    `<div class="dmb" onclick="closeSheet();openDetail('${m.id}')"><div class="dmic">${m.ic}</div><div><div class="dmn">${m.name}</div><div class="dmc">${m.id}</div></div><span class="badge ${bc(m.st)}" style="margin-left:auto">${m.stl}</span></div>`
+    `<div class="dmb" onclick="closeSheet();openDetail('${m.id}')"><div class="dmic">${m.ic||'⚙️'}</div><div><div class="dmn">${m.name}</div><div class="dmc">${m.id}</div></div><span class="badge ${bc(m.st)}" style="margin-left:auto">${m.stl}</span></div>`
   ).join('');
 }
 async function startScan(){
   if(SS)return;
-  try{
-    SS=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-    const v=document.getElementById('qrV');v.srcObject=SS;v.play();
-    v.addEventListener('loadedmetadata',scanLoop,{once:true});
-  }catch(e){}
+  try{SS=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});const v=document.getElementById('qrV');v.srcObject=SS;v.play();v.addEventListener('loadedmetadata',scanLoop,{once:true});}catch(e){}
 }
 function scanLoop(){
   const v=document.getElementById('qrV'),c=document.getElementById('qrC'),ctx=c.getContext('2d');
   function tick(){
     if(CT!=='scan')return;
-    if(v.readyState===v.HAVE_ENOUGH_DATA){
-      c.width=v.videoWidth;c.height=v.videoHeight;ctx.drawImage(v,0,0);
-      if(window.jsQR){const r=jsQR(ctx.getImageData(0,0,c.width,c.height).data,c.width,c.height);if(r&&DB[r.data]){openDetail(r.data);return;}}
-    }
+    if(v.readyState===v.HAVE_ENOUGH_DATA){c.width=v.videoWidth;c.height=v.videoHeight;ctx.drawImage(v,0,0);if(window.jsQR){const r=jsQR(ctx.getImageData(0,0,c.width,c.height).data,c.width,c.height);if(r&&DB[r.data]){openDetail(r.data);return;}}}
     SA=requestAnimationFrame(tick);
   }
   SA=requestAnimationFrame(tick);
 }
-function stopScan(){if(SA){cancelAnimationFrame(SA);SA=null;}if(SS){SS.getTracks().forEach(t=>t.stop());SS=null;}document.getElementById('qrV').srcObject=null;}
+function stopScan(){if(SA){cancelAnimationFrame(SA);SA=null;}if(SS){SS.getTracks().forEach(t=>t.stop());SS=null;}const v=document.getElementById('qrV');if(v)v.srcObject=null;}
 
-// MACHINES
+// ── MACHINES LIST ──
 function renderML(list){
-  document.getElementById('mList').innerHTML=list.map(m=>
-    `<div class="mc" onclick="goTab('machines');openDetail('${m.id}')"><div class="mc-top"><div class="mc-name">${m.name}</div><span class="badge ${bc(m.st)}">${m.stl}</span></div><div class="mc-model">${m.model}</div><div class="mc-loc">${m.loc}</div></div>`
-  ).join('');
+  document.getElementById('mList').innerHTML=list.length?list.map(m=>
+    `<div class="mc" onclick="openDetail('${m.id}')"><div class="mc-top"><div class="mc-name">${m.name}</div><span class="badge ${bc(m.st)}">${m.stl}</span></div><div class="mc-model">${m.model}</div><div class="mc-loc">${m.loc}</div></div>`
+  ).join(''):'<div style="text-align:center;padding:40px;color:var(--gray)">Žiadne stroje</div>';
 }
 function filterM(q){renderML(Object.values(DB).filter(m=>m.name.toLowerCase().includes(q.toLowerCase())||m.model.toLowerCase().includes(q.toLowerCase())||m.loc.toLowerCase().includes(q.toLowerCase())));}
 
-// DETAIL
+// ── DETAIL ──
 function openDetail(id){
   const m=DB[id];if(!m)return;
   stopScan();
@@ -400,16 +634,16 @@ function openDetail(id){
   document.getElementById('detailBody').innerHTML=buildDetail(m);
 }
 function closeDetail(){document.getElementById('vDetail').classList.add('off');if(CT==='scan')startScan();}
-
 function buildDetail(m){
   const bclass=bc(m.st);
+  const specs=[[' Výrobca',m.vyrobca||'—'],['Rok výroby',m.rok||'—'],['Výr. číslo',m.sn||'—'],['Zodpovedný',m.tech||'—']];
   return `
   <div class="dmc-card">
-    <div class="dmc-img">${m.ic}</div>
+    <div class="dmc-img">${m.ic||'⚙️'}</div>
     <div style="flex:1;min-width:0">
-      <div class="dmc-name">${m.name}</div>
-      <div class="dmc-model">${m.model}</div>
-      <div class="dmc-loc">${m.loc}</div>
+      <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:2px">${m.name}</div>
+      <div style="font-size:13px;color:var(--gray);margin-bottom:2px">${m.model}</div>
+      <div style="font-size:13px;color:var(--gray);margin-bottom:6px">${m.loc}</div>
       <span class="badge ${bclass}">${m.stl}</span>
     </div>
   </div>
@@ -420,19 +654,12 @@ function buildDetail(m){
   <div id="pSpec">
     <div class="dsec">
       <div class="dsh" onclick="togSec(this)"><div class="dsh-title">Parametre</div><div class="dsh-arr op">▾</div></div>
-      <div class="dsb">${m.specs.map(r=>`<div class="drow"><div class="drk">${r[0]}</div><div class="drv">${r[1]}</div></div>`).join('')}</div>
-    </div>
-    <div class="dsec">
-      <div class="dsh" onclick="togSec(this)"><div class="dsh-title">História údržby</div><div class="dsh-arr op">▾</div></div>
-      <div class="dsb">${m.hist.map(r=>`<div class="drow"><div class="drk">${r[0]}</div><div class="drv">${r[1]}</div></div>`).join('')}</div>
+      <div class="dsb">${specs.map(r=>`<div class="drow"><div class="drk">${r[0]}</div><div class="drv">${r[1]}</div></div>`).join('')}</div>
     </div>
     <div class="dsec">
       <div class="dsh" onclick="togSec(this)"><div class="dsh-title">Dokumentácia</div><div class="dsh-arr op">▾</div></div>
-      <div class="dsb">${m.docs.map(d=>`<div class="docrow"><div class="docic">${d.i}</div><div class="docname">${d.n}</div><span style="color:var(--gray2);font-size:18px">›</span></div>`).join('')}</div>
+      <div class="dsb">${(m.docs||[]).length?m.docs.map(d=>`<div class="docrow"><div class="docic">${d.i}</div><div style="flex:1;font-size:14px;font-weight:500;color:var(--text)">${d.n}</div><span style="color:var(--gray2);font-size:18px">›</span></div>`).join(''):'<div style="padding:14px 16px;font-size:13px;color:var(--gray)">Žiadna dokumentácia</div>'}</div>
     </div>
-    <div style="height:8px"></div>
-    <button class="mbtn mbtn-p">Naplánovaná údržba<br><small style="font-weight:400;font-size:12px">${m.hist[0]?.[1]??'—'}</small></button>
-    <button class="mbtn mbtn-s">Posledný servis<br><small style="font-weight:400;font-size:12px">${m.hist[0]?.[1]??'—'}</small></button>
     <div style="height:16px"></div>
   </div>
   <div id="pParts" style="display:none">
@@ -440,59 +667,199 @@ function buildDetail(m){
       <button class="ptab-b on" id="ptParts" onclick="swPT('parts')">Náhradné diely</button>
       <button class="ptab-b" id="ptTasks" onclick="swPT('tasks')">Úlohy</button>
     </div>
-    <div id="ppParts">${m.parts.map(p=>{const sc=p.s==='ok'?'sok':p.s==='low'?'slow':'sout';const si=p.s==='ok'?'✅':p.s==='low'?'⚠️':'❌';return`<div class="pcard"><div class="pcard-top"><div class="pimg">${p.i}</div><div style="flex:1;min-width:0"><div class="pname">${p.n}</div><div class="ppn">P/N: ${p.pn}</div><div class="pstock ${sc}">${si} ${p.sl}</div></div><span style="color:var(--gray2);font-size:20px">›</span></div><div class="pacts"><button class="pact pact-p">Označiť ako použitý</button><button class="pact pact-s">Požiadať o náhradu</button></div></div>`;}).join('')}<div style="height:16px"></div></div>
+    <div id="ppParts">
+      ${(m.parts||[]).length?m.parts.map(p=>{const sc=p.s==='ok'?'sok':p.s==='low'?'slow':'sout';const si=p.s==='ok'?'✅':p.s==='low'?'⚠️':'❌';return`<div class="pcard"><div class="pcard-top"><div class="pimg">${p.i||'🔩'}</div><div style="flex:1;min-width:0"><div class="pname">${p.n}</div><div class="ppn">P/N: ${p.pn}</div><div class="pstock ${sc}">${si} ${p.sl}</div></div></div><div class="pacts"><button class="pact pact-p">Označiť použitý</button><button class="pact pact-s">Požiadať náhradu</button></div></div>`;}).join(''):'<div style="padding:20px 16px;font-size:13px;color:var(--gray)">Žiadne náhradné diely</div>'}
+      <div style="height:16px"></div>
+    </div>
     <div id="ppTasks" style="display:none">
-      <div class="tk-sec-hdr"><div class="tk-sec-title">Úlohy</div><button class="add-tk-btn">+ Pridať</button></div>
-      ${buildTasks(m.tasks)}
+      <div class="tk-sec-hdr"><div class="tk-sec-title">Úlohy</div></div>
+      ${(m.tasks||[]).length?m.tasks.map(t=>{const d=TK[t.id]??t.done;return`<div class="tkcard" id="tkc-${t.id}"><div class="tk-top"><div class="tkbox${d?' ck':''}" onclick="togTK('${t.id}')"><span>${d?'✓':''}</span></div><div><div class="tk-name">${t.n}${t.u?' 🔴':''}</div><div class="tk-sub">${t.s}</div></div></div><div class="tk-acts"><button class="tk-act">✏️ Poznámka</button><button class="tk-act">📷 Foto</button></div></div>`;}).join(''):'<div style="padding:20px 16px;font-size:13px;color:var(--gray)">Žiadne úlohy</div>'}
       <div style="height:16px"></div>
     </div>
   </div>`;
 }
+function swSeg(t){document.getElementById('segSpec').classList.toggle('on',t==='spec');document.getElementById('segParts').classList.toggle('on',t==='parts');document.getElementById('pSpec').style.display=t==='spec'?'':'none';document.getElementById('pParts').style.display=t==='parts'?'':'none';}
+function swPT(t){document.getElementById('ptParts').classList.toggle('on',t==='parts');document.getElementById('ptTasks').classList.toggle('on',t==='tasks');document.getElementById('ppParts').style.display=t==='parts'?'':'none';document.getElementById('ppTasks').style.display=t==='tasks'?'':'none';}
+function togSec(h){const b=h.nextElementSibling,a=h.querySelector('.dsh-arr'),op=a.classList.contains('op');b.style.display=op?'none':'';a.classList.toggle('op',!op);}
+function togTK(id){const cb=document.querySelector(`#tkc-${id} .tkbox`),d=cb.classList.contains('ck');TK[id]=!d;cb.classList.toggle('ck',!d);const sp=cb.querySelector('span');if(sp)sp.textContent=!d?'✓':'';}
 
-function swSeg(t){
-  document.getElementById('segSpec').classList.toggle('on',t==='spec');
-  document.getElementById('segParts').classList.toggle('on',t==='parts');
-  document.getElementById('pSpec').style.display=t==='spec'?'':'none';
-  document.getElementById('pParts').style.display=t==='parts'?'':'none';
-}
-function swPT(t){
-  document.getElementById('ptParts').classList.toggle('on',t==='parts');
-  document.getElementById('ptTasks').classList.toggle('on',t==='tasks');
-  document.getElementById('ppParts').style.display=t==='parts'?'':'none';
-  document.getElementById('ppTasks').style.display=t==='tasks'?'':'none';
-}
-function togSec(hdr){
-  const b=hdr.nextElementSibling,a=hdr.querySelector('.dsh-arr'),op=a.classList.contains('op');
-  b.style.display=op?'none':'';a.classList.toggle('op',!op);
-}
-
-// TASKS
-function buildTasks(tasks){
-  return tasks.map(t=>{const d=TK[t.id]??t.done;return`<div class="tkcard" id="tkc-${t.id}"><div class="tk-top"><div class="tkbox${d?' ck':''}" onclick="togTK('${t.id}')"><span>${d?'✓':''}</span></div><div><div class="tk-name">${t.n}${t.u?' 🔴':''}</div><div class="tk-sub">${t.s}</div></div></div><div class="tk-acts"><button class="tk-act">✏️ Pridať poznámku</button><button class="tk-act">📷 Priložiť foto</button></div></div>`;}).join('');
-}
-function togTK(id){
-  const cb=document.querySelector(`#tkc-${id} .tkbox`),d=cb.classList.contains('ck');
-  TK[id]=!d;cb.classList.toggle('ck',!d);
-  const sp=cb.querySelector('span');if(sp)sp.textContent=!d?'✓':'';
-}
-
+// ── GLOBAL TASKS ──
 function renderGT(f){
-  const all=Object.values(DB).flatMap(m=>m.tasks.map(t=>({...t,mn:m.name})));
-  let list=all;
-  if(f==='open')list=all.filter(t=>!(TK[t.id]??t.done));
-  if(f==='done')list=all.filter(t=>TK[t.id]??t.done);
-  if(f==='urgent')list=all.filter(t=>t.u);
-  document.getElementById('gTaskList').innerHTML='<div style="padding:0 0 8px">'+list.map(t=>{const d=TK[t.id]??t.done;return`<div class="tkcard" id="gtk-${t.id}"><div style="font-size:11px;color:var(--gray);margin-bottom:6px;font-weight:600">${t.mn}</div><div class="tk-top"><div class="tkbox${d?' ck':''}" onclick="togGTK('${t.id}')"><span>${d?'✓':''}</span></div><div><div class="tk-name">${t.n}${t.u?' 🔴':''}</div><div class="tk-sub">${t.s}</div></div></div><div class="tk-acts"><button class="tk-act">✏️ Pridať poznámku</button><button class="tk-act">📷 Priložiť foto</button></div></div>`;}).join('')+'</div><div style="height:8px"></div>';
+  const all=Object.values(DB).flatMap(m=>(m.tasks||[]).map(t=>({...t,mn:m.name})));
+  let list=f==='open'?all.filter(t=>!(TK[t.id]??t.done)):f==='done'?all.filter(t=>TK[t.id]??t.done):f==='urgent'?all.filter(t=>t.u):all;
+  document.getElementById('gTaskList').innerHTML='<div style="padding:0 0 8px">'+list.map(t=>{const d=TK[t.id]??t.done;return`<div class="tkcard" id="gtk-${t.id}"><div style="font-size:11px;color:var(--gray);margin-bottom:6px;font-weight:600">${t.mn}</div><div class="tk-top"><div class="tkbox${d?' ck':''}" onclick="togGTK('${t.id}')"><span>${d?'✓':''}</span></div><div><div class="tk-name">${t.n}${t.u?' 🔴':''}</div><div class="tk-sub">${t.s}</div></div></div><div class="tk-acts"><button class="tk-act">✏️ Poznámka</button><button class="tk-act">📷 Foto</button></div></div>`;}).join('')+'</div>';
 }
-function togGTK(id){
-  const cb=document.querySelector(`#gtk-${id} .tkbox`),d=cb.classList.contains('ck');
-  TK[id]=!d;cb.classList.toggle('ck',!d);
-  const sp=cb.querySelector('span');if(sp)sp.textContent=!d?'✓':'';
+function togGTK(id){const cb=document.querySelector(`#gtk-${id} .tkbox`),d=cb.classList.contains('ck');TK[id]=!d;cb.classList.toggle('ck',!d);const sp=cb.querySelector('span');if(sp)sp.textContent=!d?'✓':'';}
+function fTasks(f,el){document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');renderGT(f);}
+
+// ════════════════════════════
+// ── ADMIN ──
+// ════════════════════════════
+function aGoTo(id){
+  ['aHome','aMachines','aDocs','aParts','aTasks'].forEach(x=>document.getElementById(x).classList.toggle('off',x!==id));
 }
-function fTasks(f,el){
-  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
-  el.classList.add('on');renderGT(f);
+function aGoHome(){aGoTo('aHome');}
+
+function renderAdminStats(){
+  const machines=Object.values(DB);
+  document.getElementById('stat-machines').textContent=machines.length;
+  document.getElementById('stat-errors').textContent=machines.filter(m=>m.st==='e').length;
+  document.getElementById('stat-tasks').textContent=machines.flatMap(m=>m.tasks||[]).filter(t=>!t.done).length;
 }
+
+function renderAdminMachines(){
+  const list=Object.values(DB);
+  document.getElementById('adminMachineList').innerHTML=list.length?
+    `<div class="admin-section">${list.map(m=>`
+      <div class="admin-machine-item">
+        <div style="font-size:24px;flex-shrink:0">${m.ic||'⚙️'}</div>
+        <div class="ami-info"><div class="ami-name">${m.name}</div><div class="ami-sub">${m.loc} · <span class="badge ${bc(m.st)}">${m.stl}</span></div></div>
+        <div class="ami-btns">
+          <button class="ami-btn ami-edit" onclick="openEditMachine('${m.id}')">✏️</button>
+          <button class="ami-btn ami-del" onclick="delMachine('${m.id}')">🗑</button>
+        </div>
+      </div>`).join('')}</div>`
+    :'<div style="text-align:center;padding:40px;color:var(--gray)">Žiadne stroje. Kliknite + Pridať.</div>';
+}
+
+function renderAdminDocs(){
+  const list=Object.values(DB);
+  document.getElementById('adminDocsList').innerHTML=list.map(m=>`
+    <div class="admin-section" style="margin-bottom:12px">
+      <div class="admin-section-title">${m.ic||''} ${m.name}</div>
+      <div>${(m.docs||[]).map((d,i)=>`<div class="admin-machine-item">
+        <div style="font-size:20px">${d.i}</div>
+        <div class="ami-info"><div class="ami-name">${d.n}</div><div class="ami-sub">${d.meta||''}</div></div>
+        <button class="ami-btn ami-del" onclick="delDoc('${m.id}',${i})">🗑</button>
+      </div>`).join('')}
+      <div style="padding:10px 16px"><button onclick="openAddDoc('${m.id}')" style="width:100%;padding:10px;background:var(--gl);color:var(--g1);border:1.5px dashed var(--g1);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">+ Pridať dokument</button></div>
+      </div>
+    </div>`).join('');
+}
+
+function renderAdminParts(){
+  const list=Object.values(DB);
+  document.getElementById('adminPartsList').innerHTML=list.map(m=>`
+    <div class="admin-section" style="margin-bottom:12px">
+      <div class="admin-section-title">${m.ic||''} ${m.name}</div>
+      <div>${(m.parts||[]).map((p,i)=>{const sc=p.s==='ok'?'var(--g1)':p.s==='low'?'var(--ora)':'var(--red)';return`<div class="admin-machine-item">
+        <div style="font-size:20px">${p.i||'🔩'}</div>
+        <div class="ami-info"><div class="ami-name">${p.n}</div><div class="ami-sub" style="color:${sc}">${p.sl} · ${p.pn}</div></div>
+        <button class="ami-btn ami-del" onclick="delPart('${m.id}',${i})">🗑</button>
+      </div>`;}).join('')}
+      <div style="padding:10px 16px"><button onclick="openAddPart('${m.id}')" style="width:100%;padding:10px;background:var(--gl);color:var(--g1);border:1.5px dashed var(--g1);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">+ Pridať diel</button></div>
+      </div>
+    </div>`).join('');
+}
+
+function renderAdminTasks(){
+  const list=Object.values(DB);
+  document.getElementById('adminTasksList').innerHTML=list.map(m=>`
+    <div class="admin-section" style="margin-bottom:12px">
+      <div class="admin-section-title">${m.ic||''} ${m.name}</div>
+      <div>${(m.tasks||[]).map((t,i)=>`<div class="admin-machine-item">
+        <div style="font-size:20px">${t.u?'🔴':'☑️'}</div>
+        <div class="ami-info"><div class="ami-name">${t.n}</div><div class="ami-sub">${t.s}</div></div>
+        <button class="ami-btn ami-del" onclick="delTask('${m.id}',${i})">🗑</button>
+      </div>`).join('')}
+      <div style="padding:10px 16px"><button onclick="openAddTask('${m.id}')" style="width:100%;padding:10px;background:var(--gl);color:var(--g1);border:1.5px dashed var(--g1);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">+ Pridať úlohu</button></div>
+      </div>
+    </div>`).join('');
+}
+
+// ── MODAL HELPERS ──
+function openModal(id){document.getElementById(id).classList.add('on');}
+function closeModal(id){document.getElementById(id).classList.remove('on');}
+function fillMachineSelects(){
+  const opts=Object.values(DB).map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
+  ['dMachine','ptMachine','tkMachine'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
+}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+// ── MACHINE CRUD ──
+function openAddMachine(){
+  document.getElementById('modalMachineTitle').textContent='Pridať stroj';
+  document.getElementById('mEditId').value='';
+  ['mName','mModel','mLoc','mIcon','mVyrobca','mRok','mSN','mTech'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mStatus').value='a';
+  openModal('modalMachine');
+}
+function openEditMachine(id){
+  const m=DB[id];if(!m)return;
+  document.getElementById('modalMachineTitle').textContent='Upraviť stroj';
+  document.getElementById('mEditId').value=id;
+  document.getElementById('mName').value=m.name;
+  document.getElementById('mModel').value=m.model;
+  document.getElementById('mLoc').value=m.loc;
+  document.getElementById('mIcon').value=m.ic||'';
+  document.getElementById('mStatus').value=m.st;
+  document.getElementById('mVyrobca').value=m.vyrobca||'';
+  document.getElementById('mRok').value=m.rok||'';
+  document.getElementById('mSN').value=m.sn||'';
+  document.getElementById('mTech').value=m.tech||'';
+  openModal('modalMachine');
+}
+function saveMachine(){
+  const name=document.getElementById('mName').value.trim();
+  const model=document.getElementById('mModel').value.trim();
+  const loc=document.getElementById('mLoc').value.trim();
+  if(!name||!model||!loc){alert('Vyplňte povinné polia (*)');return;}
+  const st=document.getElementById('mStatus').value;
+  const editId=document.getElementById('mEditId').value;
+  const id=editId||'M-'+uid();
+  if(editId){
+    DB[editId]={...DB[editId],name,model,loc,st,stl:stLabel(st),ic:document.getElementById('mIcon').value||'⚙️',vyrobca:document.getElementById('mVyrobca').value,rok:document.getElementById('mRok').value,sn:document.getElementById('mSN').value,tech:document.getElementById('mTech').value};
+  } else {
+    DB[id]={id,name,model,loc,st,stl:stLabel(st),ic:document.getElementById('mIcon').value||'⚙️',vyrobca:document.getElementById('mVyrobca').value,rok:document.getElementById('mRok').value,sn:document.getElementById('mSN').value,tech:document.getElementById('mTech').value,docs:[],parts:[],tasks:[]};
+  }
+  saveDB();closeModal('modalMachine');
+  renderAdminMachines();renderAdminDocs();renderAdminParts();renderAdminTasks();renderAdminStats();
+  renderDemos();renderML(Object.values(DB));
+  showToast(editId?'✅ Stroj upravený':'✅ Stroj pridaný');
+}
+function delMachine(id){
+  if(!confirm(`Odstrániť stroj "${DB[id]?.name}"?`))return;
+  delete DB[id];saveDB();
+  renderAdminMachines();renderAdminDocs();renderAdminParts();renderAdminTasks();renderAdminStats();
+  renderDemos();renderML(Object.values(DB));
+  showToast('🗑 Stroj odstránený');
+}
+
+// ── DOC CRUD ──
+function openAddDoc(machineId){fillMachineSelects();document.getElementById('dMachine').value=machineId;document.getElementById('dName').value='';document.getElementById('dIcon').value='📄';document.getElementById('dSize').value='';openModal('modalDoc');}
+function saveDoc(){
+  const mid=document.getElementById('dMachine').value;
+  const name=document.getElementById('dName').value.trim();
+  if(!name){alert('Zadajte názov dokumentu');return;}
+  if(!DB[mid].docs)DB[mid].docs=[];
+  DB[mid].docs.push({i:document.getElementById('dIcon').value||'📄',n:name,meta:document.getElementById('dSize').value});
+  saveDB();closeModal('modalDoc');renderAdminDocs();showToast('✅ Dokument pridaný');
+}
+function delDoc(mid,idx){if(!confirm('Odstrániť dokument?'))return;DB[mid].docs.splice(idx,1);saveDB();renderAdminDocs();showToast('🗑 Dokument odstránený');}
+
+// ── PART CRUD ──
+function openAddPart(machineId){fillMachineSelects();document.getElementById('ptMachine').value=machineId;document.getElementById('ptName').value='';document.getElementById('ptIcon').value='🔩';document.getElementById('ptPN').value='';document.getElementById('ptStock').value='ok';document.getElementById('ptSL').value='';openModal('modalPart');}
+function savePart(){
+  const mid=document.getElementById('ptMachine').value;
+  const name=document.getElementById('ptName').value.trim();
+  if(!name){alert('Zadajte názov dielu');return;}
+  if(!DB[mid].parts)DB[mid].parts=[];
+  DB[mid].parts.push({i:document.getElementById('ptIcon').value||'🔩',n:name,pn:document.getElementById('ptPN').value,s:document.getElementById('ptStock').value,sl:document.getElementById('ptSL').value||document.getElementById('ptStock').options[document.getElementById('ptStock').selectedIndex].text.replace(/^[^ ]+ /,'')});
+  saveDB();closeModal('modalPart');renderAdminParts();showToast('✅ Diel pridaný');
+}
+function delPart(mid,idx){if(!confirm('Odstrániť diel?'))return;DB[mid].parts.splice(idx,1);saveDB();renderAdminParts();showToast('🗑 Diel odstránený');}
+
+// ── TASK CRUD ──
+function openAddTask(machineId){fillMachineSelects();document.getElementById('tkMachine').value=machineId;document.getElementById('tkName').value='';document.getElementById('tkSub').value='';document.getElementById('tkUrgent').value='0';openModal('modalTask');}
+function saveTask(){
+  const mid=document.getElementById('tkMachine').value;
+  const name=document.getElementById('tkName').value.trim();
+  if(!name){alert('Zadajte názov úlohy');return;}
+  if(!DB[mid].tasks)DB[mid].tasks=[];
+  DB[mid].tasks.push({id:'t'+uid(),n:name,s:document.getElementById('tkSub').value,done:false,u:document.getElementById('tkUrgent').value==='1'});
+  saveDB();closeModal('modalTask');renderAdminTasks();renderAdminStats();renderGT('all');showToast('✅ Úloha pridaná');
+}
+function delTask(mid,idx){if(!confirm('Odstrániť úlohu?'))return;DB[mid].tasks.splice(idx,1);saveDB();renderAdminTasks();renderAdminStats();showToast('🗑 Úloha odstránená');}
 </script>
 </body>
 </html>
