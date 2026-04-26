@@ -3,220 +3,181 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#2C2C2A">
+<meta name="theme-color" content="#2A3F28">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="MaintTrack">
-<title>MaintTrack</title>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Zeo Údržba">
+<title>Zeo Údržba</title>
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden;background:#1a1a18;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+html,body{height:100%;overflow:hidden;background:#1C2B1A;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 :root{
-  --amber:#EF9F27;--amber-dark:#BA7517;--amber-light:#FAEEDA;--amber-deep:#633806;
-  --dark:#2C2C2A;--dark2:#3a3a38;--dark3:#1a1a18;
-  --gray:#888780;--gray2:#444441;
-  --bg:#ffffff;--bg2:#f5f5f3;--bg3:#eeede8;
-  --text:#1a1a18;--text2:#5F5E5A;
-  --border:#D3D1C7;--border2:#B4B2A9;
-  --green-bg:#EAF3DE;--green-text:#3B6D11;
-  --yellow-bg:#FAEEDA;--yellow-text:#854F0B;
-  --red-bg:#FCEBEB;--red-text:#A32D2D;
-  --blue-bg:#E6F1FB;--blue-text:#185FA5;
-  --radius:10px;--radiuslg:14px;--radiusxl:20px;
+  --green:#3D6B38;--green-mid:#5A8C54;--green-light:#8FBF88;--green-pale:#D6EBD3;--green-dark:#2A3F28;--green-deep:#1C2B1A;
+  --white:#FFFFFF;--off-white:#F4F9F3;--light-gray:#E8F0E6;--mid-gray:#BCCFBA;--text-gray:#5A7558;
+  --border:#C5D9C2;--border2:#9CB899;
+  --ok-bg:#DFF0D8;--ok-text:#2D6A1F;
+  --warn-bg:#FFF3CD;--warn-text:#7D5A00;
+  --err-bg:#FCDEDE;--err-text:#8B1A1A;
+  --info-bg:#D9EDF7;--info-text:#1A5F7A;
+  --radius:10px;--radiuslg:14px;
 }
-@media(prefers-color-scheme:dark){
-  :root{
-    --bg:#2C2C2A;--bg2:#3a3a38;--bg3:#1a1a18;
-    --text:#f5f5f3;--text2:#888780;
-    --border:#444441;--border2:#5F5E5A;
-  }
-}
-#app{height:100dvh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;position:relative;overflow:hidden;background:var(--bg3)}
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg3);transition:transform 0.3s cubic-bezier(.4,0,.2,1),opacity 0.3s;will-change:transform}
+#app{height:100dvh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;position:relative;overflow:hidden;background:var(--off-white)}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--off-white);transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s}
 .screen.hidden{transform:translateX(100%);pointer-events:none}
-.screen.slide-left{transform:translateX(-30%);opacity:0;pointer-events:none}
 
-/* ── TOPBAR ── */
-.topbar{background:var(--dark);padding:env(safe-area-inset-top,12px) 16px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0;min-height:56px}
-.topbar-back{background:none;border:none;color:var(--amber);font-size:22px;cursor:pointer;padding:4px;line-height:1;flex-shrink:0}
-.topbar-logo{display:flex;align-items:center;gap:8px}
-.topbar-gear{width:30px;height:30px;background:var(--amber);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
-.topbar-title{font-size:16px;font-weight:600;color:var(--amber);flex:1}
-.topbar-sub{font-size:11px;color:var(--gray);margin-top:1px}
-.topbar-right{margin-left:auto;font-size:12px;color:var(--gray);cursor:pointer;padding:6px;border:1px solid var(--gray2);border-radius:8px;background:none;color:var(--amber)}
+/* TOPBAR */
+.topbar{background:var(--green-dark);padding:env(safe-area-inset-top,12px) 16px 12px;display:flex;align-items:center;gap:10px;flex-shrink:0;min-height:56px}
+.topbar-back{background:none;border:none;color:var(--green-light);font-size:22px;cursor:pointer;padding:4px;flex-shrink:0}
+.topbar-logo{width:34px;height:34px;border-radius:8px;overflow:hidden;flex-shrink:0;background:var(--green)}
+.topbar-logo img{width:100%;height:100%;object-fit:cover}
+.topbar-title{font-size:16px;font-weight:700;color:var(--green-pale);flex:1}
+.topbar-sub{font-size:11px;color:var(--green-light);margin-top:1px}
+.topbar-right{margin-left:auto;font-size:12px;color:var(--green-pale);cursor:pointer;padding:6px 12px;border:1px solid var(--green-mid);border-radius:20px;background:none;white-space:nowrap}
 
-/* ── LOGIN ── */
-#login{background:var(--dark3)}
-.login-hero{background:var(--dark);padding:48px 24px 36px;display:flex;flex-direction:column;align-items:center;gap:12px}
-.login-icon{width:72px;height:72px;background:var(--amber);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:38px}
-.login-appname{font-size:26px;font-weight:700;color:var(--amber);letter-spacing:-0.5px}
-.login-tagline{font-size:13px;color:var(--gray);text-align:center}
-.login-form{padding:28px 20px;flex:1;display:flex;flex-direction:column;gap:16px}
-.field label{display:block;font-size:11px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:7px}
-.field input{width:100%;padding:14px 16px;border:1.5px solid #444;border-radius:var(--radius);background:#3a3a38;color:#f5f5f3;font-size:16px;outline:none;transition:border-color .2s}
-.field input:focus{border-color:var(--amber)}
-.field input::placeholder{color:#666}
-.login-btn{width:100%;padding:16px;background:var(--amber);color:var(--dark);border:none;border-radius:var(--radius);font-size:16px;font-weight:700;cursor:pointer;transition:opacity .15s;margin-top:4px}
+/* LOGIN */
+#login{background:var(--green-deep)}
+.login-hero{background:var(--green-dark);padding:52px 24px 36px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.login-icon{width:100px;height:100px;border-radius:24px;overflow:hidden;background:var(--green);display:flex;align-items:center;justify-content:center}
+.login-icon img{width:100%;height:100%;object-fit:cover}
+.login-appname{font-size:26px;font-weight:800;color:var(--green-pale);letter-spacing:-0.5px}
+.login-tagline{font-size:13px;color:var(--green-light);text-align:center}
+.login-form{padding:28px 20px;flex:1;display:flex;flex-direction:column;gap:14px}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--green-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px}
+.field input{width:100%;padding:14px 16px;border:1.5px solid #3a5a38;border-radius:var(--radius);background:#2a3f28;color:#f4f9f3;font-size:16px;outline:none;transition:border-color .2s}
+.field input:focus{border-color:var(--green-light)}
+.field input::placeholder{color:#5a7558}
+.login-btn{width:100%;padding:16px;background:var(--green-mid);color:var(--white);border:none;border-radius:var(--radius);font-size:16px;font-weight:700;cursor:pointer;transition:opacity .15s}
 .login-btn:active{opacity:.85}
-.login-hint{background:#3a3a38;border-radius:var(--radius);padding:12px 14px;font-size:12px;color:var(--gray);border-left:3px solid var(--amber)}
-.login-hint strong{color:var(--amber)}
+.login-hint{background:#2a3f28;border-radius:var(--radius);padding:12px 14px;font-size:12px;color:var(--green-light);border-left:3px solid var(--green-mid)}
+.login-hint strong{color:var(--green-pale)}
 
-/* ── HOME ── */
+/* HOME */
 .home-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px}
-.scan-card{background:var(--dark);border-radius:var(--radiuslg);padding:20px;margin-bottom:20px;display:flex;flex-direction:column;align-items:center;gap:12px;cursor:pointer;border:2px dashed var(--gray2);transition:border-color .2s}
-.scan-card:active{border-color:var(--amber)}
+.scan-card{background:var(--green-dark);border-radius:var(--radiuslg);padding:20px;margin-bottom:20px;display:flex;flex-direction:column;align-items:center;gap:12px;cursor:pointer;border:2px dashed var(--green-mid);transition:border-color .2s}
+.scan-card:active{border-color:var(--green-light)}
 .scan-qr-icon{width:80px;height:80px;display:flex;align-items:center;justify-content:center;position:relative}
-.scan-qr-icon svg{width:70px;height:70px;color:var(--amber)}
-.scan-pulse{position:absolute;inset:0;border-radius:50%;border:2px solid var(--amber);animation:pulse 2s infinite}
+.scan-qr-icon svg{width:70px;height:70px;color:var(--green-light)}
+.scan-pulse{position:absolute;inset:0;border-radius:50%;border:2px solid var(--green-light);animation:pulse 2s infinite}
 @keyframes pulse{0%{transform:scale(.8);opacity:1}100%{transform:scale(1.3);opacity:0}}
-.scan-title{font-size:17px;font-weight:600;color:#f5f5f3}
-.scan-sub{font-size:13px;color:var(--gray);text-align:center}
-.scan-btn-pill{background:var(--amber);color:var(--dark);padding:10px 28px;border-radius:30px;font-size:14px;font-weight:700}
-
+.scan-title{font-size:17px;font-weight:700;color:var(--off-white)}
+.scan-sub{font-size:13px;color:var(--green-light);text-align:center}
+.scan-btn-pill{background:var(--green-mid);color:var(--white);padding:10px 28px;border-radius:30px;font-size:14px;font-weight:700}
 .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.section-label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em}
-.section-count{font-size:11px;color:var(--gray);background:var(--bg2);padding:2px 8px;border-radius:20px}
-
-.machine-card{background:var(--bg);border-radius:var(--radiuslg);border:1px solid var(--border);margin-bottom:10px;display:flex;align-items:center;padding:14px 16px;gap:14px;cursor:pointer;transition:border-color .15s,transform .1s}
-.machine-card:active{transform:scale(.98);border-color:var(--amber-dark)}
+.section-label{font-size:11px;font-weight:700;color:var(--text-gray);text-transform:uppercase;letter-spacing:.1em}
+.section-count{font-size:11px;color:var(--text-gray);background:var(--light-gray);padding:2px 8px;border-radius:20px}
+.machine-card{background:var(--white);border-radius:var(--radiuslg);border:1px solid var(--border);margin-bottom:10px;display:flex;align-items:center;padding:14px 16px;gap:14px;cursor:pointer;transition:border-color .15s,transform .1s}
+.machine-card:active{transform:scale(.98);border-color:var(--green)}
 .machine-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-.icon-ok{background:var(--green-bg)}
-.icon-warn{background:var(--yellow-bg)}
-.icon-err{background:var(--red-bg)}
+.icon-ok{background:var(--ok-bg)}.icon-warn{background:var(--warn-bg)}.icon-err{background:var(--err-bg)}
 .machine-info{flex:1;min-width:0}
-.machine-name{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.machine-loc{font-size:12px;color:var(--text2);margin-top:2px}
-.machine-status{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;flex-shrink:0}
-.st-ok{background:var(--green-bg);color:var(--green-text)}
-.st-warn{background:var(--yellow-bg);color:var(--yellow-text)}
-.st-err{background:var(--red-bg);color:var(--red-text)}
+.machine-name{font-size:14px;font-weight:600;color:#1a2e18;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.machine-loc{font-size:12px;color:var(--text-gray);margin-top:2px}
+.machine-status{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;flex-shrink:0}
+.st-ok{background:var(--ok-bg);color:var(--ok-text)}.st-warn{background:var(--warn-bg);color:var(--warn-text)}.st-err{background:var(--err-bg);color:var(--err-text)}
 .machine-arrow{color:var(--border2);font-size:18px;flex-shrink:0}
 
-/* ── QR SCANNER SCREEN ── */
+/* SCANNER */
 #scanner-screen{background:#000;z-index:50}
 .scanner-topbar{background:rgba(0,0,0,.7);padding:env(safe-area-inset-top,12px) 16px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0}
 #qr-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .scanner-overlay-ui{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
 .scanner-frame-wrap{position:relative;width:240px;height:240px}
-.scanner-border{position:absolute;inset:0;border-radius:16px}
-.corner{position:absolute;width:28px;height:28px;border-color:var(--amber);border-style:solid;border-width:3px}
+.corner{position:absolute;width:28px;height:28px;border-color:var(--green-light);border-style:solid;border-width:3px}
 .corner.tl{top:0;left:0;border-right:none;border-bottom:none;border-radius:10px 0 0 0}
 .corner.tr{top:0;right:0;border-left:none;border-bottom:none;border-radius:0 10px 0 0}
 .corner.bl{bottom:0;left:0;border-right:none;border-top:none;border-radius:0 0 0 10px}
 .corner.br{bottom:0;right:0;border-left:none;border-top:none;border-radius:0 0 10px 0}
-.scanner-line{position:absolute;left:4px;right:4px;height:2px;background:linear-gradient(90deg,transparent,var(--amber),transparent);animation:scanline 2s ease-in-out infinite}
+.scanner-line{position:absolute;left:4px;right:4px;height:2px;background:linear-gradient(90deg,transparent,var(--green-light),transparent);animation:scanline 2s ease-in-out infinite}
 @keyframes scanline{0%{top:8px}50%{top:calc(100% - 8px)}100%{top:8px}}
 .scanner-text{margin-top:24px;font-size:14px;color:rgba(255,255,255,.8);text-align:center;padding:0 24px}
-.scanner-bottom{position:absolute;bottom:0;left:0;right:0;padding:24px;background:linear-gradient(transparent,rgba(0,0,0,.8));display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:all}
+.scanner-bottom{position:absolute;bottom:0;left:0;right:0;padding:24px;background:linear-gradient(transparent,rgba(0,0,0,.85));display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:all}
 .scanner-demo-label{font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.1em}
 .scanner-demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
-.demo-qr-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:10px;text-align:center;cursor:pointer;transition:background .15s}
-.demo-qr-btn:active{background:rgba(239,159,39,.3);border-color:var(--amber)}
-.demo-qr-code{font-size:10px;color:var(--amber);font-family:monospace;margin-bottom:3px}
+.demo-qr-btn{background:rgba(61,107,56,.3);border:1px solid rgba(143,191,136,.3);border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:background .15s}
+.demo-qr-btn:active{background:rgba(61,107,56,.6);border-color:var(--green-light)}
+.demo-qr-code{font-size:10px;color:var(--green-light);font-family:monospace;margin-bottom:3px}
 .demo-qr-name{font-size:12px;color:#fff;font-weight:500}
 .scanner-close-btn{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:10px 32px;border-radius:30px;font-size:14px;cursor:pointer}
 #qr-canvas{display:none}
 
-/* ── MACHINE DETAIL ── */
-.detail-hero{background:var(--dark);padding:16px 16px 0;flex-shrink:0}
-.detail-code{font-size:11px;color:var(--amber);font-family:monospace;font-weight:600;margin-bottom:4px}
-.detail-name{font-size:20px;font-weight:700;color:#fff;margin-bottom:4px;line-height:1.2}
-.detail-loc{font-size:13px;color:var(--gray);margin-bottom:12px}
+/* DETAIL */
+.detail-hero{background:var(--green-dark);padding:16px 16px 0;flex-shrink:0}
+.detail-code{font-size:11px;color:var(--green-light);font-family:monospace;font-weight:700;margin-bottom:4px}
+.detail-name{font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;line-height:1.2}
+.detail-loc{font-size:13px;color:var(--green-light);margin-bottom:12px}
 .detail-tags{display:flex;gap:8px;flex-wrap:wrap;padding-bottom:16px}
-.dtag{font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px}
-.dtag-ok{background:rgba(99,153,34,.2);color:#C0DD97}
-.dtag-warn{background:rgba(186,117,23,.25);color:#FAC775}
-.dtag-err{background:rgba(163,45,45,.25);color:#F09595}
-.dtag-info{background:rgba(24,95,165,.2);color:#85B7EB}
-
-.tabs-bar{background:var(--dark);display:flex;flex-shrink:0;border-bottom:1px solid var(--gray2)}
-.tab-btn{flex:1;padding:12px 4px;font-size:11px;font-weight:600;color:var(--gray);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s;white-space:nowrap;letter-spacing:.02em}
-.tab-btn.active{color:var(--amber);border-bottom-color:var(--amber)}
-
+.dtag{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px}
+.dtag-ok{background:rgba(45,106,31,.25);color:#A8D8A0}
+.dtag-warn{background:rgba(125,90,0,.25);color:#FFD97D}
+.dtag-err{background:rgba(139,26,26,.25);color:#F0A0A0}
+.dtag-info{background:rgba(26,95,122,.2);color:#90CADF}
+.tabs-bar{background:var(--green-dark);display:flex;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.1)}
+.tab-btn{flex:1;padding:12px 4px;font-size:11px;font-weight:700;color:var(--green-light);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s;white-space:nowrap;letter-spacing:.02em}
+.tab-btn.active{color:var(--green-pale);border-bottom-color:var(--green-pale)}
 .tab-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
-.tab-pane{display:none;padding:16px}
-.tab-pane.active{display:block}
-
-.info-list{background:var(--bg);border-radius:var(--radiuslg);border:1px solid var(--border);overflow:hidden}
+.tab-pane{display:none;padding:16px}.tab-pane.active{display:block}
+.info-list{background:var(--white);border-radius:var(--radiuslg);border:1px solid var(--border);overflow:hidden}
 .info-row{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);gap:12px}
 .info-row:last-child{border-bottom:none}
-.info-key{font-size:13px;color:var(--text2);flex-shrink:0}
-.info-val{font-size:13px;font-weight:600;color:var(--text);text-align:right}
-
-.doc-item{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color .15s}
-.doc-item:active{border-color:var(--amber-dark)}
-.doc-icon-wrap{width:42px;height:42px;background:var(--bg2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.info-key{font-size:13px;color:var(--text-gray);flex-shrink:0}
+.info-val{font-size:13px;font-weight:600;color:#1a2e18;text-align:right}
+.doc-item{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;cursor:pointer}
+.doc-item:active{border-color:var(--green)}
+.doc-icon-wrap{width:42px;height:42px;background:var(--light-gray);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
 .doc-info{flex:1;min-width:0}
-.doc-name{font-size:14px;font-weight:600;color:var(--text)}
-.doc-meta{font-size:12px;color:var(--text2);margin-top:2px}
+.doc-name{font-size:14px;font-weight:600;color:#1a2e18}
+.doc-meta{font-size:12px;color:var(--text-gray);margin-top:2px}
 .doc-arr{color:var(--border2);font-size:20px}
-
 .proc-step{display:flex;gap:14px;margin-bottom:16px}
-.step-num{width:32px;height:32px;border-radius:50%;background:var(--dark);border:2px solid var(--amber);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--amber);flex-shrink:0}
+.step-num{width:32px;height:32px;border-radius:50%;background:var(--green-dark);border:2px solid var(--green-mid);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--green-pale);flex-shrink:0}
 .step-body{flex:1}
-.step-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:5px}
-.step-desc{font-size:13px;color:var(--text2);line-height:1.55}
-.step-warn{margin-top:8px;padding:8px 12px;background:var(--yellow-bg);border-left:3px solid #EF9F27;border-radius:0 8px 8px 0;font-size:12px;color:var(--yellow-text);line-height:1.4}
-.step-danger{margin-top:8px;padding:8px 12px;background:var(--red-bg);border-left:3px solid #E24B4A;border-radius:0 8px 8px 0;font-size:12px;color:var(--red-text);line-height:1.4}
-
-.parts-header{display:grid;grid-template-columns:1fr auto auto;gap:8px;padding:8px 14px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em}
-.part-item{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px}
+.step-title{font-size:14px;font-weight:700;color:#1a2e18;margin-bottom:5px}
+.step-desc{font-size:13px;color:var(--text-gray);line-height:1.55}
+.step-warn{margin-top:8px;padding:8px 12px;background:var(--warn-bg);border-left:3px solid #e6a817;border-radius:0 8px 8px 0;font-size:12px;color:var(--warn-text);line-height:1.4}
+.step-danger{margin-top:8px;padding:8px 12px;background:var(--err-bg);border-left:3px solid #c0392b;border-radius:0 8px 8px 0;font-size:12px;color:var(--err-text);line-height:1.4}
+.part-item{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px}
 .part-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px}
-.part-name{font-size:13px;font-weight:600;color:var(--text);flex:1}
-.part-stock{font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;flex-shrink:0}
-.pst-ok{background:var(--green-bg);color:var(--green-text)}
-.pst-low{background:var(--yellow-bg);color:var(--yellow-text)}
-.pst-out{background:var(--red-bg);color:var(--red-text)}
+.part-name{font-size:13px;font-weight:600;color:#1a2e18;flex:1}
+.part-stock{font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;flex-shrink:0}
+.pst-ok{background:var(--ok-bg);color:var(--ok-text)}.pst-low{background:var(--warn-bg);color:var(--warn-text)}.pst-out{background:var(--err-bg);color:var(--err-text)}
 .part-bottom{display:flex;justify-content:space-between;align-items:center}
-.part-pn{font-size:11px;color:var(--text2);font-family:monospace}
-.part-qty{font-size:12px;color:var(--text2)}
-
-/* install banner */
-.install-banner{display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--dark);border-top:1px solid var(--gray2);padding:14px 20px;z-index:200;align-items:center;gap:12px}
+.part-pn{font-size:11px;color:var(--text-gray);font-family:monospace}
+.part-qty{font-size:12px;color:var(--text-gray)}
+.install-banner{display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--green-dark);border-top:1px solid var(--green);padding:14px 20px;z-index:200;align-items:center;gap:12px}
 .install-banner.show{display:flex}
-.install-text{flex:1;font-size:13px;color:#f5f5f3}
-.install-text span{color:var(--amber);font-weight:600}
-.install-btn{background:var(--amber);color:var(--dark);border:none;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
-.install-x{background:none;border:none;color:var(--gray);font-size:20px;cursor:pointer;padding:4px}
+.install-text{flex:1;font-size:13px;color:var(--off-white)}
+.install-text span{color:var(--green-pale);font-weight:700}
+.install-btn{background:var(--green-mid);color:#fff;border:none;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer}
+.install-x{background:none;border:none;color:var(--green-light);font-size:20px;cursor:pointer;padding:4px}
 </style>
 </head>
 <body>
 <div id="app">
 
-<!-- ═══ LOGIN ═══ -->
+<!-- LOGIN -->
 <div id="login" class="screen">
   <div class="login-hero">
-    <div class="login-icon">⚙️</div>
-    <div class="login-appname">MaintTrack</div>
+    <div class="login-icon"><img id="login-logo-img" src="" alt="Zeo Údržba"></div>
+    <div class="login-appname">Zeo Údržba</div>
     <div class="login-tagline">Systém správy a evidencie údržby</div>
   </div>
   <div class="login-form">
-    <div class="field">
-      <label>Používateľské meno</label>
-      <input type="text" id="inp-user" placeholder="napr. novak.peter" autocomplete="username" autocapitalize="none">
-    </div>
-    <div class="field">
-      <label>Heslo</label>
-      <input type="password" id="inp-pass" placeholder="Vaše heslo" autocomplete="current-password">
-    </div>
+    <div class="field"><label>Používateľské meno</label><input type="text" id="inp-user" placeholder="napr. novak.peter" autocomplete="username" autocapitalize="none"></div>
+    <div class="field"><label>Heslo</label><input type="password" id="inp-pass" placeholder="Vaše heslo" autocomplete="current-password"></div>
     <button class="login-btn" onclick="doLogin()">Prihlásiť sa →</button>
-    <div class="login-hint">
-      <strong>Demo režim:</strong> zadajte akékoľvek meno a heslo (min. 3 znaky) a prihláste sa.
-    </div>
+    <div class="login-hint"><strong>Demo režim:</strong> zadajte akékoľvek meno a heslo (min. 3 znaky).</div>
   </div>
 </div>
 
-<!-- ═══ HOME ═══ -->
+<!-- HOME -->
 <div id="home" class="screen hidden">
   <div class="topbar">
-    <div class="topbar-logo">
-      <div class="topbar-gear">⚙️</div>
-      <div>
-        <div class="topbar-title">MaintTrack</div>
-        <div class="topbar-sub" id="home-user">Načítavanie...</div>
-      </div>
+    <div class="topbar-logo"><img id="home-logo-img" src="" alt="logo"></div>
+    <div>
+      <div class="topbar-title">Zeo Údržba</div>
+      <div class="topbar-sub" id="home-user">Načítavanie...</div>
     </div>
     <button class="topbar-right" onclick="doLogout()">Odhlásiť</button>
   </div>
@@ -229,10 +190,9 @@ html,body{height:100%;overflow:hidden;background:#1a1a18;font-family:-apple-syst
         </svg>
       </div>
       <div class="scan-title">Skenovať QR kód stroja</div>
-      <div class="scan-sub">Namierte kameru na QR štítok alebo zvoľte demo stroj</div>
+      <div class="scan-sub">Namierte kameru na QR štítok stroja</div>
       <div class="scan-btn-pill">Otvoriť skener</div>
     </div>
-
     <div class="section-header">
       <div class="section-label">Stroje v prevádzke</div>
       <div class="section-count">4 stroje</div>
@@ -241,20 +201,18 @@ html,body{height:100%;overflow:hidden;background:#1a1a18;font-family:-apple-syst
   </div>
 </div>
 
-<!-- ═══ QR SCANNER ═══ -->
+<!-- SCANNER -->
 <div id="scanner-screen" class="screen hidden">
   <div class="scanner-topbar">
     <button class="topbar-back" onclick="closeScanner()">✕</button>
-    <div style="font-size:15px;font-weight:600;color:var(--amber)">Skener QR kódu</div>
+    <div style="font-size:15px;font-weight:700;color:var(--green-pale)">Skener QR kódu</div>
   </div>
   <video id="qr-video" autoplay playsinline muted></video>
   <canvas id="qr-canvas"></canvas>
   <div class="scanner-overlay-ui">
     <div class="scanner-frame-wrap">
-      <div class="corner tl"></div>
-      <div class="corner tr"></div>
-      <div class="corner bl"></div>
-      <div class="corner br"></div>
+      <div class="corner tl"></div><div class="corner tr"></div>
+      <div class="corner bl"></div><div class="corner br"></div>
       <div class="scanner-line"></div>
     </div>
     <div class="scanner-text">Namierte kameru na QR kód stroja</div>
@@ -266,14 +224,11 @@ html,body{height:100%;overflow:hidden;background:#1a1a18;font-family:-apple-syst
   </div>
 </div>
 
-<!-- ═══ MACHINE DETAIL ═══ -->
+<!-- DETAIL -->
 <div id="detail" class="screen hidden">
   <div class="topbar" style="padding-bottom:0">
     <button class="topbar-back" onclick="goBack()">←</button>
-    <div>
-      <div class="topbar-title" id="d-topbar-name">Stroj</div>
-      <div class="topbar-sub" id="d-topbar-loc"></div>
-    </div>
+    <div><div class="topbar-title" id="d-topbar-name">Stroj</div><div class="topbar-sub" id="d-topbar-loc"></div></div>
   </div>
   <div class="detail-hero">
     <div class="detail-code" id="d-code"></div>
@@ -295,365 +250,95 @@ html,body{height:100%;overflow:hidden;background:#1a1a18;font-family:-apple-syst
   </div>
 </div>
 
-</div><!-- /app -->
-
-<!-- PWA Install Banner -->
+</div>
 <div class="install-banner" id="install-banner">
-  <div class="install-text">Pridajte <span>MaintTrack</span> na plochu telefónu</div>
+  <div class="install-text">Pridajte <span>Zeo Údržba</span> na plochu telefónu</div>
   <button class="install-btn" id="install-btn">Inštalovať</button>
   <button class="install-x" onclick="document.getElementById('install-banner').classList.remove('show')">×</button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
-// ── DATA ──
+const LOGO_B64 = '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';
+document.getElementById('login-logo-img').src = 'data:image/png;base64,' + LOGO_B64;
+document.getElementById('home-logo-img').src = 'data:image/png;base64,' + LOGO_B64;
+
 const MACHINES = {
-  'CNC-001':{
-    id:'CNC-001',name:'CNC Frézka TF-300',loc:'Hala A — Pozícia A12',
-    status:'ok',statusLabel:'Prevádzkyschopná',
-    icon:'🔩',
-    tags:[{t:'Prevádzkyschopná',c:'dtag-ok'},{t:'Ročná revízia: 03/2027',c:'dtag-info'}],
-    info:[
-      ['Výrobca','TechnoFréz s.r.o.'],['Model','TF-300 Pro'],['Rok výroby','2019'],
-      ['Výrobné číslo','TF300-29847'],['Max. otáčky','8 000 ot/min'],['Výkon','15 kW'],
-      ['Hmotnosť','2 400 kg'],['Posledná údržba','10.03.2026'],['Zodpovedný technik','Ing. Novák P.'],
-    ],
-    docs:[
-      {icon:'📄',name:'Technický manuál TF-300',meta:'PDF · 4,2 MB'},
-      {icon:'📋',name:'Protokol o revízii 2025',meta:'PDF · 380 kB'},
-      {icon:'📐',name:'Výkresová dokumentácia',meta:'ZIP · 12,1 MB'},
-      {icon:'⚠️',name:'Bezpečnostný list',meta:'PDF · 1,1 MB'},
-    ],
-    proc:[
-      {t:'Odstavenie stroja',d:'Prepnite stroj do režimu STOP a počkajte na úplné zastavenie vretena. Minimálne 3 minúty.',w:'',danger:false},
-      {t:'LOTO zaistenie',d:'Otočte hlavný vypínač do polohy 0. Zaistite LOTO zámkom a uschovajte kľúč.',w:'POVINNÉ — vstup bez LOTO zaistenia je zakázaný! Hrozí úraz elektrickým prúdom.',danger:true},
-      {t:'Čistenie pracovného priestoru',d:'Odstráňte triesky stieračkou a priemyselným vysávačom. Nepoužívajte stlačený vzduch na triesky.',w:''},
-      {t:'Kontrola hladín olejov',d:'Skontrolujte hladinu hydraulického oleja (min/max na indikátori). Doplňte olej ISO VG 46 ak je pod min.',w:''},
-      {t:'Mazanie lineárnych vedení',d:'Naneste mazivo NLGI 2 na všetky mazacie miesta podľa schémy v manuáli (str. 34). Každé 500 prevádzkových hodín.',w:''},
-      {t:'Záznam a podpis',d:'Vyplňte servisný protokol, zaznamenajte všetky odchýlky a čas vykonania údržby.',w:''},
-    ],
-    parts:[
-      {n:'Olejový filter F-12',pn:'TF-F12-OIL',q:'2 ks',stock:'Na sklade',sc:'pst-ok'},
-      {n:'Vreteno horné ložisko',pn:'SKF-6205-2RS',q:'1 ks',stock:'3 ks',sc:'pst-ok'},
-      {n:'Hydraulická pumpa HP-80',pn:'TF-HP80-REP',q:'1 ks',stock:'Posledný kus',sc:'pst-low'},
-      {n:'Chladiaca kvapalina 5L',pn:'COOL-ISO-5L',q:'5 L',stock:'Na sklade',sc:'pst-ok'},
-      {n:'Remeň pohonu V-75',pn:'BELT-V75-A',q:'1 ks',stock:'Nie je skladom',sc:'pst-out'},
-    ]
-  },
-  'KOMP-02':{
-    id:'KOMP-02',name:'Kompresor Atlas K-50',loc:'Strojovňa — Pozícia S3',
-    status:'warn',statusLabel:'Vyžaduje kontrolu',
-    icon:'⚡',
-    tags:[{t:'Vyžaduje kontrolu',c:'dtag-warn'},{t:'Posledná revízia: 11/2025',c:'dtag-info'}],
-    info:[
-      ['Výrobca','Atlas Copco'],['Model','GA-50 VSD+'],['Rok výroby','2021'],
-      ['Výrobné číslo','AC50-84521'],['Max. tlak','13 bar'],['Výkon motora','45 kW'],
-      ['Objem vzduchu','285 m³/hod'],['Posledná údržba','15.11.2025'],['Zodpovedný','M. Horváth'],
-    ],
-    docs:[
-      {icon:'📄',name:'Prevádzkový manuál GA-50',meta:'PDF · 6,8 MB'},
-      {icon:'📋',name:'Servisná správa 2025',meta:'PDF · 520 kB'},
-      {icon:'⚠️',name:'Bezpečnostné predpisy',meta:'PDF · 2,0 MB'},
-    ],
-    proc:[
-      {t:'Kontrola pred spustením',d:'Vizuálna kontrola netesností oleja a vzduchu. Skontrolujte hladinu oleja na olejomere.',w:''},
-      {t:'Kontrola prevádzkového tlaku',d:'Po spustení sledujte manometer — prevádzkový tlak 8–10 bar. Ak je mimo rozsahu, zastavte.',w:'Tlak nad 13 bar je KRITICKÝ! Okamžite zastavte stroj a ohláste vedúcemu.',danger:true},
-      {t:'Odvod kondenzátu',d:'Otvorte vypúšťací ventil, nechajte odtiecť kondenzát cca 30 sekúnd. Zatvorte ventil.',w:''},
-      {t:'Kontrola vzduchového filtra',d:'Skontrolujte zanesenie filtrového indikátora. Červená = vymeňte filter okamžite.',w:'Zanesený filter poškodí kompresor — nikdy nespúšťajte s červeným indikátorom.',danger:false},
-      {t:'Záznam hodnôt',d:'Zapíšte tlak, teplotu oleja a stav hodinomera do servisného protokolu.',w:''},
-    ],
-    parts:[
-      {n:'Vzduchový filter AF-50',pn:'AC-AF50-STD',q:'1 ks',stock:'2 ks',sc:'pst-ok'},
-      {n:'Olejový filter OF-50',pn:'AC-OF50-VSD',q:'1 ks',stock:'Posledný kus',sc:'pst-low'},
-      {n:'Kompresorový olej 4L',pn:'AC-OIL-4L',q:'4 L',stock:'Na sklade',sc:'pst-ok'},
-      {n:'Odvzdušňovací ventil',pn:'AC-VALVE-DV',q:'1 ks',stock:'Nie je skladom',sc:'pst-out'},
-    ]
-  },
-  'CONV-03':{
-    id:'CONV-03',name:'Dopravný pás DP-12',loc:'Hala B — Linka 3',
-    status:'err',statusLabel:'PORUCHA',
-    icon:'🔄',
-    tags:[{t:'⚠ PORUCHA',c:'dtag-err'},{t:'Výroba zastavená',c:'dtag-warn'}],
-    info:[
-      ['Výrobca','ConveyTech GmbH'],['Model','DP-12/B'],['Rok výroby','2018'],
-      ['Výrobné číslo','CT12B-11234'],['Dĺžka pásu','12 m'],['Rýchlosť pásu','0,3–1,5 m/s'],
-      ['Nosnosť','800 kg/m'],['Posledná údržba','02.01.2026'],['Zodpovedný','P. Kováč'],
-    ],
-    docs:[
-      {icon:'📄',name:'Technická dokumentácia DP-12',meta:'PDF · 3,5 MB'},
-      {icon:'📋',name:'Havarijný protokol 04/2026',meta:'PDF · 210 kB'},
-      {icon:'📐',name:'Elektrická schéma zapojenia',meta:'PDF · 1,8 MB'},
-    ],
-    proc:[
-      {t:'NÚDZOVÉ ZASTAVENIE',d:'Stlačte červené STOP tlačidlo na ovládacom paneli. Zablokujte prístup žltou páskou.',w:'VSTUP do oblasti pásu bez LOTO zaistenia je ZAKÁZANÝ!',danger:true},
-      {t:'Diagnostika — chybový kód',d:'Zapíšte chybový kód z displeja. Bežné kódy: E01=pás zosklzol, E02=porucha motora, E05=chyba senzora.',w:''},
-      {t:'Vizuálna kontrola pásu',d:'Skontrolujte pás na prítomnosť trhlín, prietrží alebo zosklznutia z vodiaceho valca.',w:''},
-      {t:'Kontrola pohonu',d:'Skontrolujte napätie na frekvenčnom meniči. Skontrolujte spojku medzi motorom a prevodovkou.',w:''},
-      {t:'Oprava alebo eskalácia',d:'Menšie závady opravte podľa manuálu. Väčšie závady ihneď nahláste vedúcemu údržby.',w:''},
-    ],
-    parts:[
-      {n:'Dopravný pás 12m PVC',pn:'CT-BELT-12PVC',q:'1 ks',stock:'Objednané',sc:'pst-low'},
-      {n:'Ložisko vodiaceho valca',pn:'SKF-6210-ZZ',q:'4 ks',stock:'Na sklade',sc:'pst-ok'},
-      {n:'Frekvenčný menič 5,5kW',pn:'SEW-MDX60-55',q:'1 ks',stock:'Nie je skladom',sc:'pst-out'},
-      {n:'Snímač polohy indukčný',pn:'SICK-IMS-C',q:'2 ks',stock:'1 ks',sc:'pst-low'},
-    ]
-  },
-  'SVAR-04':{
-    id:'SVAR-04',name:'Zvárací robot WR-200',loc:'Hala C — Pozícia C07',
-    status:'ok',statusLabel:'Prevádzkyschopný',
-    icon:'🤖',
-    tags:[{t:'Prevádzkyschopný',c:'dtag-ok'},{t:'Kalibrácia: 01/2026',c:'dtag-info'}],
-    info:[
-      ['Výrobca','Yaskawa Europe'],['Model','Motoman MA2010'],['Rok výroby','2022'],
-      ['Výrobné číslo','YSK-MA2010-7741'],['Dosah ramena','2 010 mm'],['Nosnosť','10 kg'],
-      ['Presnosť','±0,07 mm'],['Posledná údržba','18.01.2026'],['Zodpovedný','Ing. Blaho'],
-    ],
-    docs:[
-      {icon:'📄',name:'Manuál Motoman MA2010',meta:'PDF · 9,1 MB'},
-      {icon:'📋',name:'Kalibračný protokol 2026',meta:'PDF · 670 kB'},
-      {icon:'⚠️',name:'Bezpečnosť pri robotoch',meta:'PDF · 3,3 MB'},
-      {icon:'📐',name:'Programovacia príručka',meta:'PDF · 5,0 MB'},
-    ],
-    proc:[
-      {t:'Kontrola bezpečnostnej zóny',d:'Pred vstupom skontrolujte, či je aktivovaný laserový bezpečnostný skener a ochranné ploty.',w:'VSTUP do pracovnej zóny robota počas prevádzky je SMRTEĽNE NEBEZPEČNÝ!',danger:true},
-      {t:'Kontrola zváracej hlavice',d:'Skontrolujte opotrebenie kontaktnej špičky a ochranného skla. Vymeňte ak je nad 50% opotrebenia.',w:''},
-      {t:'Kontrola káblov a hadíc',d:'Vizuálne skontrolujte všetky káble robota. Hľadajte zárezy, ohyby a poškodenie izolácie.',w:''},
-      {t:'Mazanie osí',d:'Spustite mazací program "GREASE-ROUTINE" z ovládacieho panela. Program trvá cca 8 minút.',w:''},
-      {t:'Test nulovej polohy',d:'Spustite sekvenciu "ZERO-CHECK". Overte, či robot dosiahne všetky referenčné body s presnosťou.',w:''},
-    ],
-    parts:[
-      {n:'Kontaktná špička M8×1.0',pn:'YSK-TIP-M8',q:'10 ks',stock:'Na sklade',sc:'pst-ok'},
-      {n:'Ochranné sklo zvárania',pn:'YSK-GLASS-WR',q:'5 ks',stock:'Na sklade',sc:'pst-ok'},
-      {n:'Mazivo Molywhite RE Nr.2',pn:'YSK-GREASE-MW',q:'1 tuba',stock:'2 ks',sc:'pst-ok'},
-      {n:'Servo motor osi 1',pn:'YSK-SERVO-A1',q:'1 ks',stock:'Nie je skladom',sc:'pst-out'},
-    ]
-  }
+  'CNC-001':{id:'CNC-001',name:'CNC Frézka TF-300',loc:'Hala A — Pozícia A12',status:'ok',statusLabel:'Prevádzkyschopná',icon:'🔩',tags:[{t:'Prevádzkyschopná',c:'dtag-ok'},{t:'Revízia: 03/2027',c:'dtag-info'}],info:[['Výrobca','TechnoFréz s.r.o.'],['Model','TF-300 Pro'],['Rok výroby','2019'],['Výrobné číslo','TF300-29847'],['Max. otáčky','8 000 ot/min'],['Výkon','15 kW'],['Hmotnosť','2 400 kg'],['Posledná údržba','10.03.2026'],['Zodpovedný','Ing. Novák P.']],docs:[{icon:'📄',name:'Technický manuál TF-300',meta:'PDF · 4,2 MB'},{icon:'📋',name:'Protokol o revízii 2025',meta:'PDF · 380 kB'},{icon:'📐',name:'Výkresová dokumentácia',meta:'ZIP · 12,1 MB'},{icon:'⚠️',name:'Bezpečnostný list',meta:'PDF · 1,1 MB'}],proc:[{t:'Odstavenie stroja',d:'Prepnite stroj do režimu STOP a počkajte na úplné zastavenie vretena. Minimálne 3 minúty.',w:'',danger:false},{t:'LOTO zaistenie',d:'Otočte hlavný vypínač do polohy 0. Zaistite LOTO zámkom.',w:'POVINNÉ — bez LOTO zaistenia hrozí úraz elektrickým prúdom!',danger:true},{t:'Čistenie pracovného priestoru',d:'Odstráňte triesky stieračkou a priemyselným vysávačom.',w:''},{t:'Kontrola hladín olejov',d:'Skontrolujte hladinu hydraulického oleja. Doplňte ISO VG 46.',w:''},{t:'Mazanie lineárnych vedení',d:'Naneste mazivo NLGI 2 podľa schémy (manuál str. 34). Každých 500 hod.',w:''},{t:'Záznam a podpis',d:'Vyplňte servisný protokol, zaznamenajte odchýlky a čas údržby.',w:''}],parts:[{n:'Olejový filter F-12',pn:'TF-F12-OIL',q:'2 ks',stock:'Na sklade',sc:'pst-ok'},{n:'Vreteno horné ložisko',pn:'SKF-6205-2RS',q:'1 ks',stock:'3 ks',sc:'pst-ok'},{n:'Hydraulická pumpa HP-80',pn:'TF-HP80-REP',q:'1 ks',stock:'Posledný kus',sc:'pst-low'},{n:'Chladiaca kvapalina 5L',pn:'COOL-ISO-5L',q:'5 L',stock:'Na sklade',sc:'pst-ok'},{n:'Remeň pohonu V-75',pn:'BELT-V75-A',q:'1 ks',stock:'Nie je skladom',sc:'pst-out'}]},
+  'KOMP-02':{id:'KOMP-02',name:'Kompresor Atlas K-50',loc:'Strojovňa — Pozícia S3',status:'warn',statusLabel:'Vyžaduje kontrolu',icon:'⚡',tags:[{t:'Vyžaduje kontrolu',c:'dtag-warn'},{t:'Revízia: 11/2025',c:'dtag-info'}],info:[['Výrobca','Atlas Copco'],['Model','GA-50 VSD+'],['Rok výroby','2021'],['Výrobné číslo','AC50-84521'],['Max. tlak','13 bar'],['Výkon motora','45 kW'],['Objem vzduchu','285 m³/hod'],['Posledná údržba','15.11.2025'],['Zodpovedný','M. Horváth']],docs:[{icon:'📄',name:'Prevádzkový manuál GA-50',meta:'PDF · 6,8 MB'},{icon:'📋',name:'Servisná správa 2025',meta:'PDF · 520 kB'},{icon:'⚠️',name:'Bezpečnostné predpisy',meta:'PDF · 2,0 MB'}],proc:[{t:'Kontrola pred spustením',d:'Vizuálna kontrola netesností oleja a vzduchu. Skontrolujte hladinu oleja.',w:''},{t:'Kontrola prevádzkového tlaku',d:'Po spustení sledujte manometer — prevádzkový tlak 8–10 bar.',w:'Tlak nad 13 bar je KRITICKÝ! Okamžite zastavte stroj.',danger:true},{t:'Odvod kondenzátu',d:'Otvorte vypúšťací ventil, nechajte odtiecť kondenzát 30 sekúnd.',w:''},{t:'Kontrola vzduchového filtra',d:'Červená na indikátori = okamžitá výmena filtra.',w:'Nikdy nespúšťajte s červeným indikátorom!',danger:false},{t:'Záznam hodnôt',d:'Zapíšte tlak, teplotu oleja a stav hodinomera do protokolu.',w:''}],parts:[{n:'Vzduchový filter AF-50',pn:'AC-AF50-STD',q:'1 ks',stock:'2 ks',sc:'pst-ok'},{n:'Olejový filter OF-50',pn:'AC-OF50-VSD',q:'1 ks',stock:'Posledný kus',sc:'pst-low'},{n:'Kompresorový olej 4L',pn:'AC-OIL-4L',q:'4 L',stock:'Na sklade',sc:'pst-ok'},{n:'Odvzdušňovací ventil',pn:'AC-VALVE-DV',q:'1 ks',stock:'Nie je skladom',sc:'pst-out'}]},
+  'CONV-03':{id:'CONV-03',name:'Dopravný pás DP-12',loc:'Hala B — Linka 3',status:'err',statusLabel:'PORUCHA',icon:'🔄',tags:[{t:'⚠ PORUCHA',c:'dtag-err'},{t:'Výroba zastavená',c:'dtag-warn'}],info:[['Výrobca','ConveyTech GmbH'],['Model','DP-12/B'],['Rok výroby','2018'],['Výrobné číslo','CT12B-11234'],['Dĺžka pásu','12 m'],['Rýchlosť pásu','0,3–1,5 m/s'],['Nosnosť','800 kg/m'],['Posledná údržba','02.01.2026'],['Zodpovedný','P. Kováč']],docs:[{icon:'📄',name:'Technická dokumentácia DP-12',meta:'PDF · 3,5 MB'},{icon:'📋',name:'Havarijný protokol 04/2026',meta:'PDF · 210 kB'},{icon:'📐',name:'Elektrická schéma zapojenia',meta:'PDF · 1,8 MB'}],proc:[{t:'NÚDZOVÉ ZASTAVENIE',d:'Stlačte červené STOP tlačidlo na ovládacom paneli. Zablokujte prístup.',w:'VSTUP do oblasti pásu bez LOTO zaistenia je ZAKÁZANÝ!',danger:true},{t:'Diagnostika — chybový kód',d:'Zapíšte kód z displeja. E01=pás, E02=motor, E05=senzor.',w:''},{t:'Vizuálna kontrola pásu',d:'Skontrolujte trhliny, prietržia alebo zosklznutie z vodiaceho valca.',w:''},{t:'Kontrola pohonu',d:'Skontrolujte napätie na frekvenčnom meniči a spojku.',w:''},{t:'Oprava alebo eskalácia',d:'Menšie závady opravte podľa manuálu. Väčšie nahláste vedúcemu.',w:''}],parts:[{n:'Dopravný pás 12m PVC',pn:'CT-BELT-12PVC',q:'1 ks',stock:'Objednané',sc:'pst-low'},{n:'Ložisko vodiaceho valca',pn:'SKF-6210-ZZ',q:'4 ks',stock:'Na sklade',sc:'pst-ok'},{n:'Frekvenčný menič 5,5kW',pn:'SEW-MDX60-55',q:'1 ks',stock:'Nie je skladom',sc:'pst-out'},{n:'Snímač polohy indukčný',pn:'SICK-IMS-C',q:'2 ks',stock:'1 ks',sc:'pst-low'}]},
+  'SVAR-04':{id:'SVAR-04',name:'Zvárací robot WR-200',loc:'Hala C — Pozícia C07',status:'ok',statusLabel:'Prevádzkyschopný',icon:'🤖',tags:[{t:'Prevádzkyschopný',c:'dtag-ok'},{t:'Kalibrácia: 01/2026',c:'dtag-info'}],info:[['Výrobca','Yaskawa Europe'],['Model','Motoman MA2010'],['Rok výroby','2022'],['Výrobné číslo','YSK-MA2010-7741'],['Dosah ramena','2 010 mm'],['Nosnosť','10 kg'],['Presnosť','±0,07 mm'],['Posledná údržba','18.01.2026'],['Zodpovedný','Ing. Blaho']],docs:[{icon:'📄',name:'Manuál Motoman MA2010',meta:'PDF · 9,1 MB'},{icon:'📋',name:'Kalibračný protokol 2026',meta:'PDF · 670 kB'},{icon:'⚠️',name:'Bezpečnosť pri robotoch',meta:'PDF · 3,3 MB'},{icon:'📐',name:'Programovacia príručka',meta:'PDF · 5,0 MB'}],proc:[{t:'Kontrola bezpečnostnej zóny',d:'Skontrolujte laserový skener a ochranné ploty pred vstupom.',w:'VSTUP do zóny robota počas prevádzky je SMRTEĽNE NEBEZPEČNÝ!',danger:true},{t:'Kontrola zváracej hlavice',d:'Skontrolujte opotrebenie kontaktnej špičky a ochranného skla.',w:''},{t:'Kontrola káblov a hadíc',d:'Vizuálne skontrolujte zárezy, ohyby a poškodenie izolácie.',w:''},{t:'Mazanie osí',d:'Spustite program "GREASE-ROUTINE" z ovládacieho panela. Trvá ~8 minút.',w:''},{t:'Test nulovej polohy',d:'Spustite "ZERO-CHECK" a overte presnosť referenčných bodov.',w:''}],parts:[{n:'Kontaktná špička M8×1.0',pn:'YSK-TIP-M8',q:'10 ks',stock:'Na sklade',sc:'pst-ok'},{n:'Ochranné sklo zvárania',pn:'YSK-GLASS-WR',q:'5 ks',stock:'Na sklade',sc:'pst-ok'},{n:'Mazivo Molywhite RE Nr.2',pn:'YSK-GREASE-MW',q:'1 tuba',stock:'2 ks',sc:'pst-ok'},{n:'Servo motor osi 1',pn:'YSK-SERVO-A1',q:'1 ks',stock:'Nie je skladom',sc:'pst-out'}]}
 };
 
-// ── STATE ──
-let currentUser = '';
-let currentScreen = 'login';
-let scannerStream = null;
-let scannerAnimFrame = null;
+let currentUser='',currentScreen='login',scannerStream=null,scannerAnimFrame=null;
 
-// ── INIT ──
-window.addEventListener('load', () => {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(()=>{});
-  }
-  renderMachineList();
-  renderDemoQR();
-
-  const saved = localStorage.getItem('mt_user');
-  if (saved) {
-    currentUser = saved;
-    showScreen('home');
-    document.getElementById('home-user').textContent = 'Prihlásený: ' + currentUser;
-  }
+window.addEventListener('load',()=>{
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  renderMachineList(); renderDemoQR();
+  const saved=localStorage.getItem('zeo_user');
+  if(saved){currentUser=saved;showScreen('home');document.getElementById('home-user').textContent='Prihlásený: '+currentUser;}
 });
 
-// ── PWA INSTALL ──
-let deferredInstall = null;
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredInstall = e;
-  document.getElementById('install-banner').classList.add('show');
-});
-document.getElementById('install-btn').addEventListener('click', () => {
-  if (deferredInstall) {
-    deferredInstall.prompt();
-    deferredInstall.userChoice.then(() => {
-      document.getElementById('install-banner').classList.remove('show');
-    });
-  }
-});
+let deferredInstall=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;document.getElementById('install-banner').classList.add('show');});
+document.getElementById('install-btn').addEventListener('click',()=>{if(deferredInstall){deferredInstall.prompt();deferredInstall.userChoice.then(()=>document.getElementById('install-banner').classList.remove('show'));}});
 
-// ── SCREENS ──
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => {
-    s.classList.add('hidden');
-    s.classList.remove('slide-left');
-  });
-  document.getElementById(id).classList.remove('hidden');
-  currentScreen = id;
-}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');currentScreen=id;}
+function doLogin(){const u=document.getElementById('inp-user').value.trim(),p=document.getElementById('inp-pass').value.trim();if(u.length<3||p.length<3){alert('Min. 3 znaky pre meno aj heslo.');return;}currentUser=u;localStorage.setItem('zeo_user',u);document.getElementById('home-user').textContent='Prihlásený: '+u;showScreen('home');}
+document.getElementById('inp-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+function doLogout(){localStorage.removeItem('zeo_user');showScreen('login');}
 
-// ── LOGIN ──
-function doLogin() {
-  const u = document.getElementById('inp-user').value.trim();
-  const p = document.getElementById('inp-pass').value.trim();
-  if (u.length < 3 || p.length < 3) {
-    alert('Zadajte aspoň 3 znaky pre meno aj heslo.');
-    return;
-  }
-  currentUser = u;
-  localStorage.setItem('mt_user', u);
-  document.getElementById('home-user').textContent = 'Prihlásený: ' + u;
-  showScreen('home');
-}
-document.getElementById('inp-pass').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doLogin();
-});
-function doLogout() {
-  localStorage.removeItem('mt_user');
-  showScreen('login');
-}
-
-// ── MACHINE LIST ──
-function renderMachineList() {
-  const container = document.getElementById('machine-list');
-  container.innerHTML = Object.values(MACHINES).map(m => {
-    const iconClass = m.status === 'ok' ? 'icon-ok' : m.status === 'warn' ? 'icon-warn' : 'icon-err';
-    const stClass = m.status === 'ok' ? 'st-ok' : m.status === 'warn' ? 'st-warn' : 'st-err';
-    return `<div class="machine-card" onclick="openMachine('${m.id}')">
-      <div class="machine-icon ${iconClass}">${m.icon}</div>
-      <div class="machine-info">
-        <div class="machine-name">${m.name}</div>
-        <div class="machine-loc">${m.loc}</div>
-      </div>
-      <span class="machine-status ${stClass}">${m.statusLabel}</span>
-      <span class="machine-arrow">›</span>
-    </div>`;
+function renderMachineList(){
+  document.getElementById('machine-list').innerHTML=Object.values(MACHINES).map(m=>{
+    const ic=m.status==='ok'?'icon-ok':m.status==='warn'?'icon-warn':'icon-err';
+    const sc=m.status==='ok'?'st-ok':m.status==='warn'?'st-warn':'st-err';
+    return `<div class="machine-card" onclick="openMachine('${m.id}')"><div class="machine-icon ${ic}">${m.icon}</div><div class="machine-info"><div class="machine-name">${m.name}</div><div class="machine-loc">${m.loc}</div></div><span class="machine-status ${sc}">${m.statusLabel}</span><span class="machine-arrow">›</span></div>`;
   }).join('');
 }
 
-// ── QR SCANNER ──
-function renderDemoQR() {
-  document.getElementById('demo-qr-grid').innerHTML = Object.values(MACHINES).map(m =>
-    `<div class="demo-qr-btn" onclick="onQRScanned('${m.id}')">
-      <div class="demo-qr-code">${m.id}</div>
-      <div class="demo-qr-name">${m.name.split(' ').slice(0,2).join(' ')}</div>
-    </div>`
+function renderDemoQR(){
+  document.getElementById('demo-qr-grid').innerHTML=Object.values(MACHINES).map(m=>
+    `<div class="demo-qr-btn" onclick="onQRScanned('${m.id}')"><div class="demo-qr-code">${m.id}</div><div class="demo-qr-name">${m.name.split(' ').slice(0,2).join(' ')}</div></div>`
   ).join('');
 }
 
-async function openScanner() {
+async function openScanner(){
   showScreen('scanner-screen');
-  try {
-    scannerStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
-    });
-    const video = document.getElementById('qr-video');
-    video.srcObject = scannerStream;
-    video.play();
-    video.addEventListener('loadedmetadata', startQRLoop);
-  } catch (err) {
-    // camera not available — demo mode only
+  try{
+    scannerStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}});
+    const v=document.getElementById('qr-video');v.srcObject=scannerStream;v.play();
+    v.addEventListener('loadedmetadata',startQRLoop);
+  }catch(e){}
+}
+function startQRLoop(){
+  const v=document.getElementById('qr-video'),c=document.getElementById('qr-canvas'),ctx=c.getContext('2d');
+  function tick(){
+    if(currentScreen!=='scanner-screen')return;
+    if(v.readyState===v.HAVE_ENOUGH_DATA){c.width=v.videoWidth;c.height=v.videoHeight;ctx.drawImage(v,0,0);const img=ctx.getImageData(0,0,c.width,c.height);if(window.jsQR){const code=jsQR(img.data,img.width,img.height);if(code&&MACHINES[code.data]){onQRScanned(code.data);return;}}}
+    scannerAnimFrame=requestAnimationFrame(tick);
   }
+  scannerAnimFrame=requestAnimationFrame(tick);
 }
+function stopScanner(){if(scannerAnimFrame)cancelAnimationFrame(scannerAnimFrame);if(scannerStream){scannerStream.getTracks().forEach(t=>t.stop());scannerStream=null;}document.getElementById('qr-video').srcObject=null;}
+function closeScanner(){stopScanner();showScreen('home');}
+function onQRScanned(id){stopScanner();openMachine(id);}
 
-function startQRLoop() {
-  const video = document.getElementById('qr-video');
-  const canvas = document.getElementById('qr-canvas');
-  const ctx = canvas.getContext('2d');
-
-  function tick() {
-    if (currentScreen !== 'scanner-screen') return;
-    if (video.readyState === video.HAVE_ENOUGH_DATA) {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      ctx.drawImage(video, 0, 0);
-      const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      if (window.jsQR) {
-        const code = jsQR(img.data, img.width, img.height);
-        if (code && MACHINES[code.data]) {
-          onQRScanned(code.data);
-          return;
-        }
-      }
-    }
-    scannerAnimFrame = requestAnimationFrame(tick);
-  }
-  scannerAnimFrame = requestAnimationFrame(tick);
+function openMachine(id){
+  const m=MACHINES[id];if(!m)return;
+  document.getElementById('d-topbar-name').textContent=m.name;
+  document.getElementById('d-topbar-loc').textContent=m.loc;
+  document.getElementById('d-code').textContent=m.id;
+  document.getElementById('d-name').textContent=m.name;
+  document.getElementById('d-loc').textContent=m.loc;
+  document.getElementById('d-tags').innerHTML=m.tags.map(t=>`<span class="dtag ${t.c}">${t.t}</span>`).join('');
+  document.getElementById('tab-info').innerHTML=`<div class="info-list">${m.info.map(r=>`<div class="info-row"><span class="info-key">${r[0]}</span><span class="info-val">${r[1]}</span></div>`).join('')}</div>`;
+  document.getElementById('tab-docs').innerHTML=m.docs.map(d=>`<div class="doc-item"><div class="doc-icon-wrap">${d.icon}</div><div class="doc-info"><div class="doc-name">${d.name}</div><div class="doc-meta">${d.meta}</div></div><span class="doc-arr">›</span></div>`).join('');
+  document.getElementById('tab-proc').innerHTML=m.proc.map((s,i)=>`<div class="proc-step"><div class="step-num">${i+1}</div><div class="step-body"><div class="step-title">${s.t}</div><div class="step-desc">${s.d}</div>${s.w?`<div class="${s.danger?'step-danger':'step-warn'}">⚠ ${s.w}</div>`:''}</div></div>`).join('');
+  document.getElementById('tab-parts').innerHTML=m.parts.map(p=>`<div class="part-item"><div class="part-top"><div class="part-name">${p.n}</div><span class="part-stock ${p.sc}">${p.stock}</span></div><div class="part-bottom"><div class="part-pn">${p.pn}</div><div class="part-qty">Potreba: ${p.q}</div></div></div>`).join('');
+  switchTab('info');showScreen('detail');
 }
-
-function stopScanner() {
-  if (scannerAnimFrame) cancelAnimationFrame(scannerAnimFrame);
-  if (scannerStream) {
-    scannerStream.getTracks().forEach(t => t.stop());
-    scannerStream = null;
-  }
-  document.getElementById('qr-video').srcObject = null;
-}
-
-function closeScanner() {
-  stopScanner();
-  showScreen('home');
-}
-
-function onQRScanned(id) {
-  stopScanner();
-  openMachine(id);
-}
-
-// ── MACHINE DETAIL ──
-function openMachine(id) {
-  const m = MACHINES[id];
-  if (!m) return;
-
-  document.getElementById('d-topbar-name').textContent = m.name;
-  document.getElementById('d-topbar-loc').textContent = m.loc;
-  document.getElementById('d-code').textContent = m.id;
-  document.getElementById('d-name').textContent = m.name;
-  document.getElementById('d-loc').textContent = m.loc;
-  document.getElementById('d-tags').innerHTML = m.tags.map(t =>
-    `<span class="dtag ${t.c}">${t.t}</span>`).join('');
-
-  // Info tab
-  document.getElementById('tab-info').innerHTML =
-    `<div class="info-list">${m.info.map(r =>
-      `<div class="info-row"><span class="info-key">${r[0]}</span><span class="info-val">${r[1]}</span></div>`
-    ).join('')}</div>`;
-
-  // Docs tab
-  document.getElementById('tab-docs').innerHTML = m.docs.map(d =>
-    `<div class="doc-item">
-      <div class="doc-icon-wrap">${d.icon}</div>
-      <div class="doc-info"><div class="doc-name">${d.name}</div><div class="doc-meta">${d.meta}</div></div>
-      <span class="doc-arr">›</span>
-    </div>`
-  ).join('');
-
-  // Procedure tab
-  document.getElementById('tab-proc').innerHTML = m.proc.map((s, i) => {
-    const warn = s.w ? `<div class="${s.danger?'step-danger':'step-warn'}">⚠ ${s.w}</div>` : '';
-    return `<div class="proc-step">
-      <div class="step-num">${i+1}</div>
-      <div class="step-body">
-        <div class="step-title">${s.t}</div>
-        <div class="step-desc">${s.d}</div>
-        ${warn}
-      </div>
-    </div>`;
-  }).join('');
-
-  // Parts tab
-  document.getElementById('tab-parts').innerHTML = m.parts.map(p =>
-    `<div class="part-item">
-      <div class="part-top">
-        <div class="part-name">${p.n}</div>
-        <span class="part-stock ${p.sc}">${p.stock}</span>
-      </div>
-      <div class="part-bottom">
-        <div class="part-pn">${p.pn}</div>
-        <div class="part-qty">Potreba: ${p.q}</div>
-      </div>
-    </div>`
-  ).join('');
-
-  switchTab('info');
-  showScreen('detail');
-}
-
-function goBack() {
-  showScreen('home');
-}
-
-function switchTab(name) {
-  const names = ['info','docs','proc','parts'];
-  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', names[i]===name));
-  document.querySelectorAll('.tab-pane').forEach((p,i) => p.classList.toggle('active', names[i]===name));
-}
+function goBack(){showScreen('home');}
+function switchTab(name){const names=['info','docs','proc','parts'];document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',names[i]===name));document.querySelectorAll('.tab-pane').forEach((p,i)=>p.classList.toggle('active',names[i]===name));}
 </script>
 </body>
 </html>
