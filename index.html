@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#1B4D1E">
+<meta name="theme-color" content="#2E7D32">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Zeo Údržba">
@@ -14,157 +14,205 @@
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden;background:#1B4D1E;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+html,body{height:100%;overflow:hidden;background:#1B5E20;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 :root{
-  --g1:#2E7D32;--g2:#388E3C;--gl:#E8F5E9;--gp:#C8E6C9;
+  --g1:#2E7D32;--g2:#388E3C;--g3:#4CAF50;--gl:#E8F5E9;--gp:#C8E6C9;--gd:#1B5E20;
   --red:#D32F2F;--rl:#FFEBEE;--ora:#F57C00;--ol:#FFF3E0;
   --gray:#8E8E93;--gray2:#C7C7CC;--gray3:#F2F2F7;--gray4:#E5E5EA;
   --text:#000;--text2:#3C3C43;--white:#fff;--border:#E5E5EA;
   --sbot:env(safe-area-inset-bottom,0px);--stop:env(safe-area-inset-top,0px);
 }
-#app{
-  position:fixed;inset:0;
-  max-width:430px;margin:0 auto;
-  background:var(--gray3);
-  overflow:hidden;
-}
-/* Každý view je absolútny a predvolene skrytý */
-.view{
-  position:absolute;inset:0;
-  display:flex;flex-direction:column;
-  background:var(--gray3);
-  transform:translateX(0);
-  transition:opacity .25s;
-  z-index:1;
-}
-.view.off{
-  opacity:0;
-  pointer-events:none;
-  z-index:0;
-}
-.spad{height:calc(var(--stop) + 44px);background:var(--white);flex-shrink:0;min-height:44px}
-.navbar{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-top:.5px solid var(--border);display:flex;flex-shrink:0;padding-bottom:var(--sbot);z-index:10;position:relative}
+#app{position:fixed;inset:0;max-width:430px;margin:0 auto;background:var(--gray3);overflow:hidden}
+.view{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--gray3);opacity:1;transition:opacity .2s}
+.view.off{opacity:0;pointer-events:none;z-index:0}
+.spad{height:calc(var(--stop) + 44px);background:var(--g1);flex-shrink:0;min-height:44px}
+.navbar{background:rgba(255,255,255,.96);backdrop-filter:blur(20px);border-top:.5px solid var(--border);display:flex;flex-shrink:0;padding-bottom:var(--sbot);z-index:10}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px 4px;gap:3px;border:none;background:none;cursor:pointer}
-.nav-ic{font-size:22px;color:var(--gray)}.nav-lb{font-size:10px;font-weight:500;color:var(--gray)}
-.nav-btn.on .nav-ic,.nav-btn.on .nav-lb{color:var(--g1)}.nav-btn.on .nav-lb{font-weight:700}
-.phdr{background:var(--white);border-bottom:.5px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:8px;min-height:52px;flex-shrink:0}
+.nav-ic{display:flex;align-items:center;justify-content:center;width:24px;height:24px}
+.nav-lb{font-size:10px;font-weight:500;color:var(--gray)}
+.nav-btn.on .nav-lb{color:var(--g1);font-weight:700}
+.phdr{background:var(--white);border-bottom:.5px solid var(--border);padding:0 16px;display:flex;align-items:center;gap:8px;height:52px;flex-shrink:0}
 .ptitle{font-size:17px;font-weight:700;color:var(--text);flex:1;text-align:center}
 .hbtn{background:none;border:none;color:var(--g1);font-size:16px;font-weight:600;cursor:pointer;padding:4px 8px;min-width:44px}
 .pbody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
-/* ── LOADING ── */
+/* ══ LOADING ══ */
 #vLoading{background:var(--g1);align-items:center;justify-content:center;gap:20px;z-index:99}
-.spinner{width:44px;height:44px;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+.spinner{width:40px;height:40px;border:3px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── LOGIN ── */
+/* ══ LOGIN ══ */
 #vLogin{background:var(--white)}
-#vLogin .spad{background:var(--g1)}
-.lhero{background:var(--g1);padding:40px 24px 44px;display:flex;flex-direction:column;align-items:center;gap:14px}
-.licon{width:96px;height:96px;border-radius:22px;overflow:hidden}
-.licon img{width:100%;height:100%;object-fit:cover}
-.lname{font-size:27px;font-weight:800;color:#fff;letter-spacing:-.4px}
-.ltag{font-size:14px;color:rgba(255,255,255,.75);text-align:center}
-.lform{padding:28px 20px;display:flex;flex-direction:column;gap:14px}
-.lgrp{background:var(--white);border-radius:12px;border:1px solid var(--border);overflow:hidden}
-.lfield{display:flex;align-items:center;padding:0 14px;gap:10px;border-bottom:.5px solid var(--border)}
-.lfield:last-child{border-bottom:none}
-.lfield span{font-size:18px;color:var(--gray);flex-shrink:0}
-.lfield input{flex:1;padding:14px 0;font-size:16px;border:none;outline:none;background:none;color:var(--text)}
-.lfield input::placeholder{color:var(--gray2)}
-.lbtn{width:100%;padding:16px;background:var(--g1);color:#fff;border:none;border-radius:12px;font-size:17px;font-weight:700;cursor:pointer}
-.lbtn:disabled{opacity:.6}
-.lerr{padding:11px 14px;background:var(--rl);border-radius:10px;font-size:13px;color:var(--red);border:1px solid #FFCDD2;display:none}
-.lerr.on{display:block}
-.linfo{padding:11px 14px;background:var(--ol);border-radius:10px;font-size:12px;color:#5D4037;border:1px solid #FFE0B2;line-height:1.6}
+.login-top{background:var(--g1);padding:calc(var(--stop) + 48px) 24px 40px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.login-logo{width:88px;height:88px;border-radius:22px;overflow:hidden;background:var(--white);display:flex;align-items:center;justify-content:center}
+.login-logo img{width:100%;height:100%;object-fit:cover}
+.login-appname{font-size:26px;font-weight:800;color:var(--white);letter-spacing:-.5px}
+.login-tagline{font-size:13px;color:rgba(255,255,255,.7);text-align:center}
+.login-form{padding:32px 24px;display:flex;flex-direction:column;gap:8px}
+.login-form-title{font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px}
+.login-group{background:var(--gray3);border-radius:14px;overflow:hidden;border:.5px solid var(--border)}
+.login-field{display:flex;align-items:center;padding:0 16px;gap:12px;border-bottom:.5px solid var(--border);background:var(--white)}
+.login-field:last-child{border-bottom:none}
+.login-field-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.login-field input{flex:1;padding:15px 0;font-size:16px;border:none;outline:none;background:none;color:var(--text)}
+.login-field input::placeholder{color:var(--gray2)}
+.login-btn{width:100%;padding:16px;background:var(--g1);color:var(--white);border:none;border-radius:14px;font-size:17px;font-weight:700;cursor:pointer;margin-top:8px;transition:opacity .15s}
+.login-btn:disabled{opacity:.6}
+.login-btn:active{opacity:.85}
+.login-forgot{text-align:center;font-size:14px;color:var(--g1);font-weight:500;padding:8px;cursor:pointer;margin-top:4px}
+.login-err{padding:12px 14px;background:var(--rl);border-radius:12px;font-size:14px;color:var(--red);display:none;margin-top:4px}
+.login-err.on{display:block}
 
-/* ── SCAN ── */
-#tScan{background:var(--white)}
-#tScan .spad{background:var(--white)}
-.scan-hdr{background:var(--white);border-bottom:.5px solid var(--border);padding:12px 16px;text-align:center;font-size:17px;font-weight:700;flex-shrink:0}
-.scan-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:24px}
-.scan-frame{width:230px;height:230px;position:relative}
-.sc{position:absolute;width:28px;height:28px;border-color:var(--g1);border-style:solid;border-width:3px}
-.sc.tl{top:0;left:0;border-right:none;border-bottom:none;border-radius:8px 0 0 0}
-.sc.tr{top:0;right:0;border-left:none;border-bottom:none;border-radius:0 8px 0 0}
-.sc.bl{bottom:0;left:0;border-right:none;border-top:none;border-radius:0 0 0 8px}
-.sc.br{bottom:0;right:0;border-left:none;border-top:none;border-radius:0 0 8px 0}
-.scan-inner{position:absolute;inset:10px;background:var(--gl);border-radius:6px;overflow:hidden}
-.scan-line{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--g1),transparent);animation:sl 2s ease-in-out infinite}
-@keyframes sl{0%{top:5%}50%{top:90%}100%{top:5%}}
-#qrV{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:6px}
-#qrC{display:none}
-.fab{position:absolute;bottom:28px;right:24px;width:54px;height:54px;background:var(--g1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;box-shadow:0 4px 16px rgba(46,125,50,.35);border:none}
-.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;z-index:30}
-.sheet-bg.on{display:flex}
-.sheet{background:var(--white);border-radius:20px 20px 0 0;width:100%;padding:20px 20px calc(20px + var(--sbot));display:flex;flex-direction:column;gap:8px;max-height:80vh;overflow-y:auto}
-.sheet-title{font-size:15px;font-weight:700;text-align:center;margin-bottom:4px}
-.dmb{background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:13px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;margin-bottom:4px}
-.dmb:active{background:var(--gl);border-color:var(--g1)}
-.sheet-cancel{background:var(--gray3);border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:700;color:var(--g1);cursor:pointer;width:100%;margin-top:4px}
+/* ══ DASHBOARD ══ */
+#tDash .spad{background:var(--g1)}
+.dash-header{background:var(--g1);padding:0 16px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.dash-greeting{font-size:12px;color:rgba(255,255,255,.75)}
+.dash-name{font-size:18px;font-weight:800;color:var(--white);margin-top:1px}
+.dash-avatar{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--white);flex-shrink:0;cursor:pointer}
+.dash-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.dash-scan-card{background:var(--gd);margin:12px 16px 0;border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:opacity .15s}
+.dash-scan-card:active{opacity:.85}
+.dash-scan-icon{width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dash-scan-texts{flex:1;min-width:0}
+.dash-scan-title{font-size:15px;font-weight:700;color:var(--white)}
+.dash-scan-sub{font-size:12px;color:rgba(255,255,255,.65);margin-top:2px}
+.dash-scan-arrow{background:var(--white);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--g1);flex-shrink:0}
+.dash-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 16px 0}
+.dash-stat{background:var(--white);border-radius:14px;padding:14px;border:.5px solid var(--border)}
+.dash-stat-val{font-size:24px;font-weight:800}
+.dash-stat-lbl{font-size:12px;color:var(--gray);margin-top:3px}
+.sec-header{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px}
+.sec-title{font-size:13px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em}
+.sec-link{font-size:13px;font-weight:600;color:var(--g1);cursor:pointer}
+.recent-card{background:var(--white);margin:0 16px 8px;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;border:.5px solid var(--border);transition:border-color .15s}
+.recent-card:active{border-color:var(--g1);background:var(--gl)}
+.recent-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.recent-info{flex:1;min-width:0}
+.recent-name{font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recent-loc{font-size:12px;color:var(--gray);margin-top:2px}
+.badge{font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;flex-shrink:0}
+.ba{background:var(--g1);color:#fff}.bm{background:var(--ol);color:#633806;border:.5px solid #EF9F27}.be{background:var(--red);color:#fff}
+.urgent-card{background:var(--white);margin:0 16px 8px;border-radius:14px;padding:14px 16px;display:flex;align-items:flex-start;gap:12px;border:.5px solid var(--border)}
+.urgent-dot{width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0;margin-top:4px;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.urgent-name{font-size:14px;font-weight:700;color:var(--text)}
+.urgent-sub{font-size:12px;color:var(--gray);margin-top:2px}
+.urgent-machine{font-size:11px;color:var(--red);font-weight:600;margin-top:4px}
+.empty-state{text-align:center;padding:32px 16px;color:var(--gray);font-size:14px}
 
-/* ── MACHINES ── */
+/* ══ MACHINES ══ */
 .srch-wrap{padding:8px 16px;background:var(--white);border-bottom:.5px solid var(--border);flex-shrink:0}
 .srch{background:var(--gray3);border-radius:10px;display:flex;align-items:center;gap:8px;padding:8px 12px}
+.srch svg{flex-shrink:0}
 .srch input{border:none;background:none;font-size:15px;color:var(--text);flex:1;outline:none}
-.mlist{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px}
-.mc{background:var(--white);border-radius:14px;border:1.5px solid var(--border);padding:14px 16px;cursor:pointer}
-.mc:active{background:var(--gl);border-color:var(--g1)}
-.mc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px}
-.mc-name{font-size:15px;font-weight:700;color:var(--text);flex:1}
-.badge{font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;flex-shrink:0}
-.ba{background:var(--g1);color:#fff}.bm{background:var(--ol);color:var(--ora);border:1px solid var(--ora)}.be{background:var(--red);color:#fff}
+.mlist{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.mc{background:var(--white);border-radius:14px;border:.5px solid var(--border);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:border-color .15s}
+.mc:active{border-color:var(--g1);background:var(--gl)}
+.mc-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.mc-info{flex:1;min-width:0}
+.mc-name{font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc-sub{font-size:12px;color:var(--gray);margin-top:2px}
 
-/* ── DETAIL ── */
-.dmc-card{background:var(--white);margin:12px 16px;border-radius:14px;border:1.5px solid var(--border);padding:14px 16px;display:flex;gap:14px;align-items:center}
-.seg{margin:0 16px 12px;background:var(--gray4);border-radius:10px;padding:2px;display:flex}
-.seg-b{flex:1;padding:8px;font-size:13px;font-weight:700;color:var(--gray);border:none;background:none;border-radius:8px;cursor:pointer;transition:all .2s}
+/* ══ SCAN ══ */
+#tScan{background:#000}
+#tScan .spad{background:rgba(0,0,0,.7)}
+.scan-topbar{background:rgba(0,0,0,.7);padding:0 16px;height:52px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.scan-topbar-title{font-size:17px;font-weight:700;color:var(--white)}
+.scan-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px;gap:20px;position:relative}
+#qrV{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#qrC{display:none}
+.scan-overlay{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:20px;width:100%}
+.scan-frame{width:220px;height:220px;position:relative}
+.sc-corner{position:absolute;width:28px;height:28px;border-color:var(--g3);border-style:solid;border-width:3px}
+.sc-corner.tl{top:0;left:0;border-right:none;border-bottom:none;border-radius:8px 0 0 0}
+.sc-corner.tr{top:0;right:0;border-left:none;border-bottom:none;border-radius:0 8px 0 0}
+.sc-corner.bl{bottom:0;left:0;border-right:none;border-top:none;border-radius:0 0 0 8px}
+.sc-corner.br{bottom:0;right:0;border-left:none;border-top:none;border-radius:0 0 8px 0}
+.sc-inner{position:absolute;inset:10px;border-radius:6px;overflow:hidden;background:rgba(76,175,80,.06)}
+.sc-line{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--g3),transparent);animation:sl 2s ease-in-out infinite}
+@keyframes sl{0%{top:8%}50%{top:88%}100%{top:8%}}
+.scan-active-pill{display:flex;align-items:center;gap:8px;background:rgba(76,175,80,.2);border-radius:30px;padding:8px 16px;border:.5px solid rgba(76,175,80,.4)}
+.scan-active-dot{width:7px;height:7px;border-radius:50%;background:var(--g3);animation:blink 1.5s infinite}
+.scan-active-text{font-size:13px;font-weight:600;color:var(--g3)}
+.scan-info-box{background:rgba(255,255,255,.1);border-radius:14px;padding:14px 16px;border:.5px solid rgba(255,255,255,.15);width:100%;max-width:280px;text-align:center;backdrop-filter:blur(10px)}
+.scan-info-title{font-size:14px;font-weight:700;color:var(--white);margin-bottom:6px}
+.scan-info-text{font-size:12px;color:rgba(255,255,255,.65);line-height:1.6}
+.scan-manual-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600;color:var(--white);cursor:pointer;width:100%;max-width:280px;text-align:center}
+
+/* ══ TASKS ══ */
+.filter-row{display:flex;gap:8px;padding:10px 16px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;background:var(--white);border-bottom:.5px solid var(--border)}
+.filter-row::-webkit-scrollbar{display:none}
+.chip{padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;border:1.5px solid var(--border);background:var(--white);color:var(--text2);cursor:pointer;white-space:nowrap;flex-shrink:0}
+.chip.on{background:var(--g1);color:var(--white);border-color:var(--g1)}
+.tkcard{background:var(--white);margin:0 16px 8px;border-radius:14px;border:.5px solid var(--border);padding:14px 16px}
+.tk-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+.tkbox{width:24px;height:24px;border-radius:7px;border:2px solid var(--border);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .15s}
+.tkbox.ck{background:var(--g1);border-color:var(--g1)}
+.tkbox svg{display:none}.tkbox.ck svg{display:block}
+.tk-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px}
+.tk-sub{font-size:12px;color:var(--gray)}
+.tk-machine{font-size:11px;color:var(--g1);font-weight:600;margin-top:4px}
+.tk-acts{display:flex;gap:12px}
+.tk-act{font-size:13px;color:var(--g1);font-weight:600;background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;gap:4px}
+
+/* ══ DETAIL ══ */
+.dmc-card{background:var(--white);margin:12px 16px;border-radius:16px;border:.5px solid var(--border);padding:16px;display:flex;gap:14px;align-items:center}
+.dmc-img{width:64px;height:64px;border-radius:14px;background:var(--gray3);display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0}
+.dmc-name{font-size:17px;font-weight:800;color:var(--text);margin-bottom:3px}
+.dmc-model{font-size:13px;color:var(--gray);margin-bottom:3px}
+.dmc-loc{font-size:13px;color:var(--gray);margin-bottom:8px}
+.seg{margin:0 16px 12px;background:var(--gray4);border-radius:12px;padding:3px;display:flex}
+.seg-b{flex:1;padding:9px 4px;font-size:13px;font-weight:700;color:var(--gray);border:none;background:none;border-radius:10px;cursor:pointer;transition:all .2s;text-align:center}
 .seg-b.on{background:var(--white);color:var(--g1);box-shadow:0 1px 4px rgba(0,0,0,.1)}
-.dsec{background:var(--white);margin:0 16px 12px;border-radius:14px;border:1.5px solid var(--border);overflow:hidden}
-.dsh{padding:13px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
-.dsh-title{font-size:15px;font-weight:700}
-.dsh-arr{font-size:13px;color:var(--gray);transition:transform .2s}
+.dsec{background:var(--white);margin:0 16px 10px;border-radius:14px;border:.5px solid var(--border);overflow:hidden}
+.dsh{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.dsh-title{font-size:15px;font-weight:700;color:var(--text)}
+.dsh-arr{font-size:14px;color:var(--gray);transition:transform .2s}
 .dsh-arr.op{transform:rotate(180deg)}
 .dsb{border-top:.5px solid var(--border)}
-.drow{display:flex;justify-content:space-between;padding:11px 16px;border-bottom:.5px solid var(--border);gap:12px}
+.drow{display:flex;justify-content:space-between;padding:12px 16px;border-bottom:.5px solid var(--border);gap:12px}
 .drow:last-child{border-bottom:none}
-.drk{font-size:14px;color:var(--text2)}.drv{font-size:14px;font-weight:700;text-align:right}
+.drk{font-size:14px;color:var(--text2)}.drv{font-size:14px;font-weight:700;text-align:right;color:var(--text)}
 .docrow{display:flex;align-items:center;padding:12px 16px;border-bottom:.5px solid var(--border);gap:12px;cursor:pointer}
 .docrow:last-child{border-bottom:none}
-.docic{width:36px;height:36px;border-radius:8px;background:var(--rl);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.ptabs{margin:0 16px 12px;background:var(--gray4);border-radius:10px;padding:2px;display:flex}
-.ptab-b{flex:1;padding:8px;font-size:13px;font-weight:700;color:var(--gray);border:none;background:none;border-radius:8px;cursor:pointer;transition:all .2s}
+.docic{width:38px;height:38px;border-radius:10px;background:var(--rl);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.ptabs{margin:0 16px 10px;background:var(--gray4);border-radius:12px;padding:3px;display:flex}
+.ptab-b{flex:1;padding:9px 4px;font-size:13px;font-weight:700;color:var(--gray);border:none;background:none;border-radius:10px;cursor:pointer;transition:all .2s;text-align:center}
 .ptab-b.on{background:var(--white);color:var(--g1);box-shadow:0 1px 4px rgba(0,0,0,.1)}
-.pcard{background:var(--white);margin:0 16px 10px;border-radius:14px;border:1.5px solid var(--border);overflow:hidden}
+.pcard{background:var(--white);margin:0 16px 8px;border-radius:14px;border:.5px solid var(--border);overflow:hidden}
 .pcard-top{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:.5px solid var(--border)}
-.pimg{width:52px;height:52px;border-radius:10px;background:var(--gray3);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.pimg{width:48px;height:48px;border-radius:12px;background:var(--gray3);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.pname{font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px}
+.ppn{font-size:11px;color:var(--gray);font-family:monospace}
 .pstock{display:flex;align-items:center;gap:4px;margin-top:4px;font-size:12px;font-weight:700}
 .sok{color:var(--g1)}.slow{color:var(--ora)}.sout{color:var(--red)}
 .pacts{display:flex;gap:8px;padding:10px 14px}
-.pact{flex:1;padding:9px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:none}
+.pact{flex:1;padding:10px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;border:none;text-align:center}
 .pact-p{background:var(--g1);color:#fff}.pact-s{background:var(--white);color:var(--g1);border:1.5px solid var(--g1)}
-.tkcard{background:var(--white);margin:0 16px 10px;border-radius:14px;border:1.5px solid var(--border);padding:14px 16px}
-.tk-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
-.tkbox{width:22px;height:22px;border-radius:6px;border:2px solid var(--border);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .15s}
-.tkbox.ck{background:var(--g1);border-color:var(--g1)}
-.tkbox span{font-size:14px;color:#fff;display:none;font-weight:700}
-.tkbox.ck span{display:block}
-.tk-acts{display:flex;gap:16px;margin-top:8px}
-.tk-act{font-size:13px;color:var(--g1);font-weight:600;background:none;border:none;cursor:pointer;padding:0}
-.filter-row{display:flex;gap:8px;padding:10px 16px;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
-.filter-row::-webkit-scrollbar{display:none}
-.chip{padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;border:1.5px solid var(--border);background:var(--white);color:var(--text2);cursor:pointer;white-space:nowrap}
-.chip.on{background:var(--g1);color:#fff;border-color:var(--g1)}
 
-/* ── ADMIN ── */
-.admin-badge{background:#7B1FA2;color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px}
-.admin-topbar{background:#1a1a2e;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
-.admin-section{background:var(--white);margin:12px 16px;border-radius:14px;border:1.5px solid var(--border);overflow:hidden}
-.admin-row{display:flex;align-items:center;padding:13px 16px;border-bottom:.5px solid var(--border);gap:12px;cursor:pointer}
+/* ══ PROFILE ══ */
+.phero{background:var(--g1);padding:calc(var(--stop) + 16px) 16px 24px;display:flex;flex-direction:column;align-items:center;gap:10px;flex-shrink:0}
+.phero-av{width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:#fff;border:3px solid rgba(255,255,255,.3)}
+.phero-name{font-size:20px;font-weight:800;color:#fff}
+.phero-role{font-size:14px;color:rgba(255,255,255,.75)}
+.pgrp{background:var(--white);margin:12px 16px 0;border-radius:14px;border:.5px solid var(--border);overflow:hidden}
+.prow{display:flex;align-items:center;padding:14px 16px;border-bottom:.5px solid var(--border);gap:14px}
+.prow:last-child{border-bottom:none}
+.pric{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.prg{background:var(--gl)}.prb{background:#E3F2FD}
+.prlbl{flex:1;font-size:15px;font-weight:500;color:var(--text)}
+.lout-btn{display:block;margin:12px 16px 32px;padding:15px;background:var(--rl);color:var(--red);border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;width:calc(100% - 32px)}
+
+/* ══ ADMIN ══ */
+.admin-topbar{background:#1a1a2e;height:calc(var(--stop) + 56px);padding-top:var(--stop);display:flex;align-items:center;padding-left:16px;padding-right:16px;gap:10px;flex-shrink:0}
+.admin-title{font-size:16px;font-weight:700;color:#CE93D8;flex:1}
+.admin-badge{background:#7B1FA2;color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px}
+.admin-section{background:var(--white);margin:12px 16px 0;border-radius:14px;border:.5px solid var(--border);overflow:hidden}
+.admin-row{display:flex;align-items:center;padding:14px 16px;border-bottom:.5px solid var(--border);gap:12px;cursor:pointer}
 .admin-row:last-child{border-bottom:none}
 .admin-row:active{background:var(--gray3)}
-.aric{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.ap{background:#F3E5F5}.ab{background:#E3F2FD}.ag{background:var(--gl)}.ao{background:var(--ol)}.ar{background:var(--rl)}
+.aric{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.ap{background:#F3E5F5}.ab{background:#E3F2FD}.ag{background:var(--gl)}.ao{background:var(--ol)}
 .admin-machine-item{display:flex;align-items:center;padding:13px 16px;border-bottom:.5px solid var(--border);gap:12px}
 .admin-machine-item:last-child{border-bottom:none}
 .ami-info{flex:1;min-width:0}
@@ -174,19 +222,29 @@ html,body{height:100%;overflow:hidden;background:#1B4D1E;font-family:-apple-syst
 .ami-btn{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:none}
 .ami-edit{background:var(--gl);color:var(--g1)}.ami-del{background:var(--rl);color:var(--red)}
 
-/* ── MODALS ── */
+/* ══ SHEET ══ */
+.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;z-index:30}
+.sheet-bg.on{display:flex}
+.sheet{background:var(--white);border-radius:20px 20px 0 0;width:100%;padding:20px 20px calc(20px + var(--sbot));display:flex;flex-direction:column;gap:8px;max-height:80vh;overflow-y:auto}
+.sheet-handle{width:36px;height:4px;background:var(--gray2);border-radius:2px;margin:0 auto 12px}
+.sheet-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:4px}
+.dmb{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;margin-bottom:4px}
+.dmb:active{background:var(--gl);border-color:var(--g1)}
+.sheet-cancel{background:var(--gray3);border:none;border-radius:14px;padding:15px;font-size:16px;font-weight:700;color:var(--g1);cursor:pointer;width:100%;margin-top:4px}
+
+/* ══ MODALS ══ */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end;max-width:430px;margin:0 auto}
 .modal-bg.on{display:flex}
 .modal{background:var(--white);border-radius:20px 20px 0 0;width:100%;padding:20px;padding-bottom:calc(20px + var(--sbot));max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
-.modal-title{font-size:18px;font-weight:800;text-align:center}
+.modal-title{font-size:18px;font-weight:800;text-align:center;color:var(--text)}
 .mf{display:flex;flex-direction:column;gap:6px}
 .ml{font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em}
-.mi{padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;color:var(--text);outline:none;background:var(--white);width:100%}
+.mi{padding:13px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;color:var(--text);outline:none;background:var(--white);width:100%}
 .mi:focus{border-color:var(--g1)}
 .mr{display:flex;gap:10px}.mr .mf{flex:1}
-.modal-save{width:100%;padding:15px;background:var(--g1);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer}
-.modal-cancel{width:100%;padding:14px;background:var(--gray3);color:var(--gray);border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer}
-.toast{position:fixed;bottom:calc(80px + var(--sbot));left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.modal-save{width:100%;padding:15px;background:var(--g1);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer}
+.modal-cancel{width:100%;padding:14px;background:var(--gray3);color:var(--gray);border:none;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer}
+.toast{position:fixed;bottom:calc(90px + var(--sbot));left:50%;transform:translateX(-50%);background:#1C2B1A;color:#C8E6C9;padding:12px 24px;border-radius:30px;font-size:14px;font-weight:600;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1}
 </style>
 </head>
@@ -194,51 +252,129 @@ html,body{height:100%;overflow:hidden;background:#1B4D1E;font-family:-apple-syst
 <div id="app">
 
 <!-- LOADING -->
-<div id="vLoading" class="view" style="background:var(--g1);align-items:center;justify-content:center;gap:20px">
+<div id="vLoading" class="view" style="background:var(--g1);align-items:center;justify-content:center;gap:20px;z-index:99">
   <img src="logo.png" style="width:80px;height:80px;border-radius:18px;object-fit:cover">
   <div class="spinner"></div>
-  <div style="color:#fff;font-size:15px;font-weight:600">Načítavanie...</div>
+  <div style="color:rgba(255,255,255,.8);font-size:15px;font-weight:600">Načítavanie...</div>
 </div>
 
 <!-- LOGIN -->
 <div id="vLogin" class="view off" style="background:var(--white)">
-  <div class="spad" style="background:var(--g1)"></div>
   <div class="pbody">
-    <div class="lhero">
-      <div class="licon"><img src="logo.png" alt="logo"></div>
-      <div class="lname">Zeo Údržba</div>
-      <div class="ltag">Systém správy a evidencie údržby strojov</div>
+    <div class="login-top">
+      <div class="login-logo"><img src="logo.png" alt="Zeo Údržba"></div>
+      <div class="login-appname">Zeo Údržba</div>
+      <div class="login-tagline">Systém správy a evidencie údržby strojov</div>
     </div>
-    <div class="lform">
-      <div class="lgrp">
-        <div class="lfield"><span>✉️</span><input id="iEmail" type="email" placeholder="Email" autocapitalize="none" autocomplete="email"></div>
-        <div class="lfield"><span>🔒</span><input id="iPass" type="password" placeholder="Heslo" autocomplete="current-password"></div>
+    <div class="login-form">
+      <div class="login-form-title">Prihlásenie</div>
+      <div class="login-group">
+        <div class="login-field">
+          <div class="login-field-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8E8E93" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <input id="iEmail" type="email" placeholder="Email" autocapitalize="none" autocomplete="email">
+        </div>
+        <div class="login-field">
+          <div class="login-field-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8E8E93" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <input id="iPass" type="password" placeholder="Heslo" autocomplete="current-password">
+        </div>
       </div>
-      <div class="lerr" id="lErr"></div>
-      <button class="lbtn" id="lBtn" onclick="doLogin()">Prihlásiť sa</button>
-      <div class="linfo">⚠️ Zadajte email a heslo vytvorené v Supabase Dashboard → Authentication → Users</div>
+      <div class="login-err" id="lErr"></div>
+      <button class="login-btn" id="lBtn" onclick="doLogin()">Prihlásiť sa</button>
+      <div class="login-forgot" onclick="forgotPassword()">Zabudnuté heslo?</div>
     </div>
   </div>
 </div>
 
-<!-- MAIN (Worker) -->
+<!-- MAIN -->
 <div id="vMain" class="view off">
   <div style="flex:1;position:relative;overflow:hidden">
-    <div id="tScan" class="view" style="background:var(--white)">
-      <div class="spad" style="background:var(--white)"></div>
-      <div class="scan-hdr">Skenovanie</div>
-      <div class="scan-body">
-        <div style="font-size:19px;font-weight:800;color:var(--g1)">Skenovať QR kód stroja</div>
-        <div class="scan-frame">
-          <div class="sc tl"></div><div class="sc tr"></div><div class="sc bl"></div><div class="sc br"></div>
-          <div class="scan-inner"><video id="qrV" autoplay playsinline muted></video><div class="scan-line"></div></div>
+
+    <!-- DASHBOARD -->
+    <div id="tDash" class="view" style="flex-direction:column">
+      <div class="spad"></div>
+      <div class="dash-header">
+        <div>
+          <div class="dash-greeting" id="dashGreeting">Dobré ráno,</div>
+          <div class="dash-name" id="dashName">—</div>
         </div>
-        <canvas id="qrC"></canvas>
-        <div style="font-size:14px;color:var(--gray);text-align:center;line-height:1.5">Namieste kameru na QR kód vo vnútri rámu</div>
+        <div class="dash-avatar" id="dashAvatar" onclick="goTab('profile')">?</div>
       </div>
-      <button class="fab" onclick="openSheet()">🔧</button>
+      <div class="dash-body">
+        <div class="dash-scan-card" onclick="goTab('scan')">
+          <div class="dash-scan-icon">
+            <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+              <rect x="2" y="2" width="12" height="12" rx="2" stroke="white" stroke-width="2.5"/>
+              <rect x="5" y="5" width="6" height="6" rx="1" fill="white"/>
+              <rect x="18" y="2" width="12" height="12" rx="2" stroke="white" stroke-width="2.5"/>
+              <rect x="21" y="5" width="6" height="6" rx="1" fill="white"/>
+              <rect x="2" y="18" width="12" height="12" rx="2" stroke="white" stroke-width="2.5"/>
+              <rect x="5" y="21" width="6" height="6" rx="1" fill="white"/>
+              <rect x="18" y="18" width="5" height="5" rx="1" fill="white"/>
+              <rect x="25" y="18" width="5" height="5" rx="1" fill="white"/>
+              <rect x="18" y="25" width="5" height="5" rx="1" fill="white"/>
+              <rect x="25" y="25" width="5" height="5" rx="1" fill="white"/>
+            </svg>
+          </div>
+          <div class="dash-scan-texts">
+            <div class="dash-scan-title">Skenovať QR kód stroja</div>
+            <div class="dash-scan-sub">Rýchly prístup k detailom</div>
+          </div>
+          <div class="dash-scan-arrow">Otvoriť →</div>
+        </div>
+        <div class="dash-stats">
+          <div class="dash-stat"><div class="dash-stat-val" id="st-machines" style="color:var(--g1)">—</div><div class="dash-stat-lbl">Strojov celkom</div></div>
+          <div class="dash-stat"><div class="dash-stat-val" id="st-errors" style="color:var(--red)">—</div><div class="dash-stat-lbl">Poruchy</div></div>
+          <div class="dash-stat"><div class="dash-stat-val" id="st-tasks" style="color:var(--ora)">—</div><div class="dash-stat-lbl">Otvorené úlohy</div></div>
+          <div class="dash-stat"><div class="dash-stat-val" id="st-urgent" style="color:var(--red)">—</div><div class="dash-stat-lbl">Urgentné</div></div>
+        </div>
+        <div class="sec-header">
+          <div class="sec-title">Naposledy zobrazené</div>
+          <div class="sec-link" onclick="goTab('machines')">Všetky →</div>
+        </div>
+        <div id="dashRecent"></div>
+        <div class="sec-header">
+          <div class="sec-title">Urgentné úlohy</div>
+          <div class="sec-link" onclick="goTab('tasks')">Všetky →</div>
+        </div>
+        <div id="dashUrgent"></div>
+        <div style="height:16px"></div>
+      </div>
+    </div>
+
+    <!-- SCAN -->
+    <div id="tScan" class="view off" style="background:#000">
+      <div style="height:calc(var(--stop) + 52px);background:rgba(0,0,0,.7);flex-shrink:0;display:flex;align-items:flex-end;padding-bottom:0">
+        <div style="height:52px;width:100%;display:flex;align-items:center;justify-content:center">
+          <div style="font-size:17px;font-weight:700;color:#fff">Skener QR kódu</div>
+        </div>
+      </div>
+      <div class="scan-body">
+        <video id="qrV" autoplay playsinline muted></video>
+        <canvas id="qrC"></canvas>
+        <div class="scan-overlay">
+          <div class="scan-frame">
+            <div class="sc-corner tl"></div><div class="sc-corner tr"></div>
+            <div class="sc-corner bl"></div><div class="sc-corner br"></div>
+            <div class="sc-inner"><div class="sc-line"></div></div>
+          </div>
+          <div class="scan-active-pill">
+            <div class="scan-active-dot"></div>
+            <div class="scan-active-text">Skener je aktívny</div>
+          </div>
+          <div class="scan-info-box">
+            <div class="scan-info-title">📋 Ako skenovať?</div>
+            <div class="scan-info-text">Priložte QR kód stroja do zeleného rámčeka.<br>Kód sa naskenuje automaticky.</div>
+          </div>
+          <button class="scan-manual-btn" onclick="openSheet()">🔧 Vybrať stroj manuálne</button>
+        </div>
+      </div>
       <div class="sheet-bg" id="sheet">
         <div class="sheet">
+          <div class="sheet-handle"></div>
           <div class="sheet-title">Vyberte stroj</div>
           <div id="demoBtns"></div>
           <button class="sheet-cancel" onclick="closeSheet()">Zrušiť</button>
@@ -246,15 +382,22 @@ html,body{height:100%;overflow:hidden;background:#1B4D1E;font-family:-apple-syst
       </div>
     </div>
 
+    <!-- MACHINES -->
     <div id="tMachines" class="view off" style="flex-direction:column">
       <div class="spad" style="background:var(--white)"></div>
       <div style="background:var(--white);border-bottom:.5px solid var(--border);flex-shrink:0">
         <div class="phdr"><div style="width:44px"></div><div class="ptitle">Stroje</div><div style="width:44px"></div></div>
-        <div class="srch-wrap"><div class="srch"><span style="font-size:16px;color:var(--gray)">🔍</span><input type="search" id="srchInp" placeholder="Hľadať..." oninput="filterM(this.value)"></div></div>
+        <div class="srch-wrap">
+          <div class="srch">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8E8E93" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="search" id="srchInp" placeholder="Hľadať stroj..." oninput="filterM(this.value)">
+          </div>
+        </div>
       </div>
       <div class="mlist" id="mList"></div>
     </div>
 
+    <!-- TASKS -->
     <div id="tTasks" class="view off" style="flex-direction:column">
       <div class="spad" style="background:var(--white)"></div>
       <div class="phdr" style="background:var(--white);border-bottom:.5px solid var(--border)"><div style="width:44px"></div><div class="ptitle">Úlohy</div><div style="width:44px"></div></div>
@@ -262,31 +405,28 @@ html,body{height:100%;overflow:hidden;background:#1B4D1E;font-family:-apple-syst
         <div class="chip on" onclick="fTasks('all',this)">Všetky</div>
         <div class="chip" onclick="fTasks('open',this)">Otvorené</div>
         <div class="chip" onclick="fTasks('done',this)">Dokončené</div>
-        <div class="chip" onclick="fTasks('urgent',this)">Urgentné</div>
+        <div class="chip" onclick="fTasks('urgent',this)">Urgentné 🔴</div>
       </div>
-      <div class="pbody" id="gTaskList"></div>
+      <div class="pbody" id="gTaskList" style="padding-top:8px"></div>
     </div>
 
+    <!-- PROFILE -->
     <div id="tProfile" class="view off" style="flex-direction:column">
-      <div class="spad" style="background:var(--white)"></div>
-      <div class="phdr" style="background:var(--white);border-bottom:.5px solid var(--border)"><div style="width:44px"></div><div class="ptitle">Profil</div><div style="width:44px"></div></div>
+      <div class="phero">
+        <div class="phero-av" id="profAvatar">?</div>
+        <div class="phero-name" id="profName">—</div>
+        <div class="phero-role" id="profRole">Strojný údržbár</div>
+      </div>
       <div class="pbody">
-        <div style="background:var(--white);padding:24px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;border-bottom:.5px solid var(--border);margin-bottom:12px">
-          <div style="width:80px;height:80px;border-radius:50%;background:var(--gl);display:flex;align-items:center;justify-content:center;font-size:36px;border:3px solid var(--gp)">👷</div>
-          <div style="font-size:20px;font-weight:800" id="pName">—</div>
-          <div style="font-size:14px;color:var(--gray)">Strojný údržbár</div>
+        <div class="pgrp">
+          <div class="prow"><div class="pric prb">📱</div><div class="prlbl">Verzia aplikácie</div><span style="font-size:13px;color:var(--gray)">2.0.0</span></div>
+          <div class="prow"><div class="pric prg">🔐</div><div class="prlbl">Supabase Auth</div><span style="font-size:13px;color:var(--g1);font-weight:700">Aktívne ✅</span></div>
         </div>
-        <div style="background:var(--white);margin:0 16px;border-radius:14px;border:1.5px solid var(--border);overflow:hidden">
-          <div style="display:flex;align-items:center;padding:14px 16px;gap:14px">
-            <div style="width:32px;height:32px;border-radius:8px;background:#E3F2FD;display:flex;align-items:center;justify-content:center">📱</div>
-            <div style="flex:1;font-size:15px;font-weight:500">Verzia</div>
-            <span style="font-size:13px;color:var(--gray)">2.0.0</span>
-          </div>
-        </div>
-        <button onclick="doLogout()" style="display:block;margin:16px;padding:14px;background:var(--rl);color:var(--red);border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;width:calc(100% - 32px)">Odhlásiť sa</button>
+        <button class="lout-btn" onclick="doLogout()">Odhlásiť sa</button>
       </div>
     </div>
 
+    <!-- DETAIL -->
     <div id="vDetail" class="view off" style="flex-direction:column">
       <div class="spad" style="background:var(--white)"></div>
       <div class="phdr" style="background:var(--white);border-bottom:.5px solid var(--border)">
@@ -296,44 +436,59 @@ html,body{height:100%;overflow:hidden;background:#1B4D1E;font-family:-apple-syst
       </div>
       <div class="pbody" id="detailBody"></div>
     </div>
+
   </div>
   <nav class="navbar">
-    <button class="nav-btn on" id="nScan" onclick="goTab('scan')"><span class="nav-ic">⊡</span><span class="nav-lb">Skenovať</span></button>
-    <button class="nav-btn" id="nMachines" onclick="goTab('machines')"><span class="nav-ic">⚙</span><span class="nav-lb">Stroje</span></button>
-    <button class="nav-btn" id="nTasks" onclick="goTab('tasks')"><span class="nav-ic">☑</span><span class="nav-lb">Úlohy</span></button>
-    <button class="nav-btn" id="nProfile" onclick="goTab('profile')"><span class="nav-ic">👤</span><span class="nav-lb">Profil</span></button>
+    <button class="nav-btn on" id="nDash" onclick="goTab('dash')">
+      <div class="nav-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="ic-dash"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+      <span class="nav-lb">Prehľad</span>
+    </button>
+    <button class="nav-btn" id="nScan" onclick="goTab('scan')">
+      <div class="nav-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="ic-scan"><path d="M4 7V4h3M17 4h3v3M4 17v3h3M20 17v3h-3"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg></div>
+      <span class="nav-lb">Skenovať</span>
+    </button>
+    <button class="nav-btn" id="nMachines" onclick="goTab('machines')">
+      <div class="nav-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg></div>
+      <span class="nav-lb">Stroje</span>
+    </button>
+    <button class="nav-btn" id="nTasks" onclick="goTab('tasks')">
+      <div class="nav-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg></div>
+      <span class="nav-lb">Úlohy</span>
+    </button>
+    <button class="nav-btn" id="nProfile" onclick="goTab('profile')">
+      <div class="nav-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+      <span class="nav-lb">Profil</span>
+    </button>
   </nav>
 </div>
 
 <!-- ADMIN -->
 <div id="vAdmin" class="view off" style="flex-direction:column">
-  <div style="height:calc(var(--stop) + 44px);background:#1a1a2e;flex-shrink:0;min-height:44px"></div>
   <div class="admin-topbar">
-    <span style="font-size:24px">⚙️</span>
-    <div style="font-size:16px;font-weight:700;color:#CE93D8;flex:1">Admin Panel <span class="admin-badge">ADMIN</span></div>
-    <button onclick="doLogout()" style="background:none;border:1px solid #7B1FA2;color:#CE93D8;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">Odhlásiť</button>
+    <div class="admin-title">Admin Panel <span class="admin-badge">ADMIN</span></div>
+    <button onclick="doLogout()" style="background:none;border:1px solid #7B1FA2;color:#CE93D8;padding:7px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer">Odhlásiť</button>
   </div>
   <div style="flex:1;position:relative;overflow:hidden">
     <div id="aHome" class="view" style="flex-direction:column;background:var(--gray3)">
       <div class="pbody">
-        <div style="padding:16px 16px 4px;font-size:13px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.08em">Správa obsahu</div>
+        <div style="padding:16px 16px 4px;font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.08em">Správa obsahu</div>
         <div class="admin-section">
           <div class="admin-row" onclick="aGoTo('aMachines')"><div class="aric ap">🏭</div><div style="flex:1"><div style="font-size:15px;font-weight:600">Stroje</div><div style="font-size:12px;color:var(--gray)">Pridať, upraviť, odstrániť</div></div><span style="color:var(--gray2);font-size:18px">›</span></div>
           <div class="admin-row" onclick="aGoTo('aDocs')"><div class="aric ab">📄</div><div style="flex:1"><div style="font-size:15px;font-weight:600">Dokumentácia</div><div style="font-size:12px;color:var(--gray)">Manuály, schémy, protokoly</div></div><span style="color:var(--gray2);font-size:18px">›</span></div>
           <div class="admin-row" onclick="aGoTo('aParts')"><div class="aric ag">🔩</div><div style="flex:1"><div style="font-size:15px;font-weight:600">Náhradné diely</div><div style="font-size:12px;color:var(--gray)">Sklad a dostupnosť</div></div><span style="color:var(--gray2);font-size:18px">›</span></div>
           <div class="admin-row" onclick="aGoTo('aTasks')"><div class="aric ao">☑️</div><div style="flex:1"><div style="font-size:15px;font-weight:600">Úlohy</div><div style="font-size:12px;color:var(--gray)">Servisné úlohy a postupy</div></div><span style="color:var(--gray2);font-size:18px">›</span></div>
         </div>
-        <div style="padding:0 16px 4px;font-size:13px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.08em">Štatistiky</div>
+        <div style="padding:16px 16px 4px;font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.08em">Štatistiky</div>
         <div class="admin-section">
-          <div class="admin-row" style="cursor:default"><div class="aric ap">🏭</div><div style="flex:1;font-size:15px;font-weight:600">Počet strojov</div><span id="stat-m" style="font-size:18px;font-weight:800;color:var(--g1)">0</span></div>
-          <div class="admin-row" style="cursor:default"><div class="aric ar">⚠️</div><div style="flex:1;font-size:15px;font-weight:600">Poruchy</div><span id="stat-e" style="font-size:18px;font-weight:800;color:var(--red)">0</span></div>
-          <div class="admin-row" style="cursor:default"><div class="aric ao">☑️</div><div style="flex:1;font-size:15px;font-weight:600">Otvorené úlohy</div><span id="stat-t" style="font-size:18px;font-weight:800;color:var(--ora)">0</span></div>
+          <div class="admin-row" style="cursor:default"><div class="aric ap">🏭</div><div style="flex:1;font-size:15px;font-weight:600">Počet strojov</div><span id="astat-m" style="font-size:20px;font-weight:800;color:var(--g1)">0</span></div>
+          <div class="admin-row" style="cursor:default"><div class="aric" style="background:var(--rl)">⚠️</div><div style="flex:1;font-size:15px;font-weight:600">Poruchy</div><span id="astat-e" style="font-size:20px;font-weight:800;color:var(--red)">0</span></div>
+          <div class="admin-row" style="cursor:default"><div class="aric ao">☑️</div><div style="flex:1;font-size:15px;font-weight:600">Otvorené úlohy</div><span id="astat-t" style="font-size:20px;font-weight:800;color:var(--ora)">0</span></div>
         </div>
         <div style="height:24px"></div>
       </div>
     </div>
     <div id="aMachines" class="view off" style="flex-direction:column;background:var(--gray3)">
-      <div class="phdr" style="background:#1a1a2e;border-bottom:none"><button class="hbtn" style="color:#CE93D8" onclick="aGoHome()">‹</button><div class="ptitle" style="color:#CE93D8">Stroje</div><button onclick="openAddMachine()" style="background:#7B1FA2;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer">+ Pridať</button></div>
+      <div class="phdr" style="background:#1a1a2e;border-bottom:none"><button class="hbtn" style="color:#CE93D8" onclick="aGoHome()">‹</button><div class="ptitle" style="color:#CE93D8">Stroje</div><button onclick="openAddMachine()" style="background:#7B1FA2;color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer">+ Pridať</button></div>
       <div class="pbody"><div id="adminMachineList" style="padding:12px 16px"></div></div>
     </div>
     <div id="aDocs" class="view off" style="flex-direction:column;background:var(--gray3)">
@@ -351,7 +506,7 @@ html,body{height:100%;overflow:hidden;background:#1B4D1E;font-family:-apple-syst
   </div>
 </div>
 
-</div><!-- /app -->
+</div>
 
 <!-- MODALS -->
 <div class="modal-bg" id="modalMachine">
@@ -420,211 +575,216 @@ html,body{height:100%;overflow:hidden;background:#1B4D1E;font-family:-apple-syst
 <div class="toast" id="toast"></div>
 
 <script>
-// ══ SUPABASE CONFIG ══
-// DÔLEŽITÉ: Nahraď ANON_KEY skutočným anon kľúčom z Supabase → Settings → API → anon public
-const SUPA_URL = 'https://psfyfgwvgabwyeztvoki.supabase.co';
-const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzZnlmZ3d2Z2Fid3llenR2b2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNzgwODQsImV4cCI6MjA5Mjg1NDA4NH0.kAFpVVPiNncRNXqMp8Fh__M16Vi3AAcEDvPtRSp11M0'; // ← sem vlož eyJ... kľúč
+const SUPA_URL='https://psfyfgwvgabwyeztvoki.supabase.co';
+const ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzZnlmZ3d2Z2Fid3llenR2b2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNzgwODQsImV4cCI6MjA5Mjg1NDA4NH0.kAFpVVPiNncRNXqMp8Fh__M16Vi3AAcEDvPtRSp11M0';
+const sb=supabase.createClient(SUPA_URL,ANON_KEY);
 
-const sb = supabase.createClient(SUPA_URL, ANON_KEY);
+let CU=null,userRole='worker',CT='dash',SS=null,SA=null;
+let MACHINES=[],TASKS=[],RECENT=[];
+let booting=false;
 
-// ══ STATE ══
-let CU = null, userRole = 'worker', CT = 'scan', SS = null, SA = null;
-let MACHINES = [], TASKS = [];
-let booting = false;
-
-// ══ BOOT ══
-window.addEventListener('load', async () => {
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
-
-  // Skontroluj či je Supabase správne nakonfigurovaný
-  if (ANON_KEY === 'VLOZ_SEM_ANON_KEY') {
-    showView('vLogin');
-    showErr('⚠️ Chýba Supabase anon kľúč. Pozri Settings → API → anon public.');
-    return;
-  }
-
+// ── BOOT ──
+window.addEventListener('load',async()=>{
+  if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
   showView('vLoading');
-  try {
-    const { data: { session } } = await sb.auth.getSession();
-    if (session?.user) {
-      CU = session.user;
-      await bootApp();
-    } else {
-      showView('vLogin');
-    }
-  } catch(e) {
-    showView('vLogin');
-    showErr('Chyba pripojenia k Supabase: ' + e.message);
-  }
+  try{
+    const{data:{session}}=await sb.auth.getSession();
+    if(session?.user){CU=session.user;await bootApp();}
+    else showView('vLogin');
+  }catch(e){showView('vLogin');}
 });
 
-// ══ AUTH ══
-async function doLogin() {
-  const email = document.getElementById('iEmail').value.trim();
-  const pass = document.getElementById('iPass').value;
-  if (!email || !pass) { showErr('Zadajte email a heslo.'); return; }
-  const btn = document.getElementById('lBtn');
-  btn.disabled = true; btn.textContent = 'Prihlasujem...';
+// ── AUTH ──
+async function doLogin(){
+  const email=document.getElementById('iEmail').value.trim();
+  const pass=document.getElementById('iPass').value;
+  if(!email||!pass){showErr('Zadajte email a heslo.');return;}
+  const btn=document.getElementById('lBtn');
+  btn.disabled=true;btn.textContent='Prihlasujem...';
   document.getElementById('lErr').classList.remove('on');
-  try {
-    const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
-    if (error) throw error;
-    CU = data.user;
+  try{
+    const{data,error}=await sb.auth.signInWithPassword({email,password:pass});
+    if(error)throw error;
+    CU=data.user;
     showView('vLoading');
     await bootApp();
-  } catch(e) {
-    showErr('Nesprávny email alebo heslo.');
-  } finally {
-    btn.disabled = false; btn.textContent = 'Prihlásiť sa';
-  }
+  }catch(e){showErr('Nesprávny email alebo heslo.');}
+  finally{btn.disabled=false;btn.textContent='Prihlásiť sa';}
 }
-document.getElementById('iPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-function showErr(msg) { const e = document.getElementById('lErr'); e.textContent = msg; e.classList.add('on'); }
+document.getElementById('iPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+function showErr(msg){const e=document.getElementById('lErr');e.textContent=msg;e.classList.add('on');}
 
-async function doLogout() {
-  stopScan();
+async function forgotPassword(){
+  const email=document.getElementById('iEmail').value.trim();
+  if(!email){showErr('Zadajte najprv email.');return;}
+  await sb.auth.resetPasswordForEmail(email);
+  showToast('📧 Email na obnovu hesla odoslaný');
+}
+
+async function doLogout(){
+  stopScan();booting=false;CU=null;
   await sb.auth.signOut();
-  CU = null; booting = false;
   showView('vLogin');
 }
 
-async function bootApp() {
-  if (booting) return;
-  booting = true;
-  try {
-    // Načítaj rolu používateľa
-    const { data: profile } = await sb.from('profiles').select('role, full_name').eq('id', CU.id).maybeSingle();
-    userRole = profile?.role || 'worker';
-    const name = profile?.full_name || CU.email;
-
-    // Načítaj dáta zo Supabase
+async function bootApp(){
+  if(booting)return;booting=true;
+  try{
+    const{data:profile}=await sb.from('profiles').select('role,full_name').eq('id',CU.id).maybeSingle();
+    userRole=profile?.role||'worker';
+    const name=profile?.full_name||CU.email?.split('@')[0]||'Používateľ';
     await loadData();
-
-    if (userRole === 'admin') {
-      showView('vAdmin');
-      aGoHome();
-      renderAdminStats();
-      renderAdminMachines();
-      renderAdminDocs();
-      renderAdminParts();
-      renderAdminTasks();
-    } else {
-      document.getElementById('pName').textContent = name;
-      renderML(MACHINES);
-      renderGT('all');
-      renderDemos();
-      showView('vMain');
-      goTab('scan');
-      startScan();
+    if(userRole==='admin'){
+      showView('vAdmin');aGoHome();
+      renderAdminStats();renderAdminMachines();renderAdminDocs();renderAdminParts();renderAdminTasks();
+    }else{
+      setupDashboard(name);
+      renderML(MACHINES);renderGT('all');renderDemos();
+      showView('vMain');goTab('dash');
     }
-  } catch(e) {
+  }catch(e){
     showView('vLogin');
-    showErr('Chyba načítania dát: ' + e.message);
-  } finally {
-    booting = false;
-  }
+    showErr('Chyba: '+e.message);
+  }finally{booting=false;}
 }
 
-async function loadData() {
-  const [{ data: machines, error: mErr }, { data: docs }, { data: parts }, { data: tasks }] = await Promise.all([
+async function loadData(){
+  const[{data:machines,error:mErr},{data:docs},{data:parts},{data:tasks}]=await Promise.all([
     sb.from('machines').select('*').order('name'),
     sb.from('documents').select('*'),
     sb.from('parts').select('*'),
     sb.from('tasks').select('*').order('created_at')
   ]);
-  if (mErr) throw mErr;
-  TASKS = tasks || [];
-  MACHINES = (machines || []).map(m => ({
-    ...m,
-    docs: (docs || []).filter(d => d.machine_id === m.id),
-    parts: (parts || []).filter(p => p.machine_id === m.id),
-    tasks: TASKS.filter(t => t.machine_id === m.id)
+  if(mErr)throw mErr;
+  TASKS=tasks||[];
+  MACHINES=(machines||[]).map(m=>({...m,
+    docs:(docs||[]).filter(d=>d.machine_id===m.id),
+    parts:(parts||[]).filter(p=>p.machine_id===m.id),
+    tasks:TASKS.filter(t=>t.machine_id===m.id)
   }));
 }
 
-// ══ VIEWS ══
-function showView(id) {
-  document.querySelectorAll('#app > .view').forEach(v => v.classList.add('off'));
-  const el = document.getElementById(id);
-  if (el) el.classList.remove('off');
+// ── VIEWS ──
+function showView(id){
+  document.querySelectorAll('#app>.view').forEach(v=>v.classList.add('off'));
+  document.getElementById(id)?.classList.remove('off');
 }
-function bc(s) { return s==='a'?'ba':s==='m'?'bm':'be'; }
-function stLabel(s) { return s==='a'?'AKTÍVNA':s==='m'?'ÚDRŽBA':'PORUCHA'; }
-function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
-function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
-function openModal(id) { document.getElementById(id).classList.add('on'); }
-function closeModal(id) { document.getElementById(id).classList.remove('on'); }
+function bc(s){return s==='a'?'ba':s==='m'?'bm':'be';}
+function stLabel(s){return s==='a'?'AKTÍVNA':s==='m'?'ÚDRŽBA':'PORUCHA';}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function openModal(id){document.getElementById(id).classList.add('on');}
+function closeModal(id){document.getElementById(id).classList.remove('on');}
 
-// ══ TABS ══
-function goTab(t) {
-  ['scan','machines','tasks','profile'].forEach(x => {
-    document.getElementById('t'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('off', x!==t);
-    document.getElementById('n'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('on', x===t);
+// ── DASHBOARD ──
+function setupDashboard(name){
+  const h=new Date().getHours();
+  const greeting=h<12?'Dobré ráno,':h<18?'Dobrý deň,':'Dobrý večer,';
+  document.getElementById('dashGreeting').textContent=greeting;
+  document.getElementById('dashName').textContent=name;
+  const initials=name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('dashAvatar').textContent=initials;
+  document.getElementById('profAvatar').textContent=initials;
+  document.getElementById('profName').textContent=name;
+  document.getElementById('profRole').textContent=userRole==='admin'?'⚙️ Administrátor':'👷 Strojný údržbár';
+  // Stats
+  document.getElementById('st-machines').textContent=MACHINES.length;
+  document.getElementById('st-errors').textContent=MACHINES.filter(m=>m.status==='e').length;
+  document.getElementById('st-tasks').textContent=TASKS.filter(t=>!t.is_done).length;
+  document.getElementById('st-urgent').textContent=TASKS.filter(t=>t.is_urgent&&!t.is_done).length;
+  // Recent
+  const recent=RECENT.length?MACHINES.filter(m=>RECENT.includes(m.id)).slice(0,3):MACHINES.slice(0,3);
+  document.getElementById('dashRecent').innerHTML=recent.length?recent.map(m=>`
+    <div class="recent-card" onclick="openDetail('${m.id}')">
+      <div class="recent-icon" style="background:${m.status==='e'?'#FFEBEE':m.status==='m'?'#FFF3E0':'#E8F5E9'}">${m.icon||'⚙️'}</div>
+      <div class="recent-info"><div class="recent-name">${m.name}</div><div class="recent-loc">${m.location}</div></div>
+      <span class="badge ${bc(m.status)}">${m.status_label}</span>
+    </div>`).join(''):'<div class="empty-state">Žiadne stroje</div>';
+  // Urgent tasks
+  const urgent=TASKS.filter(t=>t.is_urgent&&!t.is_done).slice(0,3);
+  document.getElementById('dashUrgent').innerHTML=urgent.length?urgent.map(t=>{
+    const m=MACHINES.find(m=>m.id===t.machine_id);
+    return`<div class="urgent-card">
+      <div class="urgent-dot"></div>
+      <div><div class="urgent-name">${t.name}</div><div class="urgent-sub">${t.description||''}</div>${m?`<div class="urgent-machine">${m.icon||''} ${m.name}</div>`:''}</div>
+    </div>`;}).join(''):'<div class="empty-state">Žiadne urgentné úlohy 🎉</div>';
+}
+
+// ── TABS ──
+function goTab(t){
+  const tabs=['dash','scan','machines','tasks','profile'];
+  tabs.forEach(x=>{
+    const el=document.getElementById('t'+x.charAt(0).toUpperCase()+x.slice(1));
+    if(el)el.classList.toggle('off',x!==t);
+    const nb=document.getElementById('n'+x.charAt(0).toUpperCase()+x.slice(1));
+    if(nb)nb.classList.toggle('on',x===t);
   });
-  document.getElementById('vDetail').classList.add('off');
-  CT = t;
-  if (t==='scan') startScan(); else stopScan();
+  document.getElementById('vDetail')?.classList.add('off');
+  CT=t;
+  if(t==='scan')startScan();else stopScan();
 }
 
-// ══ SCAN ══
-function openSheet() { document.getElementById('sheet').classList.add('on'); }
-function closeSheet() { document.getElementById('sheet').classList.remove('on'); }
-function renderDemos() {
-  document.getElementById('demoBtns').innerHTML = MACHINES.map(m =>
+// ── SCAN ──
+function openSheet(){document.getElementById('sheet').classList.add('on');}
+function closeSheet(){document.getElementById('sheet').classList.remove('on');}
+function renderDemos(){
+  document.getElementById('demoBtns').innerHTML=MACHINES.map(m=>
     `<div class="dmb" onclick="closeSheet();openDetail('${m.id}')">
-      <div style="width:38px;height:38px;border-radius:9px;background:var(--gray3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${m.icon||'⚙️'}</div>
-      <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700">${m.name}</div><div style="font-size:11px;color:var(--gray);font-family:monospace">${m.id}</div></div>
+      <div style="width:40px;height:40px;border-radius:10px;background:${m.status==='e'?'#FFEBEE':m.status==='m'?'#FFF3E0':'#E8F5E9'};display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${m.icon||'⚙️'}</div>
+      <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700">${m.name}</div><div style="font-size:12px;color:var(--gray);margin-top:2px">${m.location}</div></div>
       <span class="badge ${bc(m.status)}">${m.status_label}</span>
     </div>`
-  ).join('') || '<div style="padding:20px;text-align:center;color:var(--gray)">Žiadne stroje</div>';
+  ).join('')||'<div class="empty-state">Žiadne stroje</div>';
 }
-async function startScan() {
-  if (SS) return;
-  try {
-    SS = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'environment' } });
-    const v = document.getElementById('qrV'); v.srcObject=SS; v.play();
-    v.addEventListener('loadedmetadata', scanLoop, {once:true});
-  } catch(e) {}
+async function startScan(){
+  if(SS)return;
+  try{
+    SS=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    const v=document.getElementById('qrV');v.srcObject=SS;v.play();
+    v.addEventListener('loadedmetadata',scanLoop,{once:true});
+  }catch(e){}
 }
-function scanLoop() {
-  const v=document.getElementById('qrV'), c=document.getElementById('qrC'), ctx=c.getContext('2d');
-  function tick() {
-    if (CT!=='scan') return;
-    if (v.readyState===v.HAVE_ENOUGH_DATA) {
-      c.width=v.videoWidth; c.height=v.videoHeight; ctx.drawImage(v,0,0);
-      if (window.jsQR) { const r=jsQR(ctx.getImageData(0,0,c.width,c.height).data,c.width,c.height); if(r&&MACHINES.find(m=>m.id===r.data)){openDetail(r.data);return;} }
+function scanLoop(){
+  const v=document.getElementById('qrV'),c=document.getElementById('qrC'),ctx=c.getContext('2d');
+  function tick(){
+    if(CT!=='scan')return;
+    if(v.readyState===v.HAVE_ENOUGH_DATA){
+      c.width=v.videoWidth;c.height=v.videoHeight;ctx.drawImage(v,0,0);
+      if(window.jsQR){const r=jsQR(ctx.getImageData(0,0,c.width,c.height).data,c.width,c.height);if(r&&MACHINES.find(m=>m.id===r.data)){openDetail(r.data);return;}}
     }
     SA=requestAnimationFrame(tick);
   }
   SA=requestAnimationFrame(tick);
 }
-function stopScan() { if(SA){cancelAnimationFrame(SA);SA=null;} if(SS){SS.getTracks().forEach(t=>t.stop());SS=null;} const v=document.getElementById('qrV'); if(v)v.srcObject=null; }
+function stopScan(){if(SA){cancelAnimationFrame(SA);SA=null;}if(SS){SS.getTracks().forEach(t=>t.stop());SS=null;}const v=document.getElementById('qrV');if(v)v.srcObject=null;}
 
-// ══ MACHINES ══
-function renderML(list) {
-  document.getElementById('mList').innerHTML = list.length ? list.map(m =>
+// ── MACHINES ──
+function renderML(list){
+  document.getElementById('mList').innerHTML=list.length?list.map(m=>
     `<div class="mc" onclick="openDetail('${m.id}')">
-      <div class="mc-top"><div class="mc-name">${m.name}</div><span class="badge ${bc(m.status)}">${m.status_label}</span></div>
-      <div style="font-size:13px;color:var(--gray);margin-bottom:2px">${m.model}</div>
-      <div style="font-size:13px;color:var(--gray)">${m.location}</div>
+      <div class="mc-icon" style="background:${m.status==='e'?'#FFEBEE':m.status==='m'?'#FFF3E0':'#E8F5E9'}">${m.icon||'⚙️'}</div>
+      <div class="mc-info"><div class="mc-name">${m.name}</div><div class="mc-sub">${m.model} · ${m.location}</div></div>
+      <span class="badge ${bc(m.status)}">${m.status_label}</span>
     </div>`).join('')
-  : '<div style="text-align:center;padding:40px;color:var(--gray)">Žiadne stroje. Admin musí pridať stroje.</div>';
+  :'<div class="empty-state">Žiadne stroje</div>';
 }
-function filterM(q) { renderML(MACHINES.filter(m=>m.name.toLowerCase().includes(q.toLowerCase())||m.model.toLowerCase().includes(q.toLowerCase())||m.location.toLowerCase().includes(q.toLowerCase()))); }
+function filterM(q){renderML(MACHINES.filter(m=>m.name.toLowerCase().includes(q.toLowerCase())||m.model.toLowerCase().includes(q.toLowerCase())||m.location.toLowerCase().includes(q.toLowerCase())));}
 
-// ══ DETAIL ══
-function openDetail(id) {
-  const m = MACHINES.find(m=>m.id===id); if(!m) return;
+// ── DETAIL ──
+function openDetail(id){
+  const m=MACHINES.find(m=>m.id===id);if(!m)return;
+  // Save to recent
+  RECENT=([id,...RECENT.filter(r=>r!==id)]).slice(0,5);
   stopScan();
   document.getElementById('vDetail').classList.remove('off');
   const specs=[['Výrobca',m.manufacturer||'—'],['Rok výroby',m.year||'—'],['Výr. číslo',m.serial_number||'—'],['Zodpovedný',m.technician||'—']];
   document.getElementById('detailBody').innerHTML=`
     <div class="dmc-card">
-      <div style="width:64px;height:64px;border-radius:12px;background:var(--gray3);display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0">${m.icon||'⚙️'}</div>
+      <div class="dmc-img" style="background:${m.status==='e'?'#FFEBEE':m.status==='m'?'#FFF3E0':'#E8F5E9'}">${m.icon||'⚙️'}</div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:16px;font-weight:800;margin-bottom:2px">${m.name}</div>
-        <div style="font-size:13px;color:var(--gray);margin-bottom:2px">${m.model}</div>
-        <div style="font-size:13px;color:var(--gray);margin-bottom:6px">${m.location}</div>
+        <div class="dmc-name">${m.name}</div>
+        <div class="dmc-model">${m.model}</div>
+        <div class="dmc-loc">${m.location}</div>
         <span class="badge ${bc(m.status)}">${m.status_label}</span>
       </div>
     </div>
@@ -636,57 +796,63 @@ function openDetail(id) {
       </div>
       <div class="dsec">
         <div class="dsh" onclick="togSec(this)"><div class="dsh-title">Dokumentácia</div><div class="dsh-arr op">▾</div></div>
-        <div class="dsb">${m.docs.length?m.docs.map(d=>`<div class="docrow"><div class="docic">${d.icon}</div><div style="flex:1;font-size:14px;font-weight:500">${d.name}</div><div style="font-size:12px;color:var(--gray)">${d.meta||''}</div></div>`).join(''):'<div style="padding:14px 16px;font-size:13px;color:var(--gray)">Žiadna dokumentácia</div>'}</div>
+        <div class="dsb">${m.docs.length?m.docs.map(d=>`<div class="docrow"><div class="docic">${d.icon}</div><div style="flex:1"><div style="font-size:14px;font-weight:600">${d.name}</div><div style="font-size:12px;color:var(--gray);margin-top:2px">${d.meta||''}</div></div><span style="color:var(--gray2);font-size:18px">›</span></div>`).join(''):'<div style="padding:14px 16px;font-size:13px;color:var(--gray)">Žiadna dokumentácia</div>'}</div>
       </div>
       <div style="height:16px"></div>
     </div>
     <div id="pParts" style="display:none">
       <div class="ptabs"><button class="ptab-b on" id="ptP" onclick="swPT('parts')">Náhradné diely</button><button class="ptab-b" id="ptT" onclick="swPT('tasks')">Úlohy</button></div>
-      <div id="ppParts">${m.parts.length?m.parts.map(p=>{const sc=p.stock_status==='ok'?'sok':p.stock_status==='low'?'slow':'sout';const si=p.stock_status==='ok'?'✅':p.stock_status==='low'?'⚠️':'❌';return`<div class="pcard"><div class="pcard-top"><div class="pimg">${p.icon||'🔩'}</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700;margin-bottom:2px">${p.name}</div><div style="font-size:12px;color:var(--gray);font-family:monospace">P/N: ${p.part_number||'—'}</div><div class="pstock ${sc}">${si} ${p.stock_label||''}</div></div></div><div class="pacts"><button class="pact pact-p">Označiť použitý</button><button class="pact pact-s">Požiadať náhradu</button></div></div>`;}).join(''):'<div style="padding:20px 16px;font-size:13px;color:var(--gray)">Žiadne náhradné diely</div>'}<div style="height:16px"></div></div>
+      <div id="ppParts">
+        ${m.parts.length?m.parts.map(p=>{const sc=p.stock_status==='ok'?'sok':p.stock_status==='low'?'slow':'sout';const si=p.stock_status==='ok'?'✅':p.stock_status==='low'?'⚠️':'❌';return`<div class="pcard"><div class="pcard-top"><div class="pimg">${p.icon||'🔩'}</div><div style="flex:1;min-width:0"><div class="pname">${p.n||p.name}</div><div class="ppn">P/N: ${p.part_number||'—'}</div><div class="pstock ${sc}">${si} ${p.stock_label||''}</div></div></div><div class="pacts"><button class="pact pact-p">Označiť použitý</button><button class="pact pact-s">Požiadať náhradu</button></div></div>`;}).join(''):'<div style="padding:20px;font-size:13px;color:var(--gray);text-align:center">Žiadne náhradné diely</div>'}
+        <div style="height:16px"></div>
+      </div>
       <div id="ppTasks" style="display:none">
-        <div style="padding:12px 16px 6px"><div style="font-size:17px;font-weight:800">Úlohy</div></div>
-        ${m.tasks.length?m.tasks.map(t=>`<div class="tkcard" id="tkc-${t.id}"><div class="tk-top"><div class="tkbox${t.is_done?' ck':''}" onclick="togTK('${t.id}','${m.id}')"><span>${t.is_done?'✓':''}</span></div><div style="flex:1"><div style="font-size:15px;font-weight:700;margin-bottom:2px">${t.name}${t.is_urgent?' 🔴':''}</div><div style="font-size:13px;color:var(--gray)">${t.description||''}</div></div></div><div class="tk-acts"><button class="tk-act">✏️ Poznámka</button><button class="tk-act">📷 Foto</button></div></div>`).join(''):'<div style="padding:20px 16px;font-size:13px;color:var(--gray)">Žiadne úlohy</div>'}
+        <div style="padding:12px 16px 6px;font-size:17px;font-weight:800;color:var(--text)">Úlohy</div>
+        ${m.tasks.length?m.tasks.map(t=>`<div class="tkcard" id="tkc-${t.id}"><div class="tk-top"><div class="tkbox${t.is_done?' ck':''}" onclick="togTK('${t.id}','${m.id}')"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><polyline points="2,7 6,11 12,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div style="flex:1"><div class="tk-name">${t.name}${t.is_urgent?' 🔴':''}</div><div class="tk-sub">${t.description||''}</div></div></div><div class="tk-acts"><button class="tk-act">✏️ Poznámka</button><button class="tk-act">📷 Foto</button></div></div>`).join(''):'<div style="padding:20px;font-size:13px;color:var(--gray);text-align:center">Žiadne úlohy</div>'}
         <div style="height:16px"></div>
       </div>
     </div>`;
 }
-function closeDetail() { document.getElementById('vDetail').classList.add('off'); if(CT==='scan') startScan(); }
-function swSeg(t) { document.getElementById('segSpec').classList.toggle('on',t==='spec'); document.getElementById('segParts').classList.toggle('on',t==='parts'); document.getElementById('pSpec').style.display=t==='spec'?'':'none'; document.getElementById('pParts').style.display=t==='parts'?'':'none'; }
-function swPT(t) { document.getElementById('ptP').classList.toggle('on',t==='parts'); document.getElementById('ptT').classList.toggle('on',t==='tasks'); document.getElementById('ppParts').style.display=t==='parts'?'':'none'; document.getElementById('ppTasks').style.display=t==='tasks'?'':'none'; }
-function togSec(h) { const b=h.nextElementSibling,a=h.querySelector('.dsh-arr'),op=a.classList.contains('op'); b.style.display=op?'none':''; a.classList.toggle('op',!op); }
-async function togTK(taskId, machineId) {
-  const cb=document.querySelector(`#tkc-${taskId} .tkbox`); const isDone=cb.classList.contains('ck');
-  cb.classList.toggle('ck',!isDone); const sp=cb.querySelector('span'); if(sp)sp.textContent=!isDone?'✓':'';
+function closeDetail(){document.getElementById('vDetail').classList.add('off');if(CT==='scan')startScan();}
+function swSeg(t){document.getElementById('segSpec').classList.toggle('on',t==='spec');document.getElementById('segParts').classList.toggle('on',t==='parts');document.getElementById('pSpec').style.display=t==='spec'?'':'none';document.getElementById('pParts').style.display=t==='parts'?'':'none';}
+function swPT(t){document.getElementById('ptP').classList.toggle('on',t==='parts');document.getElementById('ptT').classList.toggle('on',t==='tasks');document.getElementById('ppParts').style.display=t==='parts'?'':'none';document.getElementById('ppTasks').style.display=t==='tasks'?'':'none';}
+function togSec(h){const b=h.nextElementSibling,a=h.querySelector('.dsh-arr'),op=a.classList.contains('op');b.style.display=op?'none':'';a.classList.toggle('op',!op);}
+async function togTK(taskId,machineId){
+  const cb=document.querySelector(`#tkc-${taskId} .tkbox`);const isDone=cb.classList.contains('ck');
+  cb.classList.toggle('ck',!isDone);
   await sb.from('tasks').update({is_done:!isDone}).eq('id',taskId);
-  const t=MACHINES.find(m=>m.id===machineId)?.tasks.find(t=>t.id===taskId); if(t) t.is_done=!isDone;
+  const t=MACHINES.find(m=>m.id===machineId)?.tasks.find(t=>t.id===taskId);if(t)t.is_done=!isDone;
+  const gt=TASKS.find(t=>t.id===taskId);if(gt)gt.is_done=!isDone;
 }
 
-// ══ GLOBAL TASKS ══
-function renderGT(f) {
-  const all=MACHINES.flatMap(m=>m.tasks.map(t=>({...t,mn:m.name})));
+// ── GLOBAL TASKS ──
+function renderGT(f){
+  const all=MACHINES.flatMap(m=>m.tasks.map(t=>({...t,mn:m.name,mic:m.icon||'⚙️'})));
   const list=f==='open'?all.filter(t=>!t.is_done):f==='done'?all.filter(t=>t.is_done):f==='urgent'?all.filter(t=>t.is_urgent):all;
-  document.getElementById('gTaskList').innerHTML='<div style="padding:0 0 8px">'+(list.length?list.map(t=>`<div class="tkcard"><div style="font-size:11px;color:var(--gray);margin-bottom:6px;font-weight:600">${t.mn}</div><div class="tk-top"><div class="tkbox${t.is_done?' ck':''}"><span>${t.is_done?'✓':''}</span></div><div style="flex:1"><div style="font-size:15px;font-weight:700;margin-bottom:2px">${t.name}${t.is_urgent?' 🔴':''}</div><div style="font-size:13px;color:var(--gray)">${t.description||''}</div></div></div><div class="tk-acts"><button class="tk-act">✏️ Poznámka</button><button class="tk-act">📷 Foto</button></div></div>`).join(''):'<div style="text-align:center;padding:40px;color:var(--gray)">Žiadne úlohy</div>')+'</div>';
+  document.getElementById('gTaskList').innerHTML='<div style="padding:0 16px 8px">'+
+    (list.length?list.map(t=>`<div class="tkcard" style="margin:0 0 8px"><div style="font-size:12px;color:var(--g1);font-weight:600;margin-bottom:6px">${t.mic} ${t.mn}</div><div class="tk-top"><div class="tkbox${t.is_done?' ck':''}"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><polyline points="2,7 6,11 12,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div style="flex:1"><div class="tk-name">${t.name}${t.is_urgent?' 🔴':''}</div><div class="tk-sub">${t.description||''}</div></div></div><div class="tk-acts"><button class="tk-act">✏️ Poznámka</button><button class="tk-act">📷 Foto</button></div></div>`).join('')
+    :'<div class="empty-state">Žiadne úlohy</div>')+'</div>';
 }
-function fTasks(f,el) { document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on')); el.classList.add('on'); renderGT(f); }
+function fTasks(f,el){document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');renderGT(f);}
 
-// ══ ADMIN ══
-function aGoTo(id) { ['aHome','aMachines','aDocs','aParts','aTasks'].forEach(x=>document.getElementById(x).classList.toggle('off',x!==id)); }
-function aGoHome() { aGoTo('aHome'); }
-function fillSelects() { const opts=MACHINES.map(m=>`<option value="${m.id}">${m.name}</option>`).join(''); ['dMachine','ptMachine','tkMachine'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;}); }
-function renderAdminStats() { document.getElementById('stat-m').textContent=MACHINES.length; document.getElementById('stat-e').textContent=MACHINES.filter(m=>m.status==='e').length; document.getElementById('stat-t').textContent=TASKS.filter(t=>!t.is_done).length; }
-function renderAdminMachines() {
+// ── ADMIN ──
+function aGoTo(id){['aHome','aMachines','aDocs','aParts','aTasks'].forEach(x=>document.getElementById(x).classList.toggle('off',x!==id));}
+function aGoHome(){aGoTo('aHome');}
+function fillSelects(){const opts=MACHINES.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');['dMachine','ptMachine','tkMachine'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});}
+function renderAdminStats(){document.getElementById('astat-m').textContent=MACHINES.length;document.getElementById('astat-e').textContent=MACHINES.filter(m=>m.status==='e').length;document.getElementById('astat-t').textContent=TASKS.filter(t=>!t.is_done).length;}
+function renderAdminMachines(){
   document.getElementById('adminMachineList').innerHTML=MACHINES.length?
-    `<div class="admin-section">${MACHINES.map(m=>`<div class="admin-machine-item"><div style="font-size:24px;flex-shrink:0">${m.icon||'⚙️'}</div><div class="ami-info"><div class="ami-name">${m.name}</div><div class="ami-sub">${m.location} · <span class="badge ${bc(m.status)}">${m.status_label}</span></div></div><div class="ami-btns"><button class="ami-btn ami-edit" onclick="openEditMachine('${m.id}')">✏️</button><button class="ami-btn ami-del" onclick="delMachine('${m.id}')">🗑</button></div></div>`).join('')}</div>`
-    :'<div style="text-align:center;padding:40px;color:var(--gray)">Žiadne stroje</div>';
+    `<div class="admin-section">${MACHINES.map(m=>`<div class="admin-machine-item"><div style="font-size:24px;flex-shrink:0">${m.icon||'⚙️'}</div><div class="ami-info"><div class="ami-name">${m.name}</div><div class="ami-sub">${m.location} · <span class="badge ${bc(m.status)}" style="font-size:10px;padding:2px 8px">${m.status_label}</span></div></div><div class="ami-btns"><button class="ami-btn ami-edit" onclick="openEditMachine('${m.id}')">✏️</button><button class="ami-btn ami-del" onclick="delMachine('${m.id}')">🗑</button></div></div>`).join('')}</div>`
+    :'<div class="empty-state">Žiadne stroje</div>';
 }
-function renderAdminDocs() {
-  document.getElementById('adminDocsList').innerHTML=MACHINES.map(m=>`<div class="admin-section" style="margin-bottom:12px"><div style="font-size:13px;font-weight:700;color:var(--gray);text-transform:uppercase;padding:12px 16px 6px">${m.icon||''} ${m.name}</div>${m.docs.map(d=>`<div class="admin-machine-item"><div style="font-size:20px">${d.icon}</div><div class="ami-info"><div class="ami-name">${d.name}</div><div class="ami-sub">${d.meta||''}</div></div><button class="ami-btn ami-del" onclick="delDoc(${d.id})">🗑</button></div>`).join('')}<div style="padding:10px 16px"><button onclick="openAddDoc('${m.id}')" style="width:100%;padding:10px;background:var(--gl);color:var(--g1);border:1.5px dashed var(--g1);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">+ Pridať dokument</button></div></div>`).join('');
+function renderAdminDocs(){
+  document.getElementById('adminDocsList').innerHTML=MACHINES.map(m=>`<div class="admin-section" style="margin-bottom:10px"><div style="font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;padding:12px 16px 6px">${m.icon||''} ${m.name}</div>${m.docs.map(d=>`<div class="admin-machine-item"><div style="font-size:20px">${d.icon}</div><div class="ami-info"><div class="ami-name">${d.name}</div><div class="ami-sub">${d.meta||''}</div></div><button class="ami-btn ami-del" onclick="delDoc(${d.id})">🗑</button></div>`).join('')}<div style="padding:8px 16px 12px"><button onclick="openAddDoc('${m.id}')" style="width:100%;padding:10px;background:var(--gl);color:var(--g1);border:1.5px dashed var(--g1);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">+ Pridať dokument</button></div></div>`).join('');
 }
-function renderAdminParts() {
-  document.getElementById('adminPartsList').innerHTML=MACHINES.map(m=>`<div class="admin-section" style="margin-bottom:12px"><div style="font-size:13px;font-weight:700;color:var(--gray);text-transform:uppercase;padding:12px 16px 6px">${m.icon||''} ${m.name}</div>${m.parts.map(p=>{const c=p.stock_status==='ok'?'var(--g1)':p.stock_status==='low'?'var(--ora)':'var(--red)';return`<div class="admin-machine-item"><div style="font-size:20px">${p.icon||'🔩'}</div><div class="ami-info"><div class="ami-name">${p.name}</div><div class="ami-sub" style="color:${c}">${p.stock_label||''} · ${p.part_number||''}</div></div><button class="ami-btn ami-del" onclick="delPart(${p.id})">🗑</button></div>`;}).join('')}<div style="padding:10px 16px"><button onclick="openAddPart('${m.id}')" style="width:100%;padding:10px;background:var(--gl);color:var(--g1);border:1.5px dashed var(--g1);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">+ Pridať diel</button></div></div>`).join('');
+function renderAdminParts(){
+  document.getElementById('adminPartsList').innerHTML=MACHINES.map(m=>`<div class="admin-section" style="margin-bottom:10px"><div style="font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;padding:12px 16px 6px">${m.icon||''} ${m.name}</div>${m.parts.map(p=>{const c=p.stock_status==='ok'?'var(--g1)':p.stock_status==='low'?'var(--ora)':'var(--red)';return`<div class="admin-machine-item"><div style="font-size:20px">${p.icon||'🔩'}</div><div class="ami-info"><div class="ami-name">${p.name}</div><div class="ami-sub" style="color:${c}">${p.stock_label||''} · ${p.part_number||''}</div></div><button class="ami-btn ami-del" onclick="delPart(${p.id})">🗑</button></div>`;}).join('')}<div style="padding:8px 16px 12px"><button onclick="openAddPart('${m.id}')" style="width:100%;padding:10px;background:var(--gl);color:var(--g1);border:1.5px dashed var(--g1);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">+ Pridať diel</button></div></div>`).join('');
 }
-function renderAdminTasks() {
-  document.getElementById('adminTasksList').innerHTML=MACHINES.map(m=>`<div class="admin-section" style="margin-bottom:12px"><div style="font-size:13px;font-weight:700;color:var(--gray);text-transform:uppercase;padding:12px 16px 6px">${m.icon||''} ${m.name}</div>${m.tasks.map(t=>`<div class="admin-machine-item"><div style="font-size:20px">${t.is_urgent?'🔴':'☑️'}</div><div class="ami-info"><div class="ami-name">${t.name}</div><div class="ami-sub">${t.description||''}</div></div><button class="ami-btn ami-del" onclick="delTask('${t.id}')">🗑</button></div>`).join('')}<div style="padding:10px 16px"><button onclick="openAddTask('${m.id}')" style="width:100%;padding:10px;background:var(--gl);color:var(--g1);border:1.5px dashed var(--g1);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">+ Pridať úlohu</button></div></div>`).join('');
+function renderAdminTasks(){
+  document.getElementById('adminTasksList').innerHTML=MACHINES.map(m=>`<div class="admin-section" style="margin-bottom:10px"><div style="font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;padding:12px 16px 6px">${m.icon||''} ${m.name}</div>${m.tasks.map(t=>`<div class="admin-machine-item"><div style="font-size:20px">${t.is_urgent?'🔴':'☑️'}</div><div class="ami-info"><div class="ami-name">${t.name}</div><div class="ami-sub">${t.description||''}</div></div><button class="ami-btn ami-del" onclick="delTask('${t.id}')">🗑</button></div>`).join('')}<div style="padding:8px 16px 12px"><button onclick="openAddTask('${m.id}')" style="width:100%;padding:10px;background:var(--gl);color:var(--g1);border:1.5px dashed var(--g1);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">+ Pridať úlohu</button></div></div>`).join('');
 }
 
 // MACHINE CRUD
@@ -697,15 +863,16 @@ async function saveMachine(){
   if(!name||!model||!loc){alert('Vyplňte povinné polia (*)');return;}
   const st=document.getElementById('mStatus').value,editId=document.getElementById('mEditId').value;
   const data={name,model,location:loc,status:st,status_label:stLabel(st),icon:document.getElementById('mIcon').value||'⚙️',manufacturer:document.getElementById('mVyr').value,year:document.getElementById('mRok').value,serial_number:document.getElementById('mSN').value,technician:document.getElementById('mTech').value};
-  if(editId){await sb.from('machines').update(data).eq('id',editId);}
-  else{await sb.from('machines').insert({id:'M-'+uid(),...data});}
-  await loadData();closeModal('modalMachine');renderAdminMachines();renderAdminDocs();renderAdminParts();renderAdminTasks();renderAdminStats();renderDemos();renderML(MACHINES);
+  if(editId)await sb.from('machines').update(data).eq('id',editId);
+  else await sb.from('machines').insert({id:'M-'+uid(),...data});
+  await loadData();closeModal('modalMachine');
+  renderAdminMachines();renderAdminDocs();renderAdminParts();renderAdminTasks();renderAdminStats();
   showToast(editId?'✅ Stroj upravený':'✅ Stroj pridaný');
 }
-async function delMachine(id){if(!confirm('Odstrániť stroj?'))return;await sb.from('machines').delete().eq('id',id);await loadData();renderAdminMachines();renderAdminDocs();renderAdminParts();renderAdminTasks();renderAdminStats();renderDemos();renderML(MACHINES);showToast('🗑 Stroj odstránený');}
+async function delMachine(id){if(!confirm('Odstrániť stroj?'))return;await sb.from('machines').delete().eq('id',id);await loadData();renderAdminMachines();renderAdminDocs();renderAdminParts();renderAdminTasks();renderAdminStats();showToast('🗑 Stroj odstránený');}
 
 // DOC CRUD
-function openAddDoc(mid){fillSelects();document.getElementById('dMachine').value=mid;document.getElementById('dName').value='';document.getElementById('dIcon').value='📄';document.getElementById('dSize').value='';openModal('modalDoc');}
+function openAddDoc(mid){fillSelects();document.getElementById('dMachine').value=mid;['dName','dIcon','dSize'].forEach(id=>document.getElementById(id).value='');document.getElementById('dIcon').value='📄';openModal('modalDoc');}
 async function saveDoc(){const mid=document.getElementById('dMachine').value,name=document.getElementById('dName').value.trim();if(!name){alert('Zadajte názov');return;}await sb.from('documents').insert({machine_id:mid,name,icon:document.getElementById('dIcon').value||'📄',meta:document.getElementById('dSize').value});await loadData();closeModal('modalDoc');renderAdminDocs();showToast('✅ Dokument pridaný');}
 async function delDoc(id){if(!confirm('Odstrániť?'))return;await sb.from('documents').delete().eq('id',id);await loadData();renderAdminDocs();showToast('🗑 Odstránené');}
 
@@ -715,7 +882,7 @@ async function savePart(){const mid=document.getElementById('ptMachine').value,n
 async function delPart(id){if(!confirm('Odstrániť?'))return;await sb.from('parts').delete().eq('id',id);await loadData();renderAdminParts();showToast('🗑 Odstránené');}
 
 // TASK CRUD
-function openAddTask(mid){fillSelects();document.getElementById('tkMachine').value=mid;document.getElementById('tkName').value='';document.getElementById('tkSub').value='';document.getElementById('tkUrgent').value='0';openModal('modalTask');}
+function openAddTask(mid){fillSelects();document.getElementById('tkMachine').value=mid;['tkName','tkSub'].forEach(id=>document.getElementById(id).value='');document.getElementById('tkUrgent').value='0';openModal('modalTask');}
 async function saveTask(){const mid=document.getElementById('tkMachine').value,name=document.getElementById('tkName').value.trim();if(!name){alert('Zadajte názov');return;}await sb.from('tasks').insert({id:'t'+uid(),machine_id:mid,name,description:document.getElementById('tkSub').value,is_urgent:document.getElementById('tkUrgent').value==='1',is_done:false});await loadData();closeModal('modalTask');renderAdminTasks();renderAdminStats();renderGT('all');showToast('✅ Úloha pridaná');}
 async function delTask(id){if(!confirm('Odstrániť?'))return;await sb.from('tasks').delete().eq('id',id);await loadData();renderAdminTasks();renderAdminStats();showToast('🗑 Odstránené');}
 </script>
