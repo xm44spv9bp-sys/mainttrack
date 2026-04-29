@@ -676,9 +676,17 @@ async function doLogout(){
 async function bootApp(){
   if(booting)return;booting=true;
   try{
-    const{data:profile}=await sb.from('profiles').select('role,full_name').eq('id',CU.id).maybeSingle();
-    userRole=profile?.role||'worker';
-    const name=profile?.full_name||CU.email?.split('@')[0]||'Používateľ';
+    // Admin emails - pridajte sem váš email
+    const ADMIN_EMAILS=['samqo197@gmail.com'];
+    let userRole_db='worker';
+    let name='Používateľ';
+    try{
+      const{data:profile}=await sb.from('profiles').select('role,full_name').eq('id',CU.id).maybeSingle();
+      userRole_db=(profile?.role||'worker').toLowerCase().trim();
+      name=profile?.full_name||CU.email?.split('@')[0]||'Používateľ';
+    }catch(e){name=CU.email?.split('@')[0]||'Používateľ';}
+    // Fallback: ak je email v zozname adminov, vždy admin
+    userRole=ADMIN_EMAILS.includes(CU.email)?'admin':userRole_db;
     await loadData();
     if(userRole==='admin'){
       showView('vAdmin');aGoHome();
@@ -688,19 +696,21 @@ async function bootApp(){
       renderML(MACHINES);renderDemos();
       showView('vMain');goTab('dash');
     }
-  }catch(e){showView('vLogin');showErr('Chyba: '+e.message);}
+  }catch(e){console.error('bootApp error:',e);showView('vLogin');showErr('Chyba načítania: '+e.message);}
   finally{booting=false;}
 }
 
 async function loadData(){
-  const[{data:machines,error:mErr},{data:docs},{data:parts},{data:tasks},{data:locs}]=await Promise.all([
+  const[{data:machines,error:mErr},{data:docs},{data:parts},{data:tasks}]=await Promise.all([
     sb.from('machines').select('*').order('name'),
     sb.from('documents').select('*'),
     sb.from('parts').select('*'),
     sb.from('tasks').select('*').order('created_at'),
-    sb.from('locations').select('*').order('id'),
   ]);
   if(mErr)throw mErr;
+  // Locations are optional - table may not exist yet
+  let locs=[];
+  try{const{data:l}=await sb.from('locations').select('*').order('id');locs=l||[];}catch(e){}
   TASKS=tasks||[];
   // Build locations map
   LOCATIONS={};
