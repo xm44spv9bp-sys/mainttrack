@@ -430,7 +430,7 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
           <div class="ms-sec">Stroje na tejto lokácii</div>
           <div id="msMachines"></div>
         </div>
-        <button class="ms-btn" onclick="closeMapSheet()">Zobraziť všetky stroje lokácie →</button>
+        <button class="ms-btn" id="msBtn">Zobraziť všetky stroje lokácie →</button>
       </div>
     </div>
 
@@ -899,14 +899,54 @@ function renderMapPins(){
 function openMapPin(id){
   const loc=LOCATIONS[id]||{name:'Lokalita '+id.replace('p',''),description:''};
   document.getElementById('msName').textContent=loc.name;
-  document.getElementById('msSub').textContent=loc.description||'Kliknite pre zobrazenie strojov';
-  // Show machines at this location (based on location field matching)
-  const machines=MACHINES.filter(m=>m.location&&m.location.toLowerCase().includes(loc.name.toLowerCase())).slice(0,5);
+  document.getElementById('msSub').textContent=loc.description||'';
+  // Find machines at this location
+  const machines=MACHINES.filter(m=>m.location&&m.location.toLowerCase().includes(loc.name.toLowerCase()));
   document.getElementById('msMachines').innerHTML=machines.length
-    ?machines.map(m=>`<div class="ms-mrow"><div class="ms-mic" style="background:${m.status==='e'?'#FFEBEE':m.status==='m'?'#FFF3E0':'#E8F5E9'}">${m.icon||'⚙️'}</div><div style="flex:1"><div class="ms-mn">${m.name}</div><div class="ms-ml">${m.location}</div></div><span class="badge ${bc(m.status)}">${m.status_label}</span></div>`).join('')
+    ?machines.map(m=>`
+      <div class="ms-mrow" onclick="openMachineFromMap('${m.id}')" style="cursor:pointer">
+        <div class="ms-mic" style="background:${m.status==='e'?'#FFEBEE':m.status==='m'?'#FFF3E0':'#E8F5E9'}">${m.icon||'⚙️'}</div>
+        <div style="flex:1;min-width:0">
+          <div class="ms-mn">${m.name}</div>
+          <div class="ms-ml">${m.location}</div>
+        </div>
+        <span class="badge ${bc(m.status)}">${m.status_label}</span>
+        <span style="color:#C7C7CC;font-size:18px;margin-left:8px">›</span>
+      </div>`).join('')
     :`<div style="text-align:center;padding:28px 16px;color:#BDBDBD;font-size:14px;line-height:1.7">Žiadne stroje priradené tejto lokácii.<br>Priradenie prebieha cez Admin panel → Stroje.</div>`;
+  // Update "Zobraziť všetky" button
+  const btn=document.getElementById('msBtn');
+  if(machines.length>0){
+    btn.style.display='';
+    btn.onclick=()=>{closeMapSheet();showAllMachinesForLocation(loc.name);};
+  } else {
+    btn.style.display='none';
+  }
   document.getElementById('mapOv').classList.add('on');
   document.getElementById('mapSheet').classList.add('on');
+}
+
+function openMachineFromMap(machineId){
+  closeMapSheet();
+  // Small delay to let sheet close
+  setTimeout(()=>{openDetail(machineId);},200);
+}
+
+function showAllMachinesForLocation(locName){
+  goTab('machines');
+  // Filter machines list by location
+  const filtered=MACHINES.filter(m=>m.location&&m.location.toLowerCase().includes(locName.toLowerCase()));
+  document.getElementById('mList').innerHTML=filtered.length
+    ?filtered.map(m=>`
+      <div class="mc" onclick="openDetail('${m.id}')">
+        <div class="mc-icon" style="background:${m.status==='e'?'#FFEBEE':m.status==='m'?'#FFF3E0':'#E8F5E9'}">${m.icon||'⚙️'}</div>
+        <div style="flex:1;min-width:0"><div class="mc-name">${m.name}</div><div class="mc-sub">${m.model} · ${m.location}</div></div>
+        <span class="badge ${bc(m.status)}">${m.status_label}</span>
+      </div>`).join('')
+    :'<div class="empty-state">Žiadne stroje</div>';
+  // Set search input
+  const si=document.getElementById('srchInp');
+  if(si)si.value=locName;
 }
 function closeMapSheet(){
   document.getElementById('mapOv').classList.remove('on');
