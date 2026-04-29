@@ -421,7 +421,7 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
     <div id="tMachines" class="view off" style="flex-direction:column">
       <div class="spad" style="background:var(--white)"></div>
       <div style="background:var(--white);border-bottom:.5px solid var(--border);flex-shrink:0">
-        <div class="phdr"><div style="width:44px"></div><div class="ptitle">Stroje</div><div style="width:44px"></div></div>
+        <div class="phdr"><button class="hbtn" onclick="goTab('dash')">‹</button><div class="ptitle">Stroje</div><div style="width:44px"></div></div>
         <div class="srch-wrap"><div class="srch"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8E8E93" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="search" id="srchInp" placeholder="Hľadať stroj..." oninput="filterM(this.value)"></div></div>
       </div>
       <div class="mlist" id="mList"></div>
