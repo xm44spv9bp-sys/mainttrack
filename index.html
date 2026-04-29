@@ -421,7 +421,7 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
     <div id="tMachines" class="view off" style="flex-direction:column">
       <div class="spad" style="background:var(--white)"></div>
       <div style="background:var(--white);border-bottom:.5px solid var(--border);flex-shrink:0">
-        <div class="phdr"><button class="hbtn" onclick="goTab('dash')">‹</button><div class="ptitle">Stroje</div><div style="width:44px"></div></div>
+        <div class="phdr"><button class="hbtn" onclick="goTab('dash')">‹ Späť</button><div class="ptitle">Stroje</div><div style="width:44px"></div></div>
         <div class="srch-wrap"><div class="srch"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8E8E93" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="search" id="srchInp" placeholder="Hľadať stroj..." oninput="filterM(this.value)"></div></div>
       </div>
       <div class="mlist" id="mList"></div>
@@ -484,7 +484,7 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
     <div id="tSklad" class="view off" style="flex-direction:column">
       <div class="spad" style="background:var(--white)"></div>
       <div class="phdr" style="background:var(--white);border-bottom:.5px solid var(--border)">
-        <button class="hbtn" id="skladBackBtn" onclick="goTab('dash');document.getElementById('tSklad').querySelector('.ptitle').textContent='Sklad — náhradné diely'">‹</button>
+        <button class="hbtn" id="skladBackBtn" onclick="goTab('dash');document.getElementById('tSklad').querySelector('.ptitle').textContent='Sklad — náhradné diely'">‹ Späť</button>
         <div class="ptitle">Sklad — náhradné diely</div>
         <div style="width:44px"></div>
       </div>
@@ -555,24 +555,24 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
       </div>
     </div>
     <div id="aMachines" class="view off" style="flex-direction:column;background:var(--gray3)">
-      <div class="phdr" style="background:#1a1a2e;border-bottom:none"><button class="hbtn" style="color:#CE93D8" onclick="aGoHome()">‹</button><div class="ptitle" style="color:#CE93D8">Stroje</div><button onclick="openAddMachine()" style="background:#7B1FA2;color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer">+ Pridať</button></div>
+      <div class="phdr" style="background:#1a1a2e;border-bottom:none"><button class="hbtn" style="color:#CE93D8" onclick="aGoHome()">‹ Späť</button><div class="ptitle" style="color:#CE93D8">Stroje</div><button onclick="openAddMachine()" style="background:#7B1FA2;color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer">+ Pridať</button></div>
       <div class="pbody"><div id="adminMachineList" style="padding:12px 16px"></div></div>
     </div>
     <div id="aDocs" class="view off" style="flex-direction:column;background:var(--gray3)">
-      <div class="phdr" style="background:#1a1a2e;border-bottom:none"><button class="hbtn" style="color:#CE93D8" onclick="aGoHome()">‹</button><div class="ptitle" style="color:#CE93D8">Dokumentácia</div><div style="width:60px"></div></div>
+      <div class="phdr" style="background:#1a1a2e;border-bottom:none"><button class="hbtn" style="color:#CE93D8" onclick="aGoHome()">‹ Späť</button><div class="ptitle" style="color:#CE93D8">Dokumentácia</div><div style="width:60px"></div></div>
       <div class="pbody"><div id="adminDocsList" style="padding:12px 16px"></div></div>
     </div>
     <div id="aParts" class="view off" style="flex-direction:column;background:var(--gray3)">
-      <div class="phdr" style="background:#1a1a2e;border-bottom:none"><button class="hbtn" style="color:#CE93D8" onclick="aGoHome()">‹</button><div class="ptitle" style="color:#CE93D8">Náhradné diely</div><div style="width:60px"></div></div>
+      <div class="phdr" style="background:#1a1a2e;border-bottom:none"><button class="hbtn" style="color:#CE93D8" onclick="aGoHome()">‹ Späť</button><div class="ptitle" style="color:#CE93D8">Náhradné diely</div><div style="width:60px"></div></div>
       <div class="pbody"><div id="adminPartsList" style="padding:12px 16px"></div></div>
     </div>
     <div id="aTasks" class="view off" style="flex-direction:column;background:var(--gray3)">
-      <div class="phdr" style="background:#1a1a2e;border-bottom:none"><button class="hbtn" style="color:#CE93D8" onclick="aGoHome()">‹</button><div class="ptitle" style="color:#CE93D8">Úlohy</div><div style="width:60px"></div></div>
+      <div class="phdr" style="background:#1a1a2e;border-bottom:none"><button class="hbtn" style="color:#CE93D8" onclick="aGoHome()">‹ Späť</button><div class="ptitle" style="color:#CE93D8">Úlohy</div><div style="width:60px"></div></div>
       <div class="pbody"><div id="adminTasksList" style="padding:12px 16px"></div></div>
     </div>
     <!-- ADMIN LOCATIONS -->
     <div id="aLocations" class="view off" style="flex-direction:column;background:var(--gray3)">
-      <div class="phdr" style="background:#1a1a2e;border-bottom:none"><button class="hbtn" style="color:#CE93D8" onclick="aGoHome()">‹</button><div class="ptitle" style="color:#CE93D8">Lokácie na mape</div><div style="width:60px"></div></div>
+      <div class="phdr" style="background:#1a1a2e;border-bottom:none"><button class="hbtn" style="color:#CE93D8" onclick="aGoHome()">‹ Späť</button><div class="ptitle" style="color:#CE93D8">Lokácie na mape</div><div style="width:60px"></div></div>
       <div class="pbody">
         <div style="padding:12px 16px 4px;font-size:13px;color:var(--gray);line-height:1.5">Premenujte 20 špendlíkov zobrazených na mape areálu.</div>
         <div class="admin-section" style="margin:12px 16px 0" id="adminLocList"></div>
