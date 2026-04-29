@@ -1028,13 +1028,25 @@ async function saveLocation(){
   const name=document.getElementById('locName').value.trim();
   if(!name){alert('Zadajte názov lokácie');return;}
   const desc=document.getElementById('locDesc').value.trim();
-  const{error}=await sb.from('locations').upsert({id,name,description:desc,updated_at:new Date().toISOString()});
-  if(error){showToast('❌ Chyba uloženia');return;}
+  // Try update first, then insert if not exists
+  const{error:ue}=await sb.from('locations').upsert(
+    {id,name,description:desc,updated_at:new Date().toISOString()},
+    {onConflict:'id'}
+  );
+  if(ue){alert('Chyba uloženia: '+ue.message);return;}
+  // Reload locations from DB to ensure fresh data
+  const{data:freshLocs}=await sb.from('locations').select('*');
+  if(freshLocs){
+    (freshLocs).forEach(l=>{LOCATIONS[l.id]=l;});
+  }
+  // Update local cache immediately
   LOCATIONS[id]={id,name,description:desc};
   closeModal('modalLocation');
+  // Re-render both admin list and map pins
   renderAdminLocations();
-  renderMapPins(); // Refresh pins on map
-  showToast('✅ Lokácia uložená');
+  renderMapPins();
+  // Also refresh location dropdown if open
+  showToast('✅ Lokácia uložená: '+name);
 }
 
 // MACHINE CRUD
