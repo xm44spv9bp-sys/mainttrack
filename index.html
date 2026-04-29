@@ -76,7 +76,8 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
 .dash-scan-sub{font-size:12px;color:rgba(255,255,255,.65);margin-top:2px}
 .dash-scan-arrow{background:var(--white);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--g1);flex-shrink:0}
 .dash-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 16px 0}
-.dash-stat{background:var(--white);border-radius:14px;padding:14px;border:.5px solid var(--border)}
+.dash-stat{background:var(--white);border-radius:14px;padding:14px;border:.5px solid var(--border);transition:all .15s}
+.dash-stat:active{background:var(--gl);border-color:var(--g1)}
 .dash-stat-val{font-size:24px;font-weight:800}
 .dash-stat-lbl{font-size:12px;color:var(--gray);margin-top:3px}
 .sec-header{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px}
@@ -346,11 +347,40 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
           </div>
           <div class="dash-scan-arrow">Otvoriť →</div>
         </div>
+
+        <!-- Štatistiky - klikateľné -->
         <div class="dash-stats">
-          <div class="dash-stat"><div class="dash-stat-val" id="st-machines" style="color:var(--g1)">—</div><div class="dash-stat-lbl">Strojov celkom</div></div>
-          <div class="dash-stat"><div class="dash-stat-val" id="st-errors" style="color:var(--red)">—</div><div class="dash-stat-lbl">Poruchy</div></div>
-          <div class="dash-stat"><div class="dash-stat-val" id="st-tasks" style="color:var(--ora)">—</div><div class="dash-stat-lbl">Otvorené úlohy</div></div>
-          <div class="dash-stat"><div class="dash-stat-val" id="st-urgent" style="color:var(--red)">—</div><div class="dash-stat-lbl">Urgentné</div></div>
+          <div class="dash-stat" onclick="goTab('machines')" style="cursor:pointer;active:background:var(--gl)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+              <div style="width:36px;height:36px;border-radius:10px;background:var(--gl);display:flex;align-items:center;justify-content:center;font-size:18px">⚙️</div>
+              <span style="font-size:11px;color:var(--g1);font-weight:600">Zobraziť →</span>
+            </div>
+            <div class="dash-stat-val" id="st-machines" style="color:var(--g1)">—</div>
+            <div class="dash-stat-lbl">Stroje</div>
+          </div>
+          <div class="dash-stat" onclick="goTabTasks()" style="cursor:pointer">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+              <div style="width:36px;height:36px;border-radius:10px;background:var(--ol);display:flex;align-items:center;justify-content:center;font-size:18px">☑️</div>
+              <span style="font-size:11px;color:var(--ora);font-weight:600">Zobraziť →</span>
+            </div>
+            <div class="dash-stat-val" id="st-tasks" style="color:var(--ora)">—</div>
+            <div class="dash-stat-lbl">Úlohy</div>
+          </div>
+          <div class="dash-stat" onclick="goTabSklad()" style="cursor:pointer">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+              <div style="width:36px;height:36px;border-radius:10px;background:#E3F2FD;display:flex;align-items:center;justify-content:center;font-size:18px">🔩</div>
+              <span style="font-size:11px;color:#1565C0;font-weight:600">Zobraziť →</span>
+            </div>
+            <div class="dash-stat-val" id="st-parts" style="color:#1565C0">—</div>
+            <div class="dash-stat-lbl">Sklad</div>
+          </div>
+          <div class="dash-stat" style="cursor:default;background:linear-gradient(135deg,#2E7D32,#43A047);border-color:#388E3C;opacity:.85">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:18px">🕐</div>
+            </div>
+            <div id="dtTime" style="font-size:22px;font-weight:800;color:#fff;letter-spacing:-1px;font-variant-numeric:tabular-nums;margin-bottom:2px">--:--</div>
+            <div id="dtDateShort" style="font-size:11px;color:rgba(255,255,255,.7);font-weight:500"></div>
+          </div>
         </div>
         <div class="sec-header"><div class="sec-title">Naposledy zobrazené</div><div class="sec-link" onclick="goTab('machines')">Všetky →</div></div>
         <div id="dashRecent"></div>
@@ -448,6 +478,17 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
         </div>
         <button class="lout-btn" onclick="doLogout()">Odhlásiť sa</button>
       </div>
+    </div>
+
+    <!-- SKLAD -->
+    <div id="tSklad" class="view off" style="flex-direction:column">
+      <div class="spad" style="background:var(--white)"></div>
+      <div class="phdr" style="background:var(--white);border-bottom:.5px solid var(--border)">
+        <button class="hbtn" onclick="goTab('dash')">‹</button>
+        <div class="ptitle">Sklad — náhradné diely</div>
+        <div style="width:44px"></div>
+      </div>
+      <div class="pbody" id="skladList" style="padding:12px 16px"></div>
     </div>
 
     <!-- DETAIL -->
@@ -747,9 +788,10 @@ function setupDashboard(name){
   document.getElementById('profName').textContent=name;
   document.getElementById('profRole').textContent=userRole==='admin'?'⚙️ Administrátor':'👷 Strojný údržbár';
   document.getElementById('st-machines').textContent=MACHINES.length;
-  document.getElementById('st-errors').textContent=MACHINES.filter(m=>m.status==='e').length;
   document.getElementById('st-tasks').textContent=TASKS.filter(t=>!t.is_done).length;
-  document.getElementById('st-urgent').textContent=TASKS.filter(t=>t.is_urgent&&!t.is_done).length;
+  const totalParts=MACHINES.reduce((s,m)=>s+m.parts.length,0);
+  document.getElementById('st-parts').textContent=totalParts;
+  startClock();
   const recent=RECENT.length?MACHINES.filter(m=>RECENT.includes(m.id)).slice(0,3):MACHINES.slice(0,3);
   document.getElementById('dashRecent').innerHTML=recent.length?recent.map(m=>`
     <div class="recent-card" onclick="openDetail('${m.id}')">
@@ -762,6 +804,108 @@ function setupDashboard(name){
     const m=MACHINES.find(m=>m.id===t.machine_id);
     return`<div class="urgent-card"><div class="urgent-dot"></div><div><div class="urgent-name">${t.name}</div><div class="urgent-sub">${t.description||''}</div>${m?`<div class="urgent-machine">${m.icon||''} ${m.name}</div>`:''} </div></div>`;
   }).join(''):'<div class="empty-state">Žiadne urgentné úlohy 🎉</div>';
+}
+
+// ── CLOCK ──
+function startClock(){
+  function tick(){
+    const now=new Date();
+    const days=['Ne','Po','Ut','St','Št','Pi','So'];
+    const months=['jan','feb','mar','apr','máj','jún','júl','aug','sep','okt','nov','dec'];
+    const h=String(now.getHours()).padStart(2,'0');
+    const m=String(now.getMinutes()).padStart(2,'0');
+    const s=String(now.getSeconds()).padStart(2,'0');
+    const tEl=document.getElementById('dtTime');
+    const dEl=document.getElementById('dtDateShort');
+    if(tEl)tEl.textContent=h+':'+m+':'+s;
+    if(dEl)dEl.textContent=days[now.getDay()]+' '+now.getDate()+'. '+months[now.getMonth()]+' '+now.getFullYear();
+  }
+  tick();setInterval(tick,1000);
+}
+
+function goTabTasks(){
+  // Show tasks view - reuse machines tab with task filter
+  showAllTasks();
+}
+
+function goTabSklad(){
+  // Show sklad view
+  const tabs=['dash','scan','machines','map','profile','sklad'];
+  tabs.forEach(x=>{
+    const el=document.getElementById('t'+x.charAt(0).toUpperCase()+x.slice(1));
+    if(el)el.classList.toggle('off',x!=='sklad');
+  });
+  document.getElementById('vDetail')?.classList.add('off');
+  CT='sklad';
+  stopScan();
+  renderSklad();
+}
+
+function renderSklad(){
+  const all=[];
+  MACHINES.forEach(m=>{
+    m.parts.forEach(p=>{
+      all.push({...p,machineName:m.name,machineIcon:m.icon||'⚙️'});
+    });
+  });
+  if(!all.length){
+    document.getElementById('skladList').innerHTML='<div class="empty-state">Žiadne náhradné diely v sklade</div>';
+    return;
+  }
+  // Group by machine
+  const byMachine={};
+  all.forEach(p=>{
+    const key=p.machine_id;
+    if(!byMachine[key])byMachine[key]={name:p.machineName,icon:p.machineIcon,parts:[]};
+    byMachine[key].parts.push(p);
+  });
+  document.getElementById('skladList').innerHTML=Object.values(byMachine).map(g=>`
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">${g.icon} ${g.name}</div>
+      ${g.parts.map(p=>{
+        const sc=p.stock_status==='ok'?'var(--g1)':p.stock_status==='low'?'var(--ora)':'var(--red)';
+        const si=p.stock_status==='ok'?'✅':p.stock_status==='low'?'⚠️':'❌';
+        return`<div class="pcard">
+          <div class="pcard-top">
+            <div class="pimg">${p.icon||'🔩'}</div>
+            <div style="flex:1;min-width:0">
+              <div class="pname">${p.name}</div>
+              <div class="ppn">P/N: ${p.part_number||'—'}</div>
+              <div class="pstock" style="color:${sc}">${si} ${p.stock_label||''}</div>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`).join('');
+}
+
+function showAllTasks(){
+  // Navigate to a simple tasks list
+  const tabs=['dash','scan','machines','map','profile'];
+  tabs.forEach(x=>{
+    const el=document.getElementById('t'+x.charAt(0).toUpperCase()+x.slice(1));
+    if(el)el.classList.add('off');
+  });
+  document.getElementById('vDetail')?.classList.add('off');
+  // Build tasks overlay on machines tab
+  goTab('machines');
+  const all=MACHINES.flatMap(m=>m.tasks.map(t=>({...t,mn:m.name,mic:m.icon||'⚙️'})));
+  document.getElementById('mList').innerHTML=all.length?all.map(t=>`
+    <div class="tkcard" style="margin:0 0 8px">
+      <div style="font-size:12px;color:var(--g1);font-weight:600;margin-bottom:6px">${t.mic} ${t.mn}</div>
+      <div class="tk-top">
+        <div class="tkbox${t.is_done?' ck':''}">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><polyline points="2,7 6,11 12,3" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <div style="flex:1">
+          <div class="tk-name">${t.name}${t.is_urgent?' 🔴':''}</div>
+          <div class="tk-sub">${t.description||''}</div>
+        </div>
+      </div>
+    </div>`).join('')
+  :'<div class="empty-state">Žiadne úlohy</div>';
+  document.getElementById('srchInp').value='';
+  document.querySelector('.phdr .ptitle').textContent='Všetky úlohy';
 }
 
 // ── TABS ──
