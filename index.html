@@ -550,7 +550,7 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
     <input type="hidden" id="mEditId">
     <div class="mf"><div class="ml">Názov stroja *</div><input class="mi" id="mName" placeholder="napr. CNC Frézka TF-300"></div>
     <div class="mf"><div class="ml">Model / Typ *</div><input class="mi" id="mModel" placeholder="napr. TechnoFréz TF-300 Pro"></div>
-    <div class="mf"><div class="ml">Umiestnenie *</div><input class="mi" id="mLoc" placeholder="napr. Hala A — Pozícia A12"></div>
+    <div class="mf"><div class="ml">Umiestnenie *</div><select class="mi" id="mLoc"><option value="">— Vyberte lokáciu —</option></select></div>
     <div class="mr">
       <div class="mf"><div class="ml">Ikona</div><input class="mi" id="mIcon" placeholder="🔩" style="text-align:center;font-size:24px"></div>
       <div class="mf"><div class="ml">Stav</div><select class="mi" id="mStatus"><option value="a">✅ Aktívny</option><option value="m">🔧 Údržba</option><option value="e">❌ Porucha</option></select></div>
@@ -1038,8 +1038,35 @@ async function saveLocation(){
 }
 
 // MACHINE CRUD
-function openAddMachine(){document.getElementById('mMTitle').textContent='Pridať stroj';document.getElementById('mEditId').value='';['mName','mModel','mLoc','mIcon','mVyr','mRok','mSN','mTech'].forEach(id=>document.getElementById(id).value='');document.getElementById('mStatus').value='a';openModal('modalMachine');}
-function openEditMachine(id){const m=MACHINES.find(m=>m.id===id);if(!m)return;document.getElementById('mMTitle').textContent='Upraviť stroj';document.getElementById('mEditId').value=id;document.getElementById('mName').value=m.name;document.getElementById('mModel').value=m.model;document.getElementById('mLoc').value=m.location;document.getElementById('mIcon').value=m.icon||'';document.getElementById('mStatus').value=m.status;document.getElementById('mVyr').value=m.manufacturer||'';document.getElementById('mRok').value=m.year||'';document.getElementById('mSN').value=m.serial_number||'';document.getElementById('mTech').value=m.technician||'';openModal('modalMachine');}
+function fillLocationSelect(selectedVal){
+  const sel=document.getElementById('mLoc');
+  sel.innerHTML='<option value="">— Vyberte lokáciu —</option>';
+  PIN_POSITIONS.forEach(p=>{
+    const loc=LOCATIONS[p.id]||{name:'Lokalita '+p.id.replace('p','')};
+    const opt=document.createElement('option');
+    opt.value=loc.name;
+    opt.textContent='📍 '+loc.name;
+    if(selectedVal&&selectedVal===loc.name)opt.selected=true;
+    sel.appendChild(opt);
+  });
+  // Add "Iné" option for custom input
+  const other=document.createElement('option');
+  other.value='__custom__';
+  other.textContent='✏️ Zadať vlastné...';
+  sel.appendChild(other);
+  sel.onchange=()=>{
+    if(sel.value==='__custom__'){
+      const custom=prompt('Zadajte umiestnenie:');
+      if(custom){
+        const opt2=document.createElement('option');
+        opt2.value=custom;opt2.textContent=custom;opt2.selected=true;
+        sel.insertBefore(opt2,sel.lastChild);
+      } else {sel.value='';}
+    }
+  };
+}
+function openAddMachine(){document.getElementById('mMTitle').textContent='Pridať stroj';document.getElementById('mEditId').value='';['mName','mModel','mIcon','mVyr','mRok','mSN','mTech'].forEach(id=>document.getElementById(id).value='');document.getElementById('mStatus').value='a';fillLocationSelect('');openModal('modalMachine');}
+function openEditMachine(id){const m=MACHINES.find(m=>m.id===id);if(!m)return;document.getElementById('mMTitle').textContent='Upraviť stroj';document.getElementById('mEditId').value=id;document.getElementById('mName').value=m.name;document.getElementById('mModel').value=m.model;fillLocationSelect(m.location);document.getElementById('mIcon').value=m.icon||'';document.getElementById('mStatus').value=m.status;document.getElementById('mVyr').value=m.manufacturer||'';document.getElementById('mRok').value=m.year||'';document.getElementById('mSN').value=m.serial_number||'';document.getElementById('mTech').value=m.technician||'';openModal('modalMachine');}
 async function saveMachine(){
   const name=document.getElementById('mName').value.trim(),model=document.getElementById('mModel').value.trim(),loc=document.getElementById('mLoc').value.trim();
   if(!name||!model||!loc){alert('Vyplňte povinné polia (*)');return;}
