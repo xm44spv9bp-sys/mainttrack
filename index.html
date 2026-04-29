@@ -1046,14 +1046,25 @@ function fillLocationSelect(selectedVal){
     const opt=document.createElement('option');
     opt.value=loc.name;
     opt.textContent='📍 '+loc.name;
-    if(selectedVal&&selectedVal===loc.name)opt.selected=true;
     sel.appendChild(opt);
   });
-  // Add "Iné" option for custom input
+  // Custom option
   const other=document.createElement('option');
   other.value='__custom__';
   other.textContent='✏️ Zadať vlastné...';
   sel.appendChild(other);
+  // Set selected value AFTER all options added
+  if(selectedVal){
+    // Check if value exists in options
+    let found=false;
+    for(let o of sel.options){if(o.value===selectedVal){o.selected=true;found=true;break;}}
+    if(!found&&selectedVal!=='__custom__'){
+      // Add as custom option
+      const copt=document.createElement('option');
+      copt.value=selectedVal;copt.textContent=selectedVal;copt.selected=true;
+      sel.insertBefore(copt,sel.lastChild);
+    }
+  }
   sel.onchange=()=>{
     if(sel.value==='__custom__'){
       const custom=prompt('Zadajte umiestnenie:');
@@ -1061,6 +1072,7 @@ function fillLocationSelect(selectedVal){
         const opt2=document.createElement('option');
         opt2.value=custom;opt2.textContent=custom;opt2.selected=true;
         sel.insertBefore(opt2,sel.lastChild);
+        sel.value=custom;
       } else {sel.value='';}
     }
   };
@@ -1068,25 +1080,29 @@ function fillLocationSelect(selectedVal){
 function openAddMachine(){document.getElementById('mMTitle').textContent='Pridať stroj';document.getElementById('mEditId').value='';['mName','mModel','mIcon','mVyr','mRok','mSN','mTech'].forEach(id=>document.getElementById(id).value='');document.getElementById('mStatus').value='a';fillLocationSelect('');openModal('modalMachine');}
 function openEditMachine(id){const m=MACHINES.find(m=>m.id===id);if(!m)return;document.getElementById('mMTitle').textContent='Upraviť stroj';document.getElementById('mEditId').value=id;document.getElementById('mName').value=m.name;document.getElementById('mModel').value=m.model;fillLocationSelect(m.location);document.getElementById('mIcon').value=m.icon||'';document.getElementById('mStatus').value=m.status;document.getElementById('mVyr').value=m.manufacturer||'';document.getElementById('mRok').value=m.year||'';document.getElementById('mSN').value=m.serial_number||'';document.getElementById('mTech').value=m.technician||'';openModal('modalMachine');}
 async function saveMachine(){
-  const name=document.getElementById('mName').value.trim(),model=document.getElementById('mModel').value.trim(),loc=document.getElementById('mLoc').value.trim();
+  const name=document.getElementById('mName').value.trim(),model=document.getElementById('mModel').value.trim();
+  const locSel=document.getElementById('mLoc');
+  const loc=(locSel.value==='__custom__'?'':locSel.value).trim();
   if(!name||!model||!loc){alert('Vyplňte povinné polia (*)');return;}
   const st=document.getElementById('mStatus').value,editId=document.getElementById('mEditId').value;
   const data={name,model,location:loc,status:st,status_label:stLabel(st),icon:document.getElementById('mIcon').value||'⚙️',manufacturer:document.getElementById('mVyr').value,year:document.getElementById('mRok').value,serial_number:document.getElementById('mSN').value,technician:document.getElementById('mTech').value};
-  if(editId)await sb.from('machines').update(data).eq('id',editId);
-  else await sb.from('machines').insert({id:'M-'+uid(),...data});
+  let dbErr;
+  if(editId){const{error}=await sb.from('machines').update(data).eq('id',editId);dbErr=error;}
+  else{const{error}=await sb.from('machines').insert({id:'M-'+uid(),...data});dbErr=error;}
+  if(dbErr){alert('Chyba uloženia: '+dbErr.message);return;}
   await loadData();closeModal('modalMachine');
   renderAdminMachines();renderAdminDocs();renderAdminParts();renderAdminTasks();renderAdminStats();renderDemos();renderML(MACHINES);
   showToast(editId?'✅ Stroj upravený':'✅ Stroj pridaný');
 }
 async function delMachine(id){if(!confirm('Odstrániť stroj?'))return;await sb.from('machines').delete().eq('id',id);await loadData();renderAdminMachines();renderAdminDocs();renderAdminParts();renderAdminTasks();renderAdminStats();renderDemos();renderML(MACHINES);showToast('🗑 Stroj odstránený');}
 function openAddDoc(mid){fillSelects();document.getElementById('dMachine').value=mid;['dName','dIcon','dSize'].forEach(id=>document.getElementById(id).value='');document.getElementById('dIcon').value='📄';openModal('modalDoc');}
-async function saveDoc(){const mid=document.getElementById('dMachine').value,name=document.getElementById('dName').value.trim();if(!name){alert('Zadajte názov');return;}await sb.from('documents').insert({machine_id:mid,name,icon:document.getElementById('dIcon').value||'📄',meta:document.getElementById('dSize').value});await loadData();closeModal('modalDoc');renderAdminDocs();showToast('✅ Dokument pridaný');}
+async function saveDoc(){const mid=document.getElementById('dMachine').value,name=document.getElementById('dName').value.trim();if(!name){alert('Zadajte názov');return;}const{error:de}=await sb.from('documents').insert({machine_id:mid,name,icon:document.getElementById('dIcon').value||'📄',meta:document.getElementById('dSize').value});if(de){alert('Chyba: '+de.message);return;}await loadData();closeModal('modalDoc');renderAdminDocs();showToast('✅ Dokument pridaný');}
 async function delDoc(id){if(!confirm('Odstrániť?'))return;await sb.from('documents').delete().eq('id',id);await loadData();renderAdminDocs();showToast('🗑 Odstránené');}
 function openAddPart(mid){fillSelects();document.getElementById('ptMachine').value=mid;['ptName','ptPN','ptSL'].forEach(id=>document.getElementById(id).value='');document.getElementById('ptIcon').value='🔩';document.getElementById('ptStock').value='ok';openModal('modalPart');}
-async function savePart(){const mid=document.getElementById('ptMachine').value,name=document.getElementById('ptName').value.trim();if(!name){alert('Zadajte názov');return;}await sb.from('parts').insert({machine_id:mid,name,icon:document.getElementById('ptIcon').value||'🔩',part_number:document.getElementById('ptPN').value,stock_status:document.getElementById('ptStock').value,stock_label:document.getElementById('ptSL').value});await loadData();closeModal('modalPart');renderAdminParts();showToast('✅ Diel pridaný');}
+async function savePart(){const mid=document.getElementById('ptMachine').value,name=document.getElementById('ptName').value.trim();if(!name){alert('Zadajte názov');return;}const{error:pe}=await sb.from('parts').insert({machine_id:mid,name,icon:document.getElementById('ptIcon').value||'🔩',part_number:document.getElementById('ptPN').value,stock_status:document.getElementById('ptStock').value,stock_label:document.getElementById('ptSL').value});if(pe){alert('Chyba: '+pe.message);return;}await loadData();closeModal('modalPart');renderAdminParts();showToast('✅ Diel pridaný');}
 async function delPart(id){if(!confirm('Odstrániť?'))return;await sb.from('parts').delete().eq('id',id);await loadData();renderAdminParts();showToast('🗑 Odstránené');}
 function openAddTask(mid){fillSelects();document.getElementById('tkMachine').value=mid;['tkName','tkSub'].forEach(id=>document.getElementById(id).value='');document.getElementById('tkUrgent').value='0';openModal('modalTask');}
-async function saveTask(){const mid=document.getElementById('tkMachine').value,name=document.getElementById('tkName').value.trim();if(!name){alert('Zadajte názov');return;}await sb.from('tasks').insert({id:'t'+uid(),machine_id:mid,name,description:document.getElementById('tkSub').value,is_urgent:document.getElementById('tkUrgent').value==='1',is_done:false});await loadData();closeModal('modalTask');renderAdminTasks();renderAdminStats();showToast('✅ Úloha pridaná');}
+async function saveTask(){const mid=document.getElementById('tkMachine').value,name=document.getElementById('tkName').value.trim();if(!name){alert('Zadajte názov');return;}const{error:te}=await sb.from('tasks').insert({id:'t'+uid(),machine_id:mid,name,description:document.getElementById('tkSub').value,is_urgent:document.getElementById('tkUrgent').value==='1',is_done:false});if(te){alert('Chyba: '+te.message);return;}await loadData();closeModal('modalTask');renderAdminTasks();renderAdminStats();showToast('✅ Úloha pridaná');}
 async function delTask(id){if(!confirm('Odstrániť?'))return;await sb.from('tasks').delete().eq('id',id);await loadData();renderAdminTasks();renderAdminStats();showToast('🗑 Odstránené');}
 </script>
 </body>
