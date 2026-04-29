@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mapa areálu — 3D</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#2E7D32}
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;max-width:430px;margin:0 auto;background:#2E7D32}
+.topbar{background:#1B5E20;padding:env(safe-area-inset-top,12px) 16px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;min-height:52px}
+.topbar-title{font-size:17px;font-weight:700;color:#fff}
+.topbar-sub{font-size:11px;color:rgba(255,255,255,.65);margin-top:1px}
+.legend{display:flex;gap:10px}
+.leg{display:flex;align-items:center;gap:4px;font-size:10px;color:rgba(255,255,255,.8)}
+.leg-dot{width:8px;height:8px;border-radius:50%}
+
+/* MAP */
+.map-wrap{flex:1;overflow:hidden;position:relative;background:linear-gradient(160deg,#4CAF50 0%,#388E3C 40%,#2E7D32 100%)}
+.map-scroll{width:100%;height:100%;overflow:auto;-webkit-overflow-scrolling:touch;position:relative}
+.map-svg{display:block;min-width:100%;min-height:100%}
+
+/* PIN */
+.pin-group{cursor:pointer}
+.pin-group:active .pin-circle{transform:scale(.9)}
+.pin-shadow{fill:rgba(0,0,0,.2);filter:blur(3px)}
+.pin-circle{transition:transform .15s}
+
+/* TOOLTIP */
+.pin-tooltip{
+  position:absolute;
+  background:#fff;
+  border-radius:12px;
+  padding:8px 12px;
+  font-size:12px;
+  font-weight:600;
+  color:#1a1a18;
+  white-space:nowrap;
+  box-shadow:0 4px 20px rgba(0,0,0,.2);
+  pointer-events:none;
+  opacity:0;
+  transform:translateY(4px);
+  transition:opacity .2s,transform .2s;
+  z-index:50;
+}
+.pin-tooltip.show{opacity:1;transform:translateY(0)}
+.pin-tooltip::after{
+  content:'';position:absolute;top:100%;left:50%;
+  transform:translateX(-50%);
+  border:6px solid transparent;
+  border-top-color:#fff;
+}
+
+/* BOTTOM SHEET */
+.sheet-overlay{position:absolute;inset:0;background:rgba(0,0,0,.3);z-index:30;display:none;opacity:0;transition:opacity .3s}
+.sheet-overlay.show{display:block;opacity:1}
+.sheet{
+  position:absolute;bottom:0;left:0;right:0;
+  background:#fff;border-radius:24px 24px 0 0;
+  padding:0;z-index:40;
+  transform:translateY(100%);
+  transition:transform .35s cubic-bezier(.4,0,.2,1);
+  max-height:72%;
+  display:flex;flex-direction:column;
+}
+.sheet.open{transform:translateY(0)}
+.sheet-handle-wrap{padding:12px 16px 0;flex-shrink:0}
+.sheet-handle{width:36px;height:4px;background:#E5E5EA;border-radius:2px;margin:0 auto 14px}
+.sheet-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:0 16px 14px;border-bottom:.5px solid #F2F2F7;flex-shrink:0}
+.sheet-loc{display:flex;align-items:center;gap:12px}
+.sheet-loc-icon{width:46px;height:46px;border-radius:14px;background:#E8F5E9;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.sheet-loc-name{font-size:18px;font-weight:800;color:#000}
+.sheet-loc-meta{font-size:13px;color:#8E8E93;margin-top:2px}
+.sheet-close{background:#F2F2F7;border:none;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sheet-body{overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1;padding:12px 16px}
+.sheet-section-title{font-size:12px;font-weight:700;color:#8E8E93;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.machine-row{display:flex;align-items:center;background:#F8F9FA;border-radius:14px;padding:12px 14px;margin-bottom:8px;gap:12px;cursor:pointer;transition:background .15s;border:.5px solid #F0F0F0}
+.machine-row:active{background:#E8F5E9}
+.machine-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.machine-info{flex:1;min-width:0}
+.machine-name{font-size:14px;font-weight:700;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.machine-loc{font-size:12px;color:#8E8E93;margin-top:2px}
+.machine-badge{font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;flex-shrink:0}
+.ba{background:#2E7D32;color:#fff}
+.bm{background:#F57C00;color:#fff}
+.be{background:#D32F2F;color:#fff}
+.sheet-btn{margin:8px 16px 20px;padding:15px;background:#2E7D32;color:#fff;border:none;border-radius:16px;font-size:15px;font-weight:700;cursor:pointer;width:calc(100% - 32px);display:flex;align-items:center;justify-content:center;gap:8px;flex-shrink:0}
+.sheet-btn:active{opacity:.85}
+.empty-loc{text-align:center;padding:32px;color:#8E8E93;font-size:14px}
+
+/* STATUS BADGE na pine */
+.status-ring-ok{stroke:#2E7D32}
+.status-ring-warn{stroke:#F57C00}
+.status-ring-err{stroke:#D32F2F}
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">🗺 Mapa areálu</div>
+      <div class="topbar-sub">Kliknite na 📍 pre zobrazenie strojov</div>
+    </div>
+    <div class="legend">
+      <div class="leg"><div class="leg-dot" style="background:#2E7D32"></div>OK</div>
+      <div class="leg"><div class="leg-dot" style="background:#F57C00"></div>Údržba</div>
+      <div class="leg"><div class="leg-dot" style="background:#D32F2F"></div>Porucha</div>
+    </div>
+  </div>
+
+  <div class="map-wrap">
+    <div class="map-scroll" id="mapScroll">
+      <svg id="mapSvg" viewBox="0 0 380 680" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;min-height:100%">
+        <defs>
+          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#81C784"/>
+            <stop offset="100%" stop-color="#4CAF50"/>
+          </linearGradient>
+          <linearGradient id="road" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#B0BEC5"/>
+            <stop offset="100%" stop-color="#90A4AE"/>
+          </linearGradient>
+          <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="3" dy="5" stdDeviation="4" flood-color="rgba(0,0,0,0.25)"/>
+          </filter>
+          <filter id="pin-shadow">
+            <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="rgba(0,0,0,0.3)"/>
+          </filter>
+        </defs>
+
+        <!-- POZADIE - tráva / areál -->
+        <rect width="380" height="680" fill="#5A8C4A"/>
+
+        <!-- Vonkajší plot / hranica -->
+        <polygon points="10,30 370,30 370,660 10,660" fill="#4A7A3A" stroke="#3D6B2E" stroke-width="1.5" stroke-dasharray="8,4"/>
+
+        <!-- Cesty -->
+        <!-- Hlavná cesta vertikálna -->
+        <rect x="155" y="30" width="28" height="320" fill="#8D9E8A" opacity=".85"/>
+        <!-- Kruhovka - oblúk -->
+        <ellipse cx="240" cy="180" rx="60" ry="38" fill="none" stroke="#8D9E8A" stroke-width="22" opacity=".85"/>
+        <!-- Cesta horizontálna stred -->
+        <rect x="10" y="390" width="360" height="22" fill="#8D9E8A" opacity=".85"/>
+        <!-- Cesta vertikálna vpravo -->
+        <rect x="290" y="30" width="24" height="370" fill="#8D9E8A" opacity=".7"/>
+        <!-- Parkovisko -->
+        <rect x="290" y="390" width="80" height="120" rx="4" fill="#7A8E78" opacity=".6"/>
+        <!-- Cesta dolu -->
+        <rect x="155" y="390" width="28" height="290" fill="#8D9E8A" opacity=".85"/>
+        <!-- Cesta dolu vpravo -->
+        <rect x="240" y="500" width="24" height="170" fill="#8D9E8A" opacity=".7"/>
+
+        <!-- Ulica Hermanovská hore -->
+        <rect x="0" y="0" width="380" height="28" fill="#78909C"/>
+        <text x="190" y="18" text-anchor="middle" fill="#CFD8DC" font-size="10" font-weight="700" font-family="sans-serif">HERMANOVSKÁ</text>
+
+        <!-- Ulica Prešovská vpravo -->
+        <rect x="354" y="28" width="26" height="652" fill="#78909C"/>
+        <text x="367" y="350" text-anchor="middle" fill="#CFD8DC" font-size="9" font-weight="700" font-family="sans-serif" transform="rotate(90 367 350)">PREŠOVSKÁ</text>
+
+        <!-- Zeleň / stromy -->
+        <g opacity=".7">
+          <circle cx="90" cy="70" r="14" fill="#388E3C"/>
+          <circle cx="90" cy="70" r="10" fill="#4CAF50"/>
+          <circle cx="120" cy="60" r="11" fill="#388E3C"/>
+          <circle cx="120" cy="60" r="8" fill="#4CAF50"/>
+          <circle cx="330" cy="300" r="12" fill="#388E3C"/>
+          <circle cx="330" cy="300" r="8" fill="#4CAF50"/>
+          <circle cx="350" cy="280" r="10" fill="#388E3C"/>
+          <circle cx="260" cy="470" r="13" fill="#388E3C"/>
+          <circle cx="260" cy="470" r="9" fill="#4CAF50"/>
+          <circle cx="80" cy="620" r="12" fill="#388E3C"/>
+          <circle cx="80" cy="620" r="8" fill="#4CAF50"/>
+          <circle cx="340" cy="600" r="11" fill="#388E3C"/>
+          <circle cx="340" cy="600" r="7" fill="#4CAF50"/>
+        </g>
+
+        <!-- ══════════════════════════════ -->
+        <!-- 3D BUDOVY - izometrický štýl  -->
+        <!-- ══════════════════════════════ -->
+
+        <!-- BUDOVA 1: Hlavná výrobná hala (veľká, ľavý stred) -->
+        <!-- Stena ľavá -->
+        <polygon points="18,310 18,420 85,445 85,335" fill="#B0B8A8" filter="url(#shadow)"/>
+        <!-- Stena predná -->
+        <polygon points="85,335 85,445 200,445 200,335" fill="#D4DCCC" filter="url(#shadow)"/>
+        <!-- Strecha -->
+        <polygon points="18,310 85,335 200,335 140,310" fill="#E8EDE0" filter="url(#shadow)"/>
+        <!-- Strecha detail (hrebene) -->
+        <line x1="60" y1="318" x2="145" y2="343" stroke="#C8D0C0" stroke-width="1"/>
+        <line x1="100" y1="322" x2="175" y2="340" stroke="#C8D0C0" stroke-width="1"/>
+        <!-- Okná -->
+        <rect x="100" y="352" width="18" height="24" rx="2" fill="#7BAFD4" opacity=".7"/>
+        <rect x="128" y="352" width="18" height="24" rx="2" fill="#7BAFD4" opacity=".7"/>
+        <rect x="156" y="352" width="18" height="24" rx="2" fill="#7BAFD4" opacity=".7"/>
+        <!-- Dvere -->
+        <rect x="108" y="410" width="22" height="35" rx="2" fill="#8A9880"/>
+        <text x="119" y="380" text-anchor="middle" fill="#6A7860" font-size="8" font-family="sans-serif" font-weight="600">Výrobná hala</text>
+
+        <!-- BUDOVA 2: Administratívna budova (vpravo stred) -->
+        <polygon points="210,340 210,430 290,430 290,340" fill="#D8D0C4" filter="url(#shadow)"/>
+        <polygon points="210,340 290,340 320,320 245,320" fill="#EDE8E0" filter="url(#shadow)"/>
+        <polygon points="210,340 210,430 200,425 200,335" fill="#B8B0A4" filter="url(#shadow)"/>
+        <!-- Okná admin -->
+        <rect x="222" y="356" width="16" height="20" rx="2" fill="#AED6F1" opacity=".8"/>
+        <rect x="248" y="356" width="16" height="20" rx="2" fill="#AED6F1" opacity=".8"/>
+        <rect x="268" y="356" width="16" height="20" rx="2" fill="#AED6F1" opacity=".8"/>
+        <rect x="222" y="388" width="16" height="20" rx="2" fill="#AED6F1" opacity=".8"/>
+        <rect x="248" y="388" width="16" height="20" rx="2" fill="#AED6F1" opacity=".8"/>
+        <!-- Dvere admin -->
+        <rect x="250" y="405" width="20" height="25" rx="2" fill="#9A9288"/>
+
+        <!-- BUDOVA 3: Mlynica / Silo komplex (ľavý vrch) -->
+        <polygon points="18,200 18,310 85,335 85,225" fill="#A8A89A" filter="url(#shadow)"/>
+        <polygon points="85,225 85,335 145,335 145,225" fill="#C8C8BA" filter="url(#shadow)"/>
+        <polygon points="18,200 85,225 145,225 88,200" fill="#DCDCCE" filter="url(#shadow)"/>
+        <!-- Silá / valce -->
+        <ellipse cx="55" cy="235" rx="18" ry="8" fill="#C0C0B2"/>
+        <rect x="37" y="235" width="36" height="60" fill="#B8B8AA"/>
+        <ellipse cx="55" cy="295" rx="18" ry="8" fill="#A8A89A"/>
+        <ellipse cx="90" cy="240" rx="14" ry="6" fill="#C0C0B2"/>
+        <rect x="76" y="240" width="28" height="55" fill="#B8B8AA"/>
+        <ellipse cx="90" cy="295" rx="14" ry="6" fill="#A8A89A"/>
+
+        <!-- BUDOVA 4: Skladové haly hore vpravo -->
+        <polygon points="180,90 180,180 290,180 290,90" fill="#C8C0B0" filter="url(#shadow)"/>
+        <polygon points="180,90 290,90 320,70 215,70" fill="#DEDAD0" filter="url(#shadow)"/>
+        <polygon points="180,90 180,180 168,175 168,85" fill="#AEA898" filter="url(#shadow)"/>
+        <!-- Vstupné brány skladu -->
+        <rect x="200" y="140" width="26" height="40" rx="2" fill="#9A9488"/>
+        <rect x="238" y="140" width="26" height="40" rx="2" fill="#9A9488"/>
+
+        <!-- BUDOVA 5: Malé sklady hore ľavé -->
+        <polygon points="18,100 18,180 90,180 90,100" fill="#C4BEB0" filter="url(#shadow)"/>
+        <polygon points="18,100 90,100 110,85 40,85" fill="#D8D4C8" filter="url(#shadow)"/>
+        <polygon points="18,100 18,180 10,176 10,96" fill="#AAA499" filter="url(#shadow)"/>
+
+        <!-- BUDOVA 6: Servisné centrum (vpravo dole) -->
+        <polygon points="210,450 210,540 290,540 290,450" fill="#C8C4B8" filter="url(#shadow)"/>
+        <polygon points="210,450 290,450 310,435 230,435" fill="#DCD8CC" filter="url(#shadow)"/>
+        <polygon points="210,450 210,540 200,535 200,445" fill="#B4B0A4" filter="url(#shadow)"/>
+        <!-- Okná -->
+        <rect x="224" y="468" width="16" height="20" rx="2" fill="#AED6F1" opacity=".7"/>
+        <rect x="252" y="468" width="16" height="20" rx="2" fill="#AED6F1" opacity=".7"/>
+
+        <!-- BUDOVA 7: Hala B dole ľavá -->
+        <polygon points="18,450 18,560 120,560 120,450" fill="#C0BCAE" filter="url(#shadow)"/>
+        <polygon points="18,450 120,450 138,432 38,432" fill="#D4D0C4" filter="url(#shadow)"/>
+        <polygon points="18,450 18,560 10,555 10,446" fill="#A8A498" filter="url(#shadow)"/>
+        <rect x="50" y="510" width="28" height="50" rx="2" fill="#8A8878"/>
+        <rect x="88" y="510" width="28" height="50" rx="2" fill="#8A8878"/>
+
+        <!-- BUDOVA 8: Dielne / Workshop (dole stred) -->
+        <polygon points="18,580 18,660 140,660 140,580" fill="#BEB8AC" filter="url(#shadow)"/>
+        <polygon points="18,580 140,580 155,565 35,565" fill="#D4CEC4" filter="url(#shadow)"/>
+        <polygon points="18,580 18,660 10,656 10,576" fill="#A8A29A" filter="url(#shadow)"/>
+
+        <!-- BUDOVA 9: Sklady dole vpravo -->
+        <polygon points="210,560 210,660 340,660 340,560" fill="#C4BEB0" filter="url(#shadow)"/>
+        <polygon points="210,560 340,560 352,545 222,545" fill="#D8D4C8" filter="url(#shadow)"/>
+        <polygon points="210,560 210,660 200,655 200,555" fill="#AEA8A0" filter="url(#shadow)"/>
+        <rect x="230" y="600" width="30" height="60" rx="2" fill="#9A9488"/>
+        <rect x="278" y="600" width="30" height="60" rx="2" fill="#9A9488"/>
+
+        <!-- Dopravný pás / conveyor -->
+        <line x1="145" y1="490" x2="210" y2="540" stroke="#8A8070" stroke-width="8" opacity=".8"/>
+        <line x1="145" y1="490" x2="210" y2="540" stroke="#A09888" stroke-width="4" opacity=".6" stroke-dasharray="8,4"/>
+        <!-- Silo veže dole ľavo -->
+        <ellipse cx="55" cy="590" rx="20" ry="9" fill="#B0A898"/>
+        <rect x="35" y="590" width="40" height="70" fill="#A8A090"/>
+        <ellipse cx="55" cy="660" rx="20" ry="9" fill="#989088"/>
+
+        <!-- ══════════════════════════════ -->
+        <!-- PINS so statusom               -->
+        <!-- ══════════════════════════════ -->
+
+        <!-- PIN 1: Výrobná hala -->
+        <g class="pin-group" onclick="openBuilding('vyrobna')" id="pin-vyrobna">
+          <ellipse cx="152" cy="358" rx="10" ry="4" fill="rgba(0,0,0,.2)" class="pin-shadow"/>
+          <path d="M152 320 C145 320 138 326 138 334 C138 344 152 358 152 358 C152 358 166 344 166 334 C166 326 159 320 152 320Z" fill="#D32F2F" filter="url(#pin-shadow)" class="pin-circle"/>
+          <circle cx="152" cy="333" r="5" fill="#fff" opacity=".9"/>
+          <text x="152" y="336" text-anchor="middle" fill="#D32F2F" font-size="7" font-weight="700" font-family="sans-serif">!</text>
+        </g>
+
+        <!-- PIN 2: Admin budova -->
+        <g class="pin-group" onclick="openBuilding('admin')" id="pin-admin">
+          <ellipse cx="255" cy="365" rx="10" ry="4" fill="rgba(0,0,0,.2)"/>
+          <path d="M255 327 C248 327 241 333 241 341 C241 351 255 365 255 365 C255 365 269 351 269 341 C269 333 262 327 255 327Z" fill="#2E7D32" filter="url(#pin-shadow)" class="pin-circle"/>
+          <circle cx="255" cy="340" r="5" fill="#fff" opacity=".9"/>
+        </g>
+
+        <!-- PIN 3: Mlynica -->
+        <g class="pin-group" onclick="openBuilding('mlynica')" id="pin-mlynica">
+          <ellipse cx="100" cy="250" rx="10" ry="4" fill="rgba(0,0,0,.2)"/>
+          <path d="M100 212 C93 212 86 218 86 226 C86 236 100 250 100 250 C100 250 114 236 114 226 C114 218 107 212 100 212Z" fill="#F57C00" filter="url(#pin-shadow)" class="pin-circle"/>
+          <circle cx="100" cy="225" r="5" fill="#fff" opacity=".9"/>
+          <text x="100" y="228" text-anchor="middle" fill="#F57C00" font-size="7" font-weight="700" font-family="sans-serif">~</text>
+        </g>
+
+        <!-- PIN 4: Sklady hore -->
+        <g class="pin-group" onclick="openBuilding('sklad_hore')" id="pin-sklad_hore">
+          <ellipse cx="240" cy="118" rx="10" ry="4" fill="rgba(0,0,0,.2)"/>
+          <path d="M240 80 C233 80 226 86 226 94 C226 104 240 118 240 118 C240 118 254 104 254 94 C254 86 247 80 240 80Z" fill="#2E7D32" filter="url(#pin-shadow)" class="pin-circle"/>
+          <circle cx="240" cy="93" r="5" fill="#fff" opacity=".9"/>
+        </g>
+
+        <!-- PIN 5: Malé sklady ľavo -->
+        <g class="pin-group" onclick="openBuilding('sklad_lavy')" id="pin-sklad_lavy">
+          <ellipse cx="55" cy="142" rx="10" ry="4" fill="rgba(0,0,0,.2)"/>
+          <path d="M55 104 C48 104 41 110 41 118 C41 128 55 142 55 142 C55 142 69 128 69 118 C69 110 62 104 55 104Z" fill="#2E7D32" filter="url(#pin-shadow)" class="pin-circle"/>
+          <circle cx="55" cy="117" r="5" fill="#fff" opacity=".9"/>
+        </g>
+
+        <!-- PIN 6: Servis -->
+        <g class="pin-group" onclick="openBuilding('servis')" id="pin-servis">
+          <ellipse cx="255" cy="470" rx="10" ry="4" fill="rgba(0,0,0,.2)"/>
+          <path d="M255 432 C248 432 241 438 241 446 C241 456 255 470 255 470 C255 470 269 456 269 446 C269 438 262 432 255 432Z" fill="#2E7D32" filter="url(#pin-shadow)" class="pin-circle"/>
+          <circle cx="255" cy="445" r="5" fill="#fff" opacity=".9"/>
+        </g>
+
+        <!-- PIN 7: Hala B -->
+        <g class="pin-group" onclick="openBuilding('hala_b')" id="pin-hala_b">
+          <ellipse cx="70" cy="468" rx="10" ry="4" fill="rgba(0,0,0,.2)"/>
+          <path d="M70 430 C63 430 56 436 56 444 C56 454 70 468 70 468 C70 468 84 454 84 444 C84 436 77 430 70 430Z" fill="#D32F2F" filter="url(#pin-shadow)" class="pin-circle"/>
+          <circle cx="70" cy="443" r="5" fill="#fff" opacity=".9"/>
+          <text x="70" y="446" text-anchor="middle" fill="#D32F2F" font-size="7" font-weight="700" font-family="sans-serif">!</text>
+        </g>
+
+        <!-- PIN 8: Dielne -->
+        <g class="pin-group" onclick="openBuilding('dielne')" id="pin-dielne">
+          <ellipse cx="80" cy="595" rx="10" ry="4" fill="rgba(0,0,0,.2)"/>
+          <path d="M80 557 C73 557 66 563 66 571 C66 581 80 595 80 595 C80 595 94 581 94 571 C94 563 87 557 80 557Z" fill="#2E7D32" filter="url(#pin-shadow)" class="pin-circle"/>
+          <circle cx="80" cy="570" r="5" fill="#fff" opacity=".9"/>
+        </g>
+
+        <!-- PIN 9: Sklady dole -->
+        <g class="pin-group" onclick="openBuilding('sklad_dole')" id="pin-sklad_dole">
+          <ellipse cx="275" cy="578" rx="10" ry="4" fill="rgba(0,0,0,.2)"/>
+          <path d="M275 540 C268 540 261 546 261 554 C261 564 275 578 275 578 C275 578 289 564 289 554 C289 546 282 540 275 540Z" fill="#2E7D32" filter="url(#pin-shadow)" class="pin-circle"/>
+          <circle cx="275" cy="553" r="5" fill="#fff" opacity=".9"/>
+        </g>
+
+        <!-- Kompas -->
+        <g transform="translate(340,55)">
+          <circle r="16" fill="rgba(255,255,255,.2)" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+          <text x="0" y="-6" text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="sans-serif">N</text>
+          <polygon points="0,-14 3,-2 -3,-2" fill="#fff" opacity=".9"/>
+          <polygon points="0,14 3,2 -3,2" fill="rgba(255,255,255,.4)"/>
+        </g>
+      </svg>
+    </div>
+
+    <!-- Sheet overlay -->
+    <div class="sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
+
+    <!-- Bottom Sheet -->
+    <div class="sheet" id="sheet">
+      <div class="sheet-handle-wrap">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+          <div class="sheet-loc">
+            <div class="sheet-loc-icon" id="sheetIcon">🏭</div>
+            <div>
+              <div class="sheet-loc-name" id="sheetName">—</div>
+              <div class="sheet-loc-meta" id="sheetMeta">—</div>
+            </div>
+          </div>
+          <button class="sheet-close" onclick="closeSheet()">×</button>
+        </div>
+      </div>
+      <div class="sheet-body">
+        <div class="sheet-section-title">Stroje na tejto lokácii</div>
+        <div id="sheetMachines"></div>
+      </div>
+      <button class="sheet-btn" id="sheetBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+        Zobraziť všetky stroje
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const LOCATIONS = {
+  vyrobna:{
+    name:'Výrobná hala',icon:'🏗️',
+    meta:'Hlavná výrobná hala · 4 stroje · 1 porucha',
+    status:'err',
+    machines:[
+      {icon:'🔩',name:'CNC Frézka TF-300',loc:'Pozícia A12',status:'ok'},
+      {icon:'🤖',name:'Zvárací robot WR-200',loc:'Pozícia C07',status:'ok'},
+      {icon:'⚙️',name:'Sústruh SU-450',loc:'Pozícia A08',status:'ok'},
+      {icon:'🔄',name:'Dopravný pás DP-12',loc:'Linka 3',status:'err'},
+    ]
+  },
+  admin:{
+    name:'Administratíva',icon:'🏢',
+    meta:'Administratívna budova · 1 stroj',
+    status:'ok',
+    machines:[
+      {icon:'❄️',name:'Klimatizácia KL-1',loc:'Strojovňa',status:'ok'},
+    ]
+  },
+  mlynica:{
+    name:'Mlynica',icon:'🌾',
+    meta:'Mlynský komplex · 3 stroje · 1 v údržbe',
+    status:'warn',
+    machines:[
+      {icon:'⚙️',name:'Mlynský valec MV-1',loc:'Mlynica 1',status:'warn'},
+      {icon:'🔩',name:'Čistička obilia C-3',loc:'Mlynica 2',status:'ok'},
+      {icon:'⚡',name:'Elevátor EL-2',loc:'Silo A',status:'ok'},
+    ]
+  },
+  sklad_hore:{
+    name:'Skladové haly',icon:'🏪',
+    meta:'Sklady vstupných surovín · 2 stroje',
+    status:'ok',
+    machines:[
+      {icon:'🔄',name:'Nakladač NK-1',loc:'Sklad S1',status:'ok'},
+      {icon:'⚡',name:'Vykládací dopravník VD-2',loc:'Sklad S2',status:'ok'},
+    ]
+  },
+  sklad_lavy:{
+    name:'Sklad surovín',icon:'📦',
+    meta:'Ľavý sklad · 2 stroje',
+    status:'ok',
+    machines:[
+      {icon:'🔄',name:'Pásový dopravník PD-1',loc:'Sklad L1',status:'ok'},
+      {icon:'⚙️',name:'Triediaci stroj TS-3',loc:'Sklad L2',status:'ok'},
+    ]
+  },
+  servis:{
+    name:'Servisné centrum',icon:'🔧',
+    meta:'Dielňa a servis · 2 stroje',
+    status:'ok',
+    machines:[
+      {icon:'🔧',name:'Kompresor Atlas K-50',loc:'Servis S1',status:'ok'},
+      {icon:'⚡',name:'Zvárací agregát ZA-2',loc:'Servis S2',status:'ok'},
+    ]
+  },
+  hala_b:{
+    name:'Hala B',icon:'🏭',
+    meta:'Výrobná hala B · 3 stroje · 1 porucha',
+    status:'err',
+    machines:[
+      {icon:'🔩',name:'Balička B-4',loc:'Linka 1',status:'ok'},
+      {icon:'🔄',name:'Plniaca stanica PS-2',loc:'Linka 2',status:'err'},
+      {icon:'⚙️',name:'Vákuová pumpa VP-1',loc:'Technická miestnosť',status:'ok'},
+    ]
+  },
+  dielne:{
+    name:'Dielne',icon:'🛠️',
+    meta:'Opravovne a dielne · 2 stroje',
+    status:'ok',
+    machines:[
+      {icon:'🔧',name:'Sústruh DS-1',loc:'Dielňa 1',status:'ok'},
+      {icon:'⚡',name:'Zváračka DS-3',loc:'Dielňa 2',status:'ok'},
+    ]
+  },
+  sklad_dole:{
+    name:'Sklady hotových výrobkov',icon:'📫',
+    meta:'Expedičné sklady · 2 stroje',
+    status:'ok',
+    machines:[
+      {icon:'🔄',name:'Skladový vozík AV-1',loc:'Sklad E1',status:'ok'},
+      {icon:'⚙️',name:'Paletizátor PA-2',loc:'Sklad E2',status:'ok'},
+    ]
+  },
+};
+
+function bc(s){return s==='ok'?'ba':s==='warn'?'bm':'be';}
+function bgColor(s){return s==='ok'?'#E8F5E9':s==='warn'?'#FFF3E0':'#FFEBEE';}
+function stLabel(s){return s==='ok'?'OK':s==='warn'?'Údržba':'Porucha';}
+
+function openBuilding(id){
+  const loc=LOCATIONS[id];
+  if(!loc)return;
+  document.getElementById('sheetIcon').textContent=loc.icon;
+  document.getElementById('sheetName').textContent=loc.name;
+  document.getElementById('sheetMeta').textContent=loc.meta;
+  document.getElementById('sheetMachines').innerHTML=loc.machines.length
+    ?loc.machines.map(m=>`
+      <div class="machine-row">
+        <div class="machine-icon" style="background:${bgColor(m.status)}">${m.icon}</div>
+        <div class="machine-info">
+          <div class="machine-name">${m.name}</div>
+          <div class="machine-loc">${m.loc}</div>
+        </div>
+        <span class="machine-badge ${bc(m.status)}">${stLabel(m.status)}</span>
+      </div>`).join('')
+    :'<div class="empty-loc">Žiadne stroje na tejto lokácii</div>';
+  document.getElementById('sheet').classList.add('open');
+  document.getElementById('sheetOverlay').classList.add('show');
+}
+function closeSheet(){
+  document.getElementById('sheet').classList.remove('open');
+  document.getElementById('sheetOverlay').classList.remove('show');
+}
+</script>
+</body>
+</html>
