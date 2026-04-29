@@ -829,25 +829,11 @@ function goTabTasks(){
 }
 
 function goTabSklad(){
-  // Hide all tabs
-  ['tDash','tScan','tMachines','tMap','tProfile','tSklad'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el)el.classList.add('off');
-  });
-  document.getElementById('vDetail')?.classList.add('off');
-  // Show sklad
-  document.getElementById('tSklad').classList.remove('off');
-  // Update navbar - none active
-  ['nDash','nScan','nMachines','nMap','nProfile'].forEach(id=>{
-    document.getElementById(id)?.classList.remove('on');
-  });
-  CT='sklad';
-  stopScan();
+  goTab('sklad');
   renderSklad();
 }
 
 function renderSklad(){
-  // Reset header
   const titleEl=document.querySelector('#tSklad .ptitle');
   if(titleEl)titleEl.textContent='Sklad — náhradné diely';
   const backBtn=document.getElementById('skladBackBtn');
@@ -891,27 +877,14 @@ function renderSklad(){
 }
 
 function showAllTasks(){
-  // Hide all tabs, show tSklad-style view using tSklad but with tasks content
-  ['tDash','tScan','tMachines','tMap','tProfile','tSklad'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el)el.classList.add('off');
-  });
-  document.getElementById('vDetail')?.classList.add('off');
-  ['nDash','nScan','nMachines','nMap','nProfile'].forEach(id=>{
-    document.getElementById(id)?.classList.remove('on');
-  });
-  // Reuse tSklad view but show tasks
-  document.getElementById('tSklad').classList.remove('off');
-  // Change header title temporarily
-  document.querySelector('#tSklad .ptitle').textContent='Všetky úlohy';
-  document.querySelector('#tSklad .hbtn').onclick=()=>{
-    document.querySelector('#tSklad .ptitle').textContent='Sklad — náhradné diely';
-    document.querySelector('#tSklad .hbtn').onclick=()=>goTab('dash');
-    goTab('dash');
-  };
-  CT='tasks-all';
+  goTab('sklad');
+  // Set title and back button
+  const titleEl=document.querySelector('#tSklad .ptitle');
+  if(titleEl)titleEl.textContent='Všetky úlohy';
+  const backBtn=document.getElementById('skladBackBtn');
+  if(backBtn)backBtn.onclick=()=>{goTab('dash');};
+  CT='sklad';
   stopScan();
-  // Render tasks
   const all=MACHINES.flatMap(m=>m.tasks.map(t=>({...t,mn:m.name,mic:m.icon||'⚙️'})));
   document.getElementById('skladList').innerHTML=all.length?all.map(t=>`
     <div class="tkcard" style="margin:0 0 8px">
@@ -931,11 +904,21 @@ function showAllTasks(){
 
 // ── TABS ──
 function goTab(t){
-  ['dash','scan','machines','map','profile'].forEach(x=>{
-    document.getElementById('t'+x.charAt(0).toUpperCase()+x.slice(1))?.classList.toggle('off',x!==t);
-    document.getElementById('n'+x.charAt(0).toUpperCase()+x.slice(1))?.classList.toggle('on',x===t);
+  // Hide ALL possible views
+  ['tDash','tScan','tMachines','tMap','tProfile','tSklad'].forEach(id=>{
+    document.getElementById(id)?.classList.add('off');
   });
   document.getElementById('vDetail')?.classList.add('off');
+  // Update navbar
+  ['nDash','nScan','nMachines','nMap','nProfile'].forEach(id=>{
+    document.getElementById(id)?.classList.remove('on');
+  });
+  // Show the right tab
+  const tabId = 't'+t.charAt(0).toUpperCase()+t.slice(1);
+  document.getElementById(tabId)?.classList.remove('off');
+  // Activate navbar button
+  const navId = 'n'+t.charAt(0).toUpperCase()+t.slice(1);
+  document.getElementById(navId)?.classList.add('on');
   CT=t;
   if(t==='scan')startScan();else stopScan();
   if(t==='map')initMap();
