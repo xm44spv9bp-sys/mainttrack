@@ -867,15 +867,12 @@ function closeDetail(){
 }
 
 function openDetailFromScan(id){
-  // Hide the scan tab completely before opening detail
+  // Hide scan tab first, keep CT='scan' so back button returns to scan
   stopScan();
+  document.getElementById('sheet').classList.remove('on');
   document.getElementById('tScan').classList.add('off');
-  CT='scan'; // remember we came from scan
-  const m=MACHINES.find(m=>m.id===id);if(!m)return;
-  RECENT=([id,...RECENT.filter(r=>r!==id)]).slice(0,5);
-  document.getElementById('vDetail').classList.remove('off');
-  const specs=[['Výrobca',m.manufacturer||'—'],['Rok výroby',m.year||'—'],['Výr. číslo',m.serial_number||'—'],['Zodpovedný',m.technician||'—']];
-  document.getElementById('detailBody').innerHTML=buildDetailHTML(m,specs);
+  CT='scan';
+  openDetail(id);
 }
 function swSeg(t){document.getElementById('segSpec').classList.toggle('on',t==='spec');document.getElementById('segParts').classList.toggle('on',t==='parts');document.getElementById('pSpec').style.display=t==='spec'?'':'none';document.getElementById('pParts').style.display=t==='parts'?'':'none';}
 function swPT(t){document.getElementById('ptP').classList.toggle('on',t==='parts');document.getElementById('ptT').classList.toggle('on',t==='tasks');document.getElementById('ppParts').style.display=t==='parts'?'':'none';document.getElementById('ppTasks').style.display=t==='tasks'?'':'none';}
