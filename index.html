@@ -931,6 +931,18 @@ function goTabTasks(){
 function goTabSklad(){
   SKLAD_TAB='all';
   goTab('sklad');
+  // Reset tabs to sklad mode
+  document.getElementById('stAll').innerHTML='Všetky <span class="stab-cnt" style="background:var(--gray3);color:var(--gray)" id="stAllCnt">0</span>';
+  document.getElementById('stWarn').innerHTML='Upozornenia <span class="stab-cnt" id="stWarnCnt">0</span>';
+  document.getElementById('stAll').onclick=()=>switchSkladTab('all');
+  document.getElementById('stWarn').onclick=()=>switchSkladTab('warn');
+  document.getElementById('stAll').classList.add('on');
+  document.getElementById('stWarn').classList.remove('on');
+  document.getElementById('stWarn').classList.add('warn-tab');
+  const titleEl=document.querySelector('#tSklad .ptitle');
+  if(titleEl)titleEl.textContent='Sklad';
+  const backBtn=document.getElementById('skladBackBtn');
+  if(backBtn)backBtn.onclick=()=>goTab('dash');
   renderSklad();
 }
 
@@ -963,6 +975,32 @@ function toggleAllNotifDetail(id){
 // ══════════════════════════════
 // SKLAD & NOTIFICATIONS
 // ══════════════════════════════
+
+function renderTasksInSklad(filter){
+  // Update active tab
+  document.getElementById('stAll').classList.toggle('on', filter==='all');
+  document.getElementById('stWarn').classList.toggle('on', filter==='open');
+  const all=MACHINES.flatMap(m=>m.tasks.map(t=>({...t,mn:m.name,mic:m.icon||'⚙️'})));
+  const open=all.filter(t=>!t.is_done);
+  // Update counts
+  document.getElementById('stAllCnt').textContent=all.length;
+  document.getElementById('stWarnCnt').textContent=open.length;
+  const list=filter==='all'?all:open;
+  document.getElementById('skladList').innerHTML=list.length?list.map(t=>`
+    <div class="tkcard" style="margin:0 0 8px">
+      <div style="font-size:12px;color:var(--g1);font-weight:600;margin-bottom:6px">${t.mic} ${t.mn}</div>
+      <div class="tk-top">
+        <div class="tkbox${t.is_done?' ck':''}">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><polyline points="2,7 6,11 12,3" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <div style="flex:1">
+          <div class="tk-name">${t.name}${t.is_urgent?' 🔴':''}</div>
+          <div class="tk-sub">${t.description||''}</div>
+        </div>
+      </div>
+    </div>`).join('')
+  :'<div class="empty-state">Žiadne úlohy 🎉</div>';
+}
 
 function switchSkladTab(tab){
   SKLAD_TAB=tab;
@@ -1238,29 +1276,28 @@ function toggleWG(bodyId,arrId){
 }
 
 function showAllTasks(){
+  // Use tSklad view but with task content
   goTab('sklad');
-  // Set title and back button
-  const titleEl=document.querySelector('#tSklad .ptitle');
-  if(titleEl)titleEl.textContent='Všetky úlohy';
-  const backBtn=document.getElementById('skladBackBtn');
-  if(backBtn)backBtn.onclick=()=>{goTab('dash');};
   CT='sklad';
   stopScan();
-  const all=MACHINES.flatMap(m=>m.tasks.map(t=>({...t,mn:m.name,mic:m.icon||'⚙️'})));
-  document.getElementById('skladList').innerHTML=all.length?all.map(t=>`
-    <div class="tkcard" style="margin:0 0 8px">
-      <div style="font-size:12px;color:var(--g1);font-weight:600;margin-bottom:6px">${t.mic} ${t.mn}</div>
-      <div class="tk-top">
-        <div class="tkbox${t.is_done?' ck':''}">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><polyline points="2,7 6,11 12,3" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
-        </div>
-        <div style="flex:1">
-          <div class="tk-name">${t.name}${t.is_urgent?' 🔴':''}</div>
-          <div class="tk-sub">${t.description||''}</div>
-        </div>
-      </div>
-    </div>`).join('')
-  :'<div class="empty-state">Žiadne úlohy</div>';
+  // Update header
+  const titleEl=document.querySelector('#tSklad .ptitle');
+  if(titleEl)titleEl.textContent='Úlohy';
+  const backBtn=document.getElementById('skladBackBtn');
+  if(backBtn)backBtn.onclick=()=>goTab('dash');
+  // Update tabs to show task tabs
+  document.getElementById('stAll').textContent='';
+  document.getElementById('stAll').innerHTML='Všetky <span class="stab-cnt" style="background:var(--gray3);color:var(--gray)" id="stAllCnt">0</span>';
+  document.getElementById('stWarn').textContent='';
+  document.getElementById('stWarn').innerHTML='Nesplnené <span class="stab-cnt" id="stWarnCnt">0</span>';
+  document.getElementById('stAll').classList.add('on');
+  document.getElementById('stAll').classList.remove('warn-tab');
+  document.getElementById('stWarn').classList.remove('on');
+  document.getElementById('stWarn').classList.add('warn-tab');
+  // Override tab switch for tasks mode
+  document.getElementById('stAll').onclick=()=>renderTasksInSklad('all');
+  document.getElementById('stWarn').onclick=()=>renderTasksInSklad('open');
+  renderTasksInSklad('all');
 }
 
 // ── TABS ──
@@ -1356,7 +1393,7 @@ function openDetail(id){
     <div id="pParts" style="display:none">
       <div class="ptabs"><button class="ptab-b on" id="ptP" onclick="swPT('parts')">Náhradné diely</button><button class="ptab-b" id="ptT" onclick="swPT('tasks')">Úlohy</button></div>
       <div id="ppParts">
-        ${m.parts.length?m.parts.map((p,pi)=>{const sc=p.stock_status==='ok'?'sok':p.stock_status==='low'?'slow':'sout';const si=p.stock_status==='ok'?'✅':p.stock_status==='low'?'⚠️':'❌';const qty=p.quantity??0;return`<div class="pcard"><div class="pcard-top"><div class="pimg">${p.icon||'🔩'}</div><div style="flex:1;min-width:0"><div class="pname">${p.name}</div><div class="ppn">P/N: ${p.part_number||'—'}</div><div class="pstock ${sc}" id="pstock_${m.id}_${pi}">${si} ${p.stock_label||''}</div><div style="font-size:11px;color:var(--gray);margin-top:2px">Sklad: <strong id="pqty_${m.id}_${pi}" style="color:${sc==='sok'?'var(--g1)':sc==='slow'?'var(--ora)':'var(--red)'}">${qty} ks</strong></div></div></div><div class="pacts"><button class="pact pact-p" id="usebtn_${m.id}_${pi}" onclick="toggleUseQty('use_${m.id}_${pi}',this)">Označiť použitý</button></div><div id="use_${m.id}_${pi}" style="display:none;padding:10px 14px;background:var(--gray3);border-top:.5px solid var(--border);align-items:center;gap:8px"><span style="font-size:12px;color:var(--gray);flex:1">Počet:</span><button class="doplnq-btn m" onclick="let v=document.getElementById('uqty_${m.id}_${pi}');v.textContent=Math.max(1,parseInt(v.textContent)-1)">−</button><span class="doplnq-val" id="uqty_${m.id}_${pi}">1</span><button class="doplnq-btn p" onclick="let v=document.getElementById('uqty_${m.id}_${pi}');v.textContent=Math.min(${Math.max(1,qty)},parseInt(v.textContent)+1)">+</button><button class="dopln-confirm" style="background:var(--red)" onclick="markUsed(${p.id},'${m.id}',${pi},'uqty_${m.id}_${pi}')">✓</button></div></div>`;
+        ${m.parts.length?m.parts.map((p,pi)=>{const sc=p.stock_status==='ok'?'sok':p.stock_status==='low'?'slow':'sout';const si=p.stock_status==='ok'?'✅':p.stock_status==='low'?'⚠️':'❌';const qty=p.quantity??0;return`<div class="pcard"><div class="pcard-top"><div class="pimg">${p.icon||'🔩'}</div><div style="flex:1;min-width:0"><div class="pname">${p.name}</div><div class="ppn">P/N: ${p.part_number||'—'}</div><div class="pstock ${sc}" id="pstock_${m.id}_${pi}">${si} ${p.stock_label||''}</div><div style="font-size:11px;color:var(--gray);margin-top:2px">Sklad: <strong id="pqty_${m.id}_${pi}" style="color:${sc==='sok'?'var(--g1)':sc==='slow'?'var(--ora)':'var(--red)'}">${qty} ks</strong></div></div></div><div class="pacts"><button class="pact pact-p" id="usebtn_${m.id}_${pi}" onclick="toggleUseQty('use_${m.id}_${pi}',this)">Označiť použitý</button></div><div id="use_${m.id}_${pi}" style="display:none;padding:10px 14px;background:var(--gray3);border-top:.5px solid var(--border);align-items:center;gap:8px"><span style="font-size:12px;color:var(--gray);flex:1">Počet:</span><button class="doplnq-btn m" onclick="let v=document.getElementById('uqty_${m.id}_${pi}');v.textContent=Math.max(1,parseInt(v.textContent)-1)">−</button><span class="doplnq-val" id="uqty_${m.id}_${pi}">1</span><button class="doplnq-btn p" onclick="let v=document.getElementById('uqty_${m.id}_${pi}');v.textContent=Math.min(${Math.max(1,qty)},parseInt(v.textContent)+1)">+</button><button class="dopln-confirm" style="background:var(--g1)" onclick="markUsed(${p.id},'${m.id}',${pi},'uqty_${m.id}_${pi}')">✓ Potvrdiť</button></div></div>`;
 }).join(''):'<div style="padding:20px;font-size:13px;color:var(--gray);text-align:center">Žiadne náhradné diely</div>'}:'<div style="padding:20px;font-size:13px;color:var(--gray);text-align:center">Žiadne úlohy</div>'}
         <div style="height:16px"></div>
       </div>
