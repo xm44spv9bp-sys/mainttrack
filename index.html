@@ -1036,24 +1036,50 @@ async function updatePartQty(partId,machineId,delta){
   p.quantity=newQty;p.stock_status=newStatus;p.stock_label=newLabel;
 }
 
+async function updatePartInDB(partId,machineId,newQty){
+  const m=MACHINES.find(m=>m.id===machineId);if(!m)return null;
+  const p=m.parts.find(p=>p.id===partId);if(!p)return null;
+  const min=p.min_quantity||0;
+  const newStatus=newQty===0?'out':newQty<=min?'low':'ok';
+  const newLabel=newQty===0?'Nedostupný':newQty<=min?'Posledné kusy ('+newQty+' ks)':'Na sklade ('+newQty+' ks)';
+  const{error}=await sb.from('parts').update({quantity:newQty,stock_status:newStatus,stock_label:newLabel}).eq('id',partId);
+  if(error){showToast('❌ '+error.message);return null;}
+  // Update local cache immediately - no reload needed
+  p.quantity=newQty;p.stock_status=newStatus;p.stock_label=newLabel;
+  return{p,newStatus,min};
+}
+
+async function quickQty(partId,machineId,delta,uid){
+  const m=MACHINES.find(m=>m.id===machineId);if(!m)return;
+  const p=m.parts.find(p=>p.id===partId);if(!p)return;
+  const newQty=Math.max(0,(p.quantity||0)+delta);
+  const result=await updatePartInDB(partId,machineId,newQty);
+  if(!result)return;
+  // Update just the display element - no full re-render
+  const el=document.getElementById('qv_'+uid);
+  if(el){
+    el.textContent=newQty+' ks';
+    el.style.color=newQty===0?'var(--red)':newQty<=result.min&&newQty>0?'var(--ora)':'var(--g1)';
+  }
+  // Update badge on sklad card
+  renderDashNotifications();
+}
+
 async function confirmDopln(partId,machineId,addQtyId){
   const addQty=parseInt(document.getElementById(addQtyId).textContent)||0;
   if(addQty<=0)return;
-  const m=MACHINES.find(m=>m.id===machineId);
-  if(!m)return;
-  const p=m.parts.find(p=>p.id===partId);
-  if(!p)return;
+  const m=MACHINES.find(m=>m.id===machineId);if(!m)return;
+  const p=m.parts.find(p=>p.id===partId);if(!p)return;
   const newQty=(p.quantity||0)+addQty;
-  const newStatus=newQty===0?'out':newQty<=(p.min_quantity||0)?'low':'ok';
-  const newLabel=newQty===0?'Nedostupný':newQty<=(p.min_quantity||0)?'Posledné kusy ('+newQty+' ks)':'Na sklade ('+newQty+' ks)';
-  const{error}=await sb.from('parts').update({quantity:newQty,stock_status:newStatus,stock_label:newLabel}).eq('id',partId);
-  if(error){showToast('❌ Chyba: '+error.message);return;}
-  // Create notification manually for restocking
-  if(newQty>(p.min_quantity||0)){
+  const result=await updatePartInDB(partId,machineId,newQty);
+  if(!result)return;
+  // Add success notification if restocked above minimum
+  if(newQty>(p.min_quantity||0)&&(p.quantity||0)<=(p.min_quantity||0)){
     await sb.from('notifications').insert({type:'success',title:'Sklad doplnený',message:p.name+' bol doplnený o '+addQty+' ks. Nový stav: '+newQty+' ks.',link_type:'part',link_id:String(partId)});
+    const{data:notifs}=await sb.from('notifications').select('*').order('created_at',{ascending:false}).limit(50);
+    NOTIFICATIONS=notifs||[];
   }
-  p.quantity=newQty;p.stock_status=newStatus;p.stock_label=newLabel;
-  await loadData();
+  // Re-render sklad in place - instant, no page reload
   renderSklad();
   renderDashNotifications();
   showToast('✅ '+p.name+' doplnený o '+addQty+' ks');
@@ -1090,7 +1116,7 @@ function renderSklad(){
     list.innerHTML=Object.values(byMachine).map(g=>`
       <div style="font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;margin:4px 0 8px">${g.icon} ${g.name}</div>
       <div class="pcard" style="margin-bottom:12px">
-        ${g.parts.map((p,pi)=>partRow(p,pi+'_all')).join('')}
+        ${g.parts.map((p,pi)=>partRow(p,pi+'_all','all')).join('')}
       </div>`).join('')||'<div class="empty-state">Žiadne diely</div>';
   } else {
     // Warn tab - grouped by severity
@@ -1100,7 +1126,7 @@ function renderSklad(){
           <span class="wg-ic">❌</span><span class="wg-title">Nedostupné diely</span>
           <span class="wg-cnt">${errParts.length}</span><span class="wg-arr" id="aarr">▾</span>
         </div>
-        <div class="wg-body" id="werr">${errParts.map((p,i)=>partRow(p,'e'+i)).join('')}</div>
+        <div class="wg-body" id="werr">${errParts.map((p,i)=>partRow(p,'e'+i,'warn')).join('')}</div>
       </div>`:'')
     +(lowParts.length?`
       <div class="wg low">
@@ -1108,7 +1134,7 @@ function renderSklad(){
           <span class="wg-ic">⚠️</span><span class="wg-title">Pod minimálnym množstvom</span>
           <span class="wg-cnt">${lowParts.length}</span><span class="wg-arr" id="larr">▾</span>
         </div>
-        <div class="wg-body" id="wlow">${lowParts.map((p,i)=>partRow(p,'l'+i)).join('')}</div>
+        <div class="wg-body" id="wlow">${lowParts.map((p,i)=>partRow(p,'l'+i,'warn')).join('')}</div>
       </div>`:'')
     +(okParts.length?`
       <div class="wg ok">
@@ -1116,22 +1142,37 @@ function renderSklad(){
           <span class="wg-ic">✅</span><span class="wg-title">V poriadku</span>
           <span class="wg-cnt">${okParts.length}</span><span class="wg-arr cl" id="oarr">▾</span>
         </div>
-        <div class="wg-body" id="wok" style="display:none">${okParts.map((p,i)=>partRow(p,'o'+i)).join('')}</div>
+        <div class="wg-body" id="wok" style="display:none">${okParts.map((p,i)=>partRow(p,'o'+i,'all')).join('')}</div>
       </div>`:'')
     ||'<div class="empty-state">Žiadne upozornenia 🎉</div>';
   }
 }
 
-function partRow(p,uid){
-  const qty=p.quantity??'?';
+function partRow(p,uid,mode){
+  const qty=p.quantity??0;
   const min=p.min_quantity||0;
-  const qtyColor=p.quantity===0?'var(--red)':p.quantity<=min&&p.quantity>0?'var(--ora)':'var(--g1)';
-  const qtyText=p.quantity!==undefined?(p.quantity+(min>0?'/'+min:'')+' ks'):(p.stock_label||'?');
+  const qtyColor=qty===0?'var(--red)':qty<=min&&qty>0?'var(--ora)':'var(--g1)';
+  const qtyDisp=p.quantity!==undefined?qty+' ks':(p.stock_label||'?');
+  // ALL tab: show inline +/- for quick quantity change
+  if(mode==='all'){
+    return`<div class="pr">
+      <div class="pr-main" style="gap:8px">
+        <span class="pr-ic">${p.icon||'🔩'}</span>
+        <span class="pr-name">${p.name}</span>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto">
+          <button class="doplnq-btn m" onclick="quickQty(${p.id},'${p.machineId||p.machine_id}',-1,'${uid}')">−</button>
+          <span class="doplnq-val" id="qv_${uid}" style="color:${qtyColor}">${qtyDisp}</span>
+          <button class="doplnq-btn p" onclick="quickQty(${p.id},'${p.machineId||p.machine_id}',1,'${uid}')">+</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  // WARN tab: show Doplniť button which expands +/-
   return`<div class="pr">
     <div class="pr-main">
       <span class="pr-ic">${p.icon||'🔩'}</span>
       <span class="pr-name">${p.name}</span>
-      <span class="pr-qty" style="color:${qtyColor}">${qtyText}</span>
+      <span class="pr-qty" style="color:${qtyColor}">${qtyDisp}${min>0?' / min '+min:''}</span>
       <button class="pr-dopln-btn" onclick="toggleDopln('exp_${uid}',this)">Doplniť</button>
     </div>
     <div class="pr-expand" id="exp_${uid}">
