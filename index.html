@@ -941,7 +941,7 @@ async function bootApp(){
       renderML(MACHINES);renderDemos();
       showView('vMain');goTab('dash');
       startLiveUpdates();
-      setupPullToRefresh();
+      // setupPullToRefresh(); // disabled - confuses users
     }
   }catch(e){console.error('bootApp error:',e);showView('vLogin');showErr('Chyba načítania: '+e.message);}
   finally{booting=false;}
