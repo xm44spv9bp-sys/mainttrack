@@ -634,7 +634,12 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
           <div class="admin-row" onclick="aGoTo('aTasks')"><div class="aric ao">☑️</div><div style="flex:1"><div style="font-size:15px;font-weight:600">Úlohy</div><div style="font-size:12px;color:var(--gray)">Servisné úlohy a postupy</div></div><span style="color:var(--gray2);font-size:18px">›</span></div>
           <div class="admin-row" onclick="aGoTo('aLocations')"><div class="aric amap">🗺️</div><div style="flex:1"><div style="font-size:15px;font-weight:600">Lokácie na mape</div><div style="font-size:12px;color:var(--gray)">Premenovať 20 špendlíkov na mape</div></div><span style="color:var(--gray2);font-size:18px">›</span></div>
         </div>
-        <div style="padding:16px 16px 4px;font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.08em">Štatistiky</div>
+        <div style="padding:16px 16px 4px;font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.08em">Upozornenia</div>
+        <div class="admin-section">
+          <div class="admin-row" style="cursor:default"><div class="aric" style="background:var(--rl)">🔔</div><div style="flex:1;font-size:15px;font-weight:600">Počet upozornení</div><span id="astat-notif" style="font-size:20px;font-weight:800;color:var(--ora)">0</span></div>
+          <div class="admin-row" onclick="deleteAllNotifications()" style="cursor:pointer"><div class="aric" style="background:var(--rl)">🗑️</div><div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--red)">Vymazať všetky upozornenia</div><div style="font-size:12px;color:var(--gray)">Uvoľniť pamäť databázy</div></div><span style="color:var(--gray2);font-size:18px">›</span></div>
+        </div>
+        <div style="padding:0 16px 4px;font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.08em">Štatistiky</div>
         <div class="admin-section">
           <div class="admin-row" style="cursor:default"><div class="aric ap">🏭</div><div style="flex:1;font-size:15px;font-weight:600">Počet strojov</div><span id="astat-m" style="font-size:20px;font-weight:800;color:var(--g1)">0</span></div>
           <div class="admin-row" style="cursor:default"><div class="aric" style="background:var(--rl)">⚠️</div><div style="flex:1;font-size:15px;font-weight:600">Poruchy</div><span id="astat-e" style="font-size:20px;font-weight:800;color:var(--red)">0</span></div>
@@ -800,7 +805,7 @@ async function forgotPassword(){
   showToast('📧 Email na obnovu hesla odoslaný');
 }
 async function doLogout(){
-  stopScan();booting=false;CU=null;
+  stopScan();stopLiveUpdates();booting=false;CU=null;
   await sb.auth.signOut();
   showView('vLogin');
 }
@@ -823,13 +828,61 @@ async function bootApp(){
     if(userRole==='admin'){
       showView('vAdmin');aGoHome();
       renderAdminStats();renderAdminMachines();renderAdminDocs();renderAdminParts();renderAdminTasks();renderAdminLocations();
+      startLiveUpdates();
     }else{
       setupDashboard(name);
       renderML(MACHINES);renderDemos();
       showView('vMain');goTab('dash');
+      startLiveUpdates();
     }
   }catch(e){console.error('bootApp error:',e);showView('vLogin');showErr('Chyba načítania: '+e.message);}
   finally{booting=false;}
+}
+
+// ── REALTIME + POLLING ──
+let realtimeChannel=null;
+let pollingInterval=null;
+
+function startLiveUpdates(){
+  // 1. Supabase Realtime - instant notifications
+  try{
+    realtimeChannel=sb.channel('notifications-live')
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications'},async(payload)=>{
+        // New notification received instantly
+        NOTIFICATIONS.unshift(payload.new);
+        if(NOTIFICATIONS.length>100)NOTIFICATIONS=NOTIFICATIONS.slice(0,100);
+        renderDashNotifications();
+        // Show toast
+        showToast('🔔 '+payload.new.title);
+      })
+      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'parts'},async(payload)=>{
+        // Part quantity changed - update local cache
+        const updated=payload.new;
+        MACHINES.forEach(m=>{
+          const p=m.parts.find(p=>p.id===updated.id);
+          if(p){p.quantity=updated.quantity;p.stock_status=updated.stock_status;p.stock_label=updated.stock_label;}
+        });
+        renderDashNotifications();
+      })
+      .subscribe();
+  }catch(e){console.warn('Realtime unavailable:',e);}
+
+  // 2. Polling every 60s as fallback
+  pollingInterval=setInterval(async()=>{
+    try{
+      const{data:notifs}=await sb.from('notifications').select('*').order('created_at',{ascending:false}).limit(100);
+      if(notifs){
+        const newCount=notifs.filter(n=>!NOTIFICATIONS.find(o=>o.id===n.id)).length;
+        NOTIFICATIONS=notifs;
+        if(newCount>0)renderDashNotifications();
+      }
+    }catch(e){}
+  },60000);
+}
+
+function stopLiveUpdates(){
+  if(realtimeChannel){sb.removeChannel(realtimeChannel);realtimeChannel=null;}
+  if(pollingInterval){clearInterval(pollingInterval);pollingInterval=null;}
 }
 
 async function loadData(){
@@ -901,6 +954,29 @@ function setupDashboard(name){
     const m=MACHINES.find(m=>m.id===t.machine_id);
     return`<div class="urgent-card"><div class="urgent-dot"></div><div><div class="urgent-name">${t.name}</div><div class="urgent-sub">${t.description||''}</div>${m?`<div class="urgent-machine">${m.icon||''} ${m.name}</div>`:''} </div></div>`;
   }).join(''):'<div class="empty-state">Žiadne urgentné úlohy 🎉</div>';
+}
+
+async function cleanupNotifications(){
+  // Keep only latest 100 - delete older ones
+  try{
+    const{data:all}=await sb.from('notifications').select('id').order('created_at',{ascending:false});
+    if(all&&all.length>100){
+      const toDelete=all.slice(100).map(n=>n.id);
+      await sb.from('notifications').delete().in('id',toDelete);
+    }
+    const{data:fresh}=await sb.from('notifications').select('*').order('created_at',{ascending:false}).limit(100);
+    NOTIFICATIONS=fresh||[];
+    renderDashNotifications();
+  }catch(e){}
+}
+
+async function deleteAllNotifications(){
+  if(!confirm('Vymazať všetky upozornenia?'))return;
+  const{error}=await sb.from('notifications').delete().neq('id','00000000-0000-0000-0000-000000000000');
+  if(error){showToast('❌ Chyba: '+error.message);return;}
+  NOTIFICATIONS=[];
+  renderDashNotifications();
+  showToast('🗑 Všetky upozornenia vymazané');
 }
 
 function openMachinesFromNotif(){goTab('machines');}
@@ -1107,12 +1183,10 @@ async function markUsed(partId, machineId, partIdx, qtyElId){
   // Add notification if low/out
   if(newQty===0){
     await sb.from('notifications').insert({type:'error',title:'Diel nedostupný',message:p.name+' klesol na 0 ks po použití '+usedQty+' ks.',link_type:'part',link_id:String(partId)});
-    const{data:n}=await sb.from('notifications').select('*').order('created_at',{ascending:false}).limit(50);
-    NOTIFICATIONS=n||[];
+    await cleanupNotifications();
   }else if(newQty<=(p.min_quantity||0)){
     await sb.from('notifications').insert({type:'warning',title:'Pod minimálnym množstvom',message:p.name+' klesol na '+newQty+' ks (min: '+(p.min_quantity||0)+' ks).',link_type:'part',link_id:String(partId)});
-    const{data:n}=await sb.from('notifications').select('*').order('created_at',{ascending:false}).limit(50);
-    NOTIFICATIONS=n||[];
+    await cleanupNotifications();
   }
   renderDashNotifications();
   showToast('✅ Použitých '+usedQty+' ks — zostatok: '+newQty+' ks');
@@ -1584,7 +1658,7 @@ window.addEventListener('resize',()=>{mapReady=false;if(CT==='map')initMap();});
 function aGoTo(id){['aHome','aMachines','aDocs','aParts','aTasks','aLocations'].forEach(x=>document.getElementById(x).classList.toggle('off',x!==id));}
 function aGoHome(){aGoTo('aHome');}
 function fillSelects(){const opts=MACHINES.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');['dMachine','ptMachine','tkMachine'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});}
-function renderAdminStats(){document.getElementById('astat-m').textContent=MACHINES.length;document.getElementById('astat-e').textContent=MACHINES.filter(m=>m.status==='e').length;document.getElementById('astat-t').textContent=TASKS.filter(t=>!t.is_done).length;}
+function renderAdminStats(){document.getElementById('astat-m').textContent=MACHINES.length;document.getElementById('astat-e').textContent=MACHINES.filter(m=>m.status==='e').length;document.getElementById('astat-t').textContent=TASKS.filter(t=>!t.is_done).length;const ne=document.getElementById('astat-notif');if(ne)ne.textContent=NOTIFICATIONS.length;}
 function renderAdminMachines(){
   document.getElementById('adminMachineList').innerHTML=MACHINES.length?
     `<div class="admin-section">${MACHINES.map(m=>`<div class="admin-machine-item"><div style="font-size:24px;flex-shrink:0">${m.icon||'⚙️'}</div><div class="ami-info"><div class="ami-name">${m.name}</div><div class="ami-sub">${m.location} · <span class="badge ${bc(m.status)}" style="font-size:10px;padding:2px 8px">${m.status_label}</span></div></div><div class="ami-btns"><button class="ami-btn ami-edit" onclick="openEditMachine('${m.id}')">✏️</button><button class="ami-btn ami-del" onclick="delMachine('${m.id}')">🗑</button></div></div>`).join('')}</div>`
