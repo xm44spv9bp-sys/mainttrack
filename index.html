@@ -337,6 +337,8 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
 .mr{display:flex;gap:10px}.mr .mf{flex:1}
 .modal-save{width:100%;padding:15px;background:var(--g1);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer}
 .modal-cancel{width:100%;padding:14px;background:var(--gray3);color:var(--gray);border:none;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer}
+.offline-banner{position:fixed;top:0;left:50%;transform:translateX(-50%);background:#FF9800;color:#fff;padding:8px 20px;border-radius:0 0 12px 12px;font-size:13px;font-weight:600;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,.2);display:none;max-width:90%;text-align:center}
+.offline-banner.show{display:block}
 .toast{position:fixed;bottom:calc(90px + var(--sbot));left:50%;transform:translateX(-50%);background:#1C2B1A;color:#C8E6C9;padding:12px 24px;border-radius:30px;font-size:14px;font-weight:600;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1}
 </style>
@@ -390,7 +392,10 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
           <div class="dash-greeting" id="dashGreeting">Dobré ráno,</div>
           <div class="dash-name" id="dashName">—</div>
         </div>
-        <div class="dash-avatar" id="dashAvatar" onclick="goTab('profile')">?</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button id="dashRefreshBtn" onclick="refreshAllData()" style="background:rgba(255,255,255,.15);border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px" title="Obnoviť">↻</button>
+          <div style="display:flex;align-items:center;gap:8px"><button onclick="manualRefresh()" id="refreshBtn" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:50%;width:36px;height:36px;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0" title="Obnoviť dáta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg></button><div class="dash-avatar" id="dashAvatar" onclick="goTab('profile')">?</div></div>
+        </div>
       </div>
       <div class="dash-body">
         <div class="dash-scan-card" onclick="goTab('scan')">
@@ -547,8 +552,10 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
       </div>
       <div class="pbody">
         <div class="pgrp">
-          <div class="prow"><div class="pric prb">📱</div><div class="prlbl">Verzia aplikácie</div><span style="font-size:13px;color:var(--gray)">2.1.0</span></div>
-          <div class="prow"><div class="pric prg">🔐</div><div class="prlbl">Supabase Auth</div><span style="font-size:13px;color:var(--g1);font-weight:700">Aktívne ✅</span></div>
+          <div class="prow" style="cursor:pointer" onclick="openEditProfile()"><div class="pric prg">✏️</div><div class="prlbl">Upraviť meno</div><span style="color:var(--gray2);font-size:18px">›</span></div>
+          <div class="prow" style="cursor:pointer" onclick="openChangePassword()"><div class="pric prb">🔑</div><div class="prlbl">Zmeniť heslo</div><span style="color:var(--gray2);font-size:18px">›</span></div>
+          <div class="prow"><div class="pric prb">📱</div><div class="prlbl">Verzia aplikácie</div><span style="font-size:13px;color:var(--gray)">3.0.0</span></div>
+          <div class="prow"><div class="pric prg">🔐</div><div class="prlbl">Auth</div><span style="font-size:13px;color:var(--g1);font-weight:700">Aktívne ✅</span></div>
         </div>
         <button class="lout-btn" onclick="doLogout()">Odhlásiť sa</button>
       </div>
@@ -633,6 +640,8 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
           <div class="admin-row" onclick="aGoTo('aParts')"><div class="aric ag">🔩</div><div style="flex:1"><div style="font-size:15px;font-weight:600">Náhradné diely</div><div style="font-size:12px;color:var(--gray)">Sklad a dostupnosť</div></div><span style="color:var(--gray2);font-size:18px">›</span></div>
           <div class="admin-row" onclick="aGoTo('aTasks')"><div class="aric ao">☑️</div><div style="flex:1"><div style="font-size:15px;font-weight:600">Úlohy</div><div style="font-size:12px;color:var(--gray)">Servisné úlohy a postupy</div></div><span style="color:var(--gray2);font-size:18px">›</span></div>
           <div class="admin-row" onclick="aGoTo('aLocations')"><div class="aric amap">🗺️</div><div style="flex:1"><div style="font-size:15px;font-weight:600">Lokácie na mape</div><div style="font-size:12px;color:var(--gray)">Premenovať 20 špendlíkov na mape</div></div><span style="color:var(--gray2);font-size:18px">›</span></div>
+          <div class="admin-row" onclick="aGoTo('aUsers')"><div class="aric" style="background:#FCE4EC">👥</div><div style="flex:1"><div style="font-size:15px;font-weight:600">Používatelia</div><div style="font-size:12px;color:var(--gray)">Roly a oprávnenia</div></div><span style="color:var(--gray2);font-size:18px">›</span></div>
+          <div class="admin-row" onclick="aGoTo('aUsers');renderAdminUsers()"><div class="aric ab">👥</div><div style="flex:1"><div style="font-size:15px;font-weight:600">Používatelia</div><div style="font-size:12px;color:var(--gray)">Spravovať roly používateľov</div></div><span style="color:var(--gray2);font-size:18px">›</span></div>
         </div>
         <div style="padding:16px 16px 4px;font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.08em">Upozornenia</div>
         <div class="admin-section">
@@ -664,6 +673,30 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
       <div class="phdr" style="background:#1a1a2e;border-bottom:none"><button class="hbtn" style="color:#CE93D8" onclick="aGoHome()">‹ Späť</button><div class="ptitle" style="color:#CE93D8">Úlohy</div><div style="width:60px"></div></div>
       <div class="pbody"><div id="adminTasksList" style="padding:12px 16px"></div></div>
     </div>
+    <!-- ADMIN USERS -->
+    <div id="aUsers" class="view off" style="flex-direction:column;background:var(--gray3)">
+      <div class="phdr" style="background:#1a1a2e;border-bottom:none">
+        <button class="hbtn" style="color:#CE93D8" onclick="aGoHome()">‹ Späť</button>
+        <div class="ptitle" style="color:#CE93D8">Používatelia</div>
+        <div style="width:60px"></div>
+      </div>
+      <div class="pbody">
+        <div style="padding:12px 16px 4px;font-size:13px;color:var(--gray);line-height:1.5">Registrácia nových používateľov prebieha cez Supabase Dashboard. Tu môžete meniť ich roly.</div>
+        <div class="admin-section" style="margin:12px 16px 0" id="adminUserList"></div>
+        <div style="height:24px"></div>
+      </div>
+    </div>
+
+    <!-- ADMIN USERS -->
+    <div id="aUsers" class="view off" style="flex-direction:column;background:var(--gray3)">
+      <div class="phdr" style="background:#1a1a2e;border-bottom:none"><button class="hbtn" style="color:#CE93D8" onclick="aGoHome()">‹ Späť</button><div class="ptitle" style="color:#CE93D8">Používatelia</div><div style="width:60px"></div></div>
+      <div class="pbody">
+        <div style="padding:12px 16px 4px;font-size:13px;color:var(--gray);line-height:1.5">Spravujte roly používateľov. Nového používateľa pridáte v Supabase Dashboard → Authentication.</div>
+        <div class="admin-section" style="margin:12px 16px 0" id="adminUsersList"></div>
+        <div style="height:24px"></div>
+      </div>
+    </div>
+
     <!-- ADMIN LOCATIONS -->
     <div id="aLocations" class="view off" style="flex-direction:column;background:var(--gray3)">
       <div class="phdr" style="background:#1a1a2e;border-bottom:none"><button class="hbtn" style="color:#CE93D8" onclick="aGoHome()">‹ Späť</button><div class="ptitle" style="color:#CE93D8">Lokácie na mape</div><div style="width:60px"></div></div>
@@ -696,7 +729,7 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
       <div class="mf"><div class="ml">Výrobné číslo</div><input class="mi" id="mSN" placeholder="SN-12345"></div>
     </div>
     <div class="mf"><div class="ml">Zodpovedný technik</div><input class="mi" id="mTech" placeholder="Ing. Novák P."></div>
-    <button class="modal-save" onclick="saveMachine()">Uložiť stroj</button>
+    <button class="modal-save" onclick="withLoading(this,saveMachine)">Uložiť stroj</button>
     <button class="modal-cancel" onclick="closeModal('modalMachine')">Zrušiť</button>
   </div>
 </div>
@@ -709,7 +742,7 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
       <div class="mf"><div class="ml">Ikona</div><input class="mi" id="dIcon" placeholder="📄" style="text-align:center;font-size:24px"></div>
       <div class="mf"><div class="ml">Veľkosť/typ</div><input class="mi" id="dSize" placeholder="PDF · 4,2 MB"></div>
     </div>
-    <button class="modal-save" onclick="saveDoc()">Uložiť dokument</button>
+    <button class="modal-save" onclick="withLoading(this,saveDoc)">Uložiť dokument</button>
     <button class="modal-cancel" onclick="closeModal('modalDoc')">Zrušiť</button>
   </div>
 </div>
@@ -726,7 +759,7 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
       <div class="mf"><div class="ml">Počet na sklade</div><input class="mi" id="ptQty" type="number" placeholder="0" min="0"></div>
       <div class="mf"><div class="ml">Minimálne množstvo</div><input class="mi" id="ptMinQty" type="number" placeholder="0" min="0"></div>
     </div>
-    <button class="modal-save" onclick="savePart()">Uložiť diel</button>
+    <button class="modal-save" onclick="withLoading(this,savePart)">Uložiť diel</button>
     <button class="modal-cancel" onclick="closeModal('modalPart')">Zrušiť</button>
   </div>
 </div>
@@ -737,10 +770,31 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
     <div class="mf"><div class="ml">Názov úlohy *</div><input class="mi" id="tkName" placeholder="napr. Výmena filtra"></div>
     <div class="mf"><div class="ml">Popis / Frekvencia</div><input class="mi" id="tkSub" placeholder="napr. Mesačná údržba"></div>
     <div class="mf"><div class="ml">Priorita</div><select class="mi" id="tkUrgent"><option value="0">Normálna</option><option value="1">🔴 Urgentná</option></select></div>
-    <button class="modal-save" onclick="saveTask()">Uložiť úlohu</button>
+    <button class="modal-save" onclick="withLoading(this,saveTask)">Uložiť úlohu</button>
     <button class="modal-cancel" onclick="closeModal('modalTask')">Zrušiť</button>
   </div>
 </div>
+<!-- Modal pre úpravu profilu -->
+<div class="modal-bg" id="modalProfile">
+  <div class="modal">
+    <div class="modal-title">Upraviť profil</div>
+    <div class="mf"><div class="ml">Meno *</div><input class="mi" id="profEditName" placeholder="Vaše meno"></div>
+    <button class="modal-save" onclick="withLoading(this,saveProfile)">Uložiť</button>
+    <button class="modal-cancel" onclick="closeModal('modalProfile')">Zrušiť</button>
+  </div>
+</div>
+
+<!-- Modal pre zmenu hesla -->
+<div class="modal-bg" id="modalPassword">
+  <div class="modal">
+    <div class="modal-title">Zmeniť heslo</div>
+    <div class="mf"><div class="ml">Nové heslo (min. 6 znakov)</div><input class="mi" type="password" id="newPass1" placeholder="••••••"></div>
+    <div class="mf"><div class="ml">Potvrdiť heslo</div><input class="mi" type="password" id="newPass2" placeholder="••••••"></div>
+    <button class="modal-save" onclick="withLoading(this,changePassword)">Zmeniť heslo</button>
+    <button class="modal-cancel" onclick="closeModal('modalPassword')">Zrušiť</button>
+  </div>
+</div>
+
 <!-- Modal pre editáciu lokácie -->
 <div class="modal-bg" id="modalLocation">
   <div class="modal">
@@ -749,11 +803,12 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
     <div class="mf"><div class="ml">Číslo špendlíka</div><div style="padding:10px 14px;background:var(--gray3);border-radius:12px;font-size:15px;color:var(--gray)" id="locPinNum">—</div></div>
     <div class="mf"><div class="ml">Názov lokácie *</div><input class="mi" id="locName" placeholder="napr. Mlynica, Sklad A, Kompresorovňa..."></div>
     <div class="mf"><div class="ml">Popis (voliteľné)</div><input class="mi" id="locDesc" placeholder="napr. Hlavná výrobná budova"></div>
-    <button class="modal-save" onclick="saveLocation()">Uložiť názov</button>
+    <button class="modal-save" onclick="withLoading(this,saveLocation)">Uložiť názov</button>
     <button class="modal-cancel" onclick="closeModal('modalLocation')">Zrušiť</button>
   </div>
 </div>
 
+<div class="offline-banner" id="offlineBanner">📵 Žiadne pripojenie — pracujete offline</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -771,8 +826,60 @@ let MACHINES=[],TASKS=[],RECENT=[],LOCATIONS={};
 let booting=false;
 
 // ── BOOT ──
+// Pull-to-refresh
+let _ptrStartY=0,_ptrCurrentY=0,_ptrPulling=false;
+function setupPullToRefresh(){
+  const main=document.getElementById('vMain');
+  if(!main)return;
+  document.addEventListener('touchstart',(e)=>{
+    if(window.scrollY===0&&CT==='dash'){
+      const tDash=document.getElementById('tDash');
+      const body=tDash?.querySelector('.dash-body');
+      if(body&&body.scrollTop===0){
+        _ptrStartY=e.touches[0].clientY;_ptrPulling=true;
+      }
+    }
+  },{passive:true});
+  document.addEventListener('touchmove',(e)=>{
+    if(!_ptrPulling)return;
+    _ptrCurrentY=e.touches[0].clientY;
+    const diff=_ptrCurrentY-_ptrStartY;
+    if(diff>0&&diff<150){
+      const btn=document.getElementById('dashRefreshBtn');
+      if(btn)btn.style.transform=`rotate(${diff*2}deg)`;
+    }
+  },{passive:true});
+  document.addEventListener('touchend',()=>{
+    if(_ptrPulling&&_ptrCurrentY-_ptrStartY>80){refreshAllData();}
+    else{
+      const btn=document.getElementById('dashRefreshBtn');
+      if(btn){btn.style.transition='transform .3s';btn.style.transform='';setTimeout(()=>btn.style.transition='none',300);}
+    }
+    _ptrPulling=false;_ptrStartY=0;_ptrCurrentY=0;
+  });
+}
+
+// Online/offline detection
+window.addEventListener('online',()=>{document.getElementById('offlineBanner')?.classList.remove('show');showToast('✅ Pripojené');});
+window.addEventListener('offline',()=>{document.getElementById('offlineBanner')?.classList.add('show');});
+
 window.addEventListener('load',async()=>{
-  if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  if(!navigator.onLine)document.getElementById('offlineBanner')?.classList.add('show');
+  if('serviceWorker'in navigator){
+    navigator.serviceWorker.register('/sw.js').then(reg=>{
+      reg.addEventListener('updatefound',()=>{
+        const nw=reg.installing;
+        if(nw)nw.addEventListener('statechange',()=>{
+          if(nw.state==='installed'&&navigator.serviceWorker.controller){
+            // New version available
+            if(confirm('🔄 Dostupná nová verzia. Obnoviť?')){nw.postMessage({type:'SKIP_WAITING'});window.location.reload();}
+          }
+        });
+      });
+    }).catch(()=>{});
+    let refreshing=false;
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!refreshing){refreshing=true;window.location.reload();}});
+  }
   showView('vLoading');
   try{
     const{data:{session}}=await sb.auth.getSession();
@@ -805,7 +912,7 @@ async function forgotPassword(){
   showToast('📧 Email na obnovu hesla odoslaný');
 }
 async function doLogout(){
-  stopScan();stopLiveUpdates();booting=false;CU=null;
+  stopScan();stopLiveUpdates();stopClock();booting=false;CU=null;
   await sb.auth.signOut();
   showView('vLogin');
 }
@@ -813,7 +920,7 @@ async function doLogout(){
 async function bootApp(){
   if(booting)return;booting=true;
   try{
-    // Admin emails - pridajte sem váš email
+    // Primary: profiles.role; Fallback: hardcoded email list
     const ADMIN_EMAILS=['samqo197@gmail.com'];
     let userRole_db='worker';
     let name='Používateľ';
@@ -822,8 +929,8 @@ async function bootApp(){
       userRole_db=(profile?.role||'worker').toLowerCase().trim();
       name=profile?.full_name||CU.email?.split('@')[0]||'Používateľ';
     }catch(e){name=CU.email?.split('@')[0]||'Používateľ';}
-    // Fallback: ak je email v zozname adminov, vždy admin
-    userRole=ADMIN_EMAILS.includes(CU.email)?'admin':userRole_db;
+    // Use DB role primarily; fallback to email list only if DB role missing
+    userRole=userRole_db==='admin'?'admin':(ADMIN_EMAILS.includes(CU.email)?'admin':'worker');
     await loadData();
     if(userRole==='admin'){
       showView('vAdmin');aGoHome();
@@ -834,6 +941,7 @@ async function bootApp(){
       renderML(MACHINES);renderDemos();
       showView('vMain');goTab('dash');
       startLiveUpdates();
+      setupPullToRefresh();
     }
   }catch(e){console.error('bootApp error:',e);showView('vLogin');showErr('Chyba načítania: '+e.message);}
   finally{booting=false;}
@@ -844,28 +952,35 @@ let realtimeChannel=null;
 let pollingInterval=null;
 
 function startLiveUpdates(){
-  // 1. Supabase Realtime - instant notifications
+  // 1. Supabase Realtime - instant notifications (optional)
   try{
-    realtimeChannel=sb.channel('notifications-live')
-      .on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications'},async(payload)=>{
-        // New notification received instantly
-        NOTIFICATIONS.unshift(payload.new);
-        if(NOTIFICATIONS.length>100)NOTIFICATIONS=NOTIFICATIONS.slice(0,100);
-        renderDashNotifications();
-        // Show toast
-        showToast('🔔 '+payload.new.title);
+    if(realtimeChannel){sb.removeChannel(realtimeChannel);realtimeChannel=null;}
+    realtimeChannel=sb.channel('zeo-live-'+Date.now())
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications'},(payload)=>{
+        try{
+          if(!NOTIFICATIONS.find(n=>n.id===payload.new.id)){
+            NOTIFICATIONS.unshift(payload.new);
+            if(NOTIFICATIONS.length>100)NOTIFICATIONS=NOTIFICATIONS.slice(0,100);
+            renderDashNotifications();
+            showToast('🔔 '+payload.new.title);
+          }
+        }catch(e){console.warn('notif insert handler:',e);}
       })
-      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'parts'},async(payload)=>{
-        // Part quantity changed - update local cache
-        const updated=payload.new;
-        MACHINES.forEach(m=>{
-          const p=m.parts.find(p=>p.id===updated.id);
-          if(p){p.quantity=updated.quantity;p.stock_status=updated.stock_status;p.stock_label=updated.stock_label;}
-        });
-        renderDashNotifications();
+      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'parts'},(payload)=>{
+        try{
+          const updated=payload.new;
+          MACHINES.forEach(m=>{
+            const p=m.parts.find(p=>p.id===updated.id);
+            if(p){p.quantity=updated.quantity;p.stock_status=updated.stock_status;p.stock_label=updated.stock_label;}
+          });
+          renderDashNotifications();
+        }catch(e){console.warn('part update handler:',e);}
       })
-      .subscribe();
-  }catch(e){console.warn('Realtime unavailable:',e);}
+      .subscribe((status)=>{
+        if(status==='SUBSCRIBED')console.log('✅ Realtime connected');
+        else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')console.warn('Realtime issue:',status);
+      });
+  }catch(e){console.warn('Realtime unavailable, using polling:',e);}
 
   // 2. Polling every 60s as fallback
   pollingInterval=setInterval(async()=>{
@@ -880,9 +995,37 @@ function startLiveUpdates(){
   },60000);
 }
 
+// Online/offline detection
+let _wasOffline=false;
+window.addEventListener('online',()=>{
+  if(_wasOffline){showToast('🟢 Pripojenie obnovené');_wasOffline=false;
+    // Refresh data
+    loadData().then(()=>{renderDashNotifications();}).catch(()=>{});
+  }
+});
+window.addEventListener('offline',()=>{
+  _wasOffline=true;
+  showToast('🔴 Bez pripojenia');
+});
+
 function stopLiveUpdates(){
   if(realtimeChannel){sb.removeChannel(realtimeChannel);realtimeChannel=null;}
   if(pollingInterval){clearInterval(pollingInterval);pollingInterval=null;}
+}
+
+async function refreshAllData(){
+  const btn=document.getElementById('dashRefreshBtn');
+  if(btn){btn.style.transition='transform .8s';btn.style.transform='rotate(360deg)';}
+  try{
+    await loadData();
+    setupDashboard(document.getElementById('dashName')?.textContent||'Používateľ');
+    renderML(MACHINES);
+    renderDashNotifications();
+    showToast('✅ Aktualizované');
+  }catch(e){showToast('❌ '+e.message);}
+  finally{
+    if(btn)setTimeout(()=>{btn.style.transition='none';btn.style.transform='';},800);
+  }
 }
 
 async function loadData(){
@@ -918,10 +1061,39 @@ async function loadData(){
 
 // ── VIEWS ──
 function showView(id){document.querySelectorAll('#app>.view').forEach(v=>v.classList.add('off'));document.getElementById(id)?.classList.remove('off');}
+function escHtml(s){if(s==null)return'';return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+async function withLoading(saveBtn,fn){
+  const btn=typeof saveBtn==='string'?document.querySelector(saveBtn):saveBtn;
+  if(!btn||btn.dataset.busy==='1')return;
+  btn.dataset.busy='1';
+  const orig=btn.textContent;
+  btn.textContent='⏳ Ukladám...';
+  btn.disabled=true;
+  btn.style.opacity='.6';
+  try{await fn();}
+  finally{
+    btn.textContent=orig;
+    btn.disabled=false;
+    btn.style.opacity='';
+    delete btn.dataset.busy;
+  }
+}
 function bc(s){return s==='a'?'ba':s==='m'?'bm':'be';}
 function stLabel(s){return s==='a'?'AKTÍVNA':s==='m'?'ÚDRŽBA':'PORUCHA';}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+async function manualRefresh(){
+  const btn=document.getElementById('refreshBtn');
+  if(btn){btn.style.transform='rotate(360deg)';btn.style.transition='transform .6s';}
+  try{
+    await loadData();
+    setupDashboard(document.getElementById('dashName').textContent);
+    renderML(MACHINES);renderDemos();renderDashNotifications();
+    showToast('🔄 Dáta obnovené');
+  }catch(e){showToast('❌ Chyba obnovy');}
+  setTimeout(()=>{if(btn){btn.style.transform='';btn.style.transition='';}},600);
+}
 function openModal(id){document.getElementById(id).classList.add('on');}
 function closeModal(id){document.getElementById(id).classList.remove('on');}
 
@@ -946,13 +1118,13 @@ function setupDashboard(name){
   document.getElementById('dashRecent').innerHTML=recent.length?recent.map(m=>`
     <div class="recent-card" onclick="openDetail('${m.id}')">
       <div class="recent-icon" style="background:${m.status==='e'?'#FFEBEE':m.status==='m'?'#FFF3E0':'#E8F5E9'}">${m.icon||'⚙️'}</div>
-      <div class="recent-info"><div class="recent-name">${m.name}</div><div class="recent-loc">${m.location}</div></div>
+      <div class="recent-info"><div class="recent-name">${escHtml(m.name)}</div><div class="recent-loc">${escHtml(m.location)}</div></div>
       <span class="badge ${bc(m.status)}">${m.status_label}</span>
     </div>`).join(''):'<div class="empty-state">Žiadne stroje</div>';
   const urgent=TASKS.filter(t=>t.is_urgent&&!t.is_done).slice(0,3);
   document.getElementById('dashUrgent').innerHTML=urgent.length?urgent.map(t=>{
     const m=MACHINES.find(m=>m.id===t.machine_id);
-    return`<div class="urgent-card"><div class="urgent-dot"></div><div><div class="urgent-name">${t.name}</div><div class="urgent-sub">${t.description||''}</div>${m?`<div class="urgent-machine">${m.icon||''} ${m.name}</div>`:''} </div></div>`;
+    return`<div class="urgent-card"><div class="urgent-dot"></div><div><div class="urgent-name">${escHtml(t.name)}</div><div class="urgent-sub">${escHtml(t.description||'')}</div>${m?`<div class="urgent-machine">${m.icon||''} ${escHtml(m.name)}</div>`:''} </div></div>`;
   }).join(''):'<div class="empty-state">Žiadne urgentné úlohy 🎉</div>';
 }
 
@@ -983,7 +1155,9 @@ function openMachinesFromNotif(){goTab('machines');}
 function openMachinesTab(){goTab('machines');}
 
 // ── CLOCK ──
+let _clockInterval=null;
 function startClock(){
+  if(_clockInterval)clearInterval(_clockInterval);
   function tick(){
     const now=new Date();
     const days=['Ne','Po','Ut','St','Št','Pi','So'];
@@ -996,8 +1170,9 @@ function startClock(){
     if(tEl)tEl.textContent=h+':'+m+':'+s;
     if(dEl)dEl.textContent=days[now.getDay()]+' '+now.getDate()+'. '+months[now.getMonth()]+' '+now.getFullYear();
   }
-  tick();setInterval(tick,1000);
+  tick();_clockInterval=setInterval(tick,1000);
 }
+function stopClock(){if(_clockInterval){clearInterval(_clockInterval);_clockInterval=null;}}
 
 function goTabTasks(){
   // Show tasks view - reuse machines tab with task filter
@@ -1032,13 +1207,13 @@ function showAllNotifications(){
     <div class="notif-row" onclick="toggleAllNotifDetail('and${i}')">
       <div class="notif-dot" style="background:${notifColor(n.type)}"></div>
       <div class="notif-content">
-        <div class="notif-title">${n.title}</div>
-        <div class="notif-msg">${n.message}</div>
+        <div class="notif-title">${escHtml(n.title)}</div>
+        <div class="notif-msg">${escHtml(n.message)}</div>
       </div>
       <div class="notif-time">${timeAgo(n.created_at)}</div>
     </div>
     <div class="notif-detail-box" id="and${i}">
-      <div class="notif-detail-text">${n.message}</div>
+      <div class="notif-detail-text">${escHtml(n.message)}</div>
       ${n.link_type==='part'?'<span class="notif-action-link" onclick="goTabSklad()">→ Prejsť do Skladu</span>':
         n.link_type==='machine'?'<span class="notif-action-link" onclick="openMachinesTab()">→ Zobraziť stroje</span>':''}
     </div>`).join('')+'</div>';
@@ -1064,14 +1239,14 @@ function renderTasksInSklad(filter){
   const list=filter==='all'?all:open;
   document.getElementById('skladList').innerHTML=list.length?list.map(t=>`
     <div class="tkcard" style="margin:0 0 8px">
-      <div style="font-size:12px;color:var(--g1);font-weight:600;margin-bottom:6px">${t.mic} ${t.mn}</div>
+      <div style="font-size:12px;color:var(--g1);font-weight:600;margin-bottom:6px">${t.mic} ${escHtml(t.mn)}</div>
       <div class="tk-top">
         <div class="tkbox${t.is_done?' ck':''}">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><polyline points="2,7 6,11 12,3" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
         </div>
         <div style="flex:1">
-          <div class="tk-name">${t.name}${t.is_urgent?' 🔴':''}</div>
-          <div class="tk-sub">${t.description||''}</div>
+          <div class="tk-name">${escHtml(t.name)}${t.is_urgent?' 🔴':''}</div>
+          <div class="tk-sub">${escHtml(t.description||'')}</div>
         </div>
       </div>
     </div>`).join('')
@@ -1116,13 +1291,13 @@ function renderDashNotifications(){
     <div class="notif-row" onclick="toggleNotifDetail('nd${i}')">
       <div class="notif-dot" style="background:${notifColor(n.type)}${n.type==='error'?';animation:blink 1.5s infinite':''}"></div>
       <div class="notif-content">
-        <div class="notif-title">${n.title}</div>
-        <div class="notif-msg">${n.message}</div>
+        <div class="notif-title">${escHtml(n.title)}</div>
+        <div class="notif-msg">${escHtml(n.message)}</div>
       </div>
       <div class="notif-time">${timeAgo(n.created_at)}</div>
     </div>
     <div class="notif-detail-box" id="nd${i}">
-      <div class="notif-detail-text">${n.message}</div>
+      <div class="notif-detail-text">${escHtml(n.message)}</div>
       ${n.link_type==='part'?'<span class="notif-action-link" onclick="goTabSklad()">→ Prejsť do Skladu</span>':
         n.link_type==='machine'?'<span class="notif-action-link" onclick="openMachinesTab()">→ Zobraziť stroje</span>':''}
     </div>`).join('')+'</div>';
@@ -1205,20 +1380,32 @@ async function updatePartInDB(partId,machineId,newQty){
   return{p,newStatus,min};
 }
 
-async function quickQty(partId,machineId,delta,uid){
+// Debounce mechanism for rapid clicks
+const _qtyQueue={};
+const _qtyTimers={};
+function quickQty(partId,machineId,delta,uid){
   const m=MACHINES.find(m=>m.id===machineId);if(!m)return;
   const p=m.parts.find(p=>p.id===partId);if(!p)return;
-  const newQty=Math.max(0,(p.quantity||0)+delta);
-  const result=await updatePartInDB(partId,machineId,newQty);
-  if(!result)return;
-  // Update just the display element - no full re-render
+  // Update LOCAL state immediately for responsive UI
+  if(_qtyQueue[partId]===undefined)_qtyQueue[partId]=p.quantity||0;
+  _qtyQueue[partId]=Math.max(0,_qtyQueue[partId]+delta);
+  const newQty=_qtyQueue[partId];
+  const min=p.min_quantity||0;
+  // Update display instantly
   const el=document.getElementById('qv_'+uid);
   if(el){
     el.textContent=newQty+' ks';
-    el.style.color=newQty===0?'var(--red)':newQty<=result.min&&newQty>0?'var(--ora)':'var(--g1)';
+    el.style.color=newQty===0?'var(--red)':newQty<=min&&newQty>0?'var(--ora)':'var(--g1)';
   }
-  // Update badge on sklad card
-  renderDashNotifications();
+  // Debounce DB write - send after 500ms of no clicks
+  if(_qtyTimers[partId])clearTimeout(_qtyTimers[partId]);
+  _qtyTimers[partId]=setTimeout(async()=>{
+    const finalQty=_qtyQueue[partId];
+    delete _qtyQueue[partId];
+    delete _qtyTimers[partId];
+    const result=await updatePartInDB(partId,machineId,finalQty);
+    if(result)renderDashNotifications();
+  },500);
 }
 
 async function confirmDopln(partId,machineId,addQtyId){
@@ -1249,6 +1436,19 @@ function toggleDopln(expandId,btnEl){
 }
 
 function renderSklad(){
+  // Reset tabs to sklad mode (in case we came from tasks view)
+  const stAll=document.getElementById('stAll');
+  const stWarn=document.getElementById('stWarn');
+  if(stAll&&!stAll.innerHTML.includes('Všetky diely')){
+    stAll.innerHTML='Všetky diely <span class="stab-cnt" style="background:var(--gray3);color:var(--gray)" id="stAllCnt">0</span>';
+    stAll.onclick=()=>switchSkladTab('all');
+  }
+  if(stWarn&&!stWarn.innerHTML.includes('Upozornenia')){
+    stWarn.innerHTML='Upozornenia <span class="stab-cnt" id="stWarnCnt">0</span>';
+    stWarn.onclick=()=>switchSkladTab('warn');
+  }
+  const titleEl=document.querySelector('#tSklad .ptitle');
+  if(titleEl)titleEl.textContent='Sklad';
 
   const allParts=MACHINES.flatMap(m=>m.parts.map(p=>({...p,machineName:m.name,machineIcon:m.icon||'⚙️',machineId:m.id})));
   const errParts=allParts.filter(p=>p.quantity===0||(p.quantity!==undefined&&p.stock_status==='out'));
@@ -1270,7 +1470,7 @@ function renderSklad(){
       byMachine[p.machine_id].parts.push(p);
     });
     list.innerHTML=Object.values(byMachine).map(g=>`
-      <div style="font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;margin:4px 0 8px">${g.icon} ${g.name}</div>
+      <div style="font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;margin:4px 0 8px">${g.icon} ${escHtml(g.name)}</div>
       <div class="pcard" style="margin-bottom:12px">
         ${g.parts.map((p,pi)=>partRow(p,pi+'_all','all')).join('')}
       </div>`).join('')||'<div class="empty-state">Žiadne diely</div>';
@@ -1314,7 +1514,7 @@ function partRow(p,uid,mode){
     return`<div class="pr">
       <div class="pr-main" style="gap:8px">
         <span class="pr-ic">${p.icon||'🔩'}</span>
-        <span class="pr-name">${p.name}</span>
+        <span class="pr-name">${escHtml(p.name)}</span>
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto">
           <button class="doplnq-btn m" onclick="quickQty(${p.id},'${p.machineId||p.machine_id}',-1,'${uid}')">−</button>
           <span class="doplnq-val" id="qv_${uid}" style="color:${qtyColor}">${qtyDisp}</span>
@@ -1327,7 +1527,7 @@ function partRow(p,uid,mode){
   return`<div class="pr">
     <div class="pr-main">
       <span class="pr-ic">${p.icon||'🔩'}</span>
-      <span class="pr-name">${p.name}</span>
+      <span class="pr-name">${escHtml(p.name)}</span>
       <span class="pr-qty" style="color:${qtyColor}">${qtyDisp}${min>0?' / min '+min:''}</span>
       <button class="pr-dopln-btn" onclick="toggleDopln('exp_${uid}',this)">Doplniť</button>
     </div>
@@ -1403,7 +1603,7 @@ function renderDemos(){
   document.getElementById('demoBtns').innerHTML=MACHINES.map(m=>
     `<div class="dmb" onclick="closeSheet();openDetailFromScan('${m.id}')">
       <div style="width:40px;height:40px;border-radius:10px;background:${m.status==='e'?'#FFEBEE':m.status==='m'?'#FFF3E0':'#E8F5E9'};display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${m.icon||'⚙️'}</div>
-      <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700">${m.name}</div><div style="font-size:12px;color:var(--gray);margin-top:2px">${m.location}</div></div>
+      <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700">${escHtml(m.name)}</div><div style="font-size:12px;color:var(--gray);margin-top:2px">${escHtml(m.location)}</div></div>
       <span class="badge ${bc(m.status)}">${m.status_label}</span>
     </div>`
   ).join('')||'<div class="empty-state">Žiadne stroje</div>';
@@ -1414,12 +1614,12 @@ async function startScan(){
 }
 function scanLoop(){
   const v=document.getElementById('qrV'),c=document.getElementById('qrC'),ctx=c.getContext('2d');
-  function tick(){
+  function tickScan(){
     if(CT!=='scan')return;
     if(v.readyState===v.HAVE_ENOUGH_DATA){c.width=v.videoWidth;c.height=v.videoHeight;ctx.drawImage(v,0,0);if(window.jsQR){const r=jsQR(ctx.getImageData(0,0,c.width,c.height).data,c.width,c.height);if(r&&MACHINES.find(m=>m.id===r.data)){openDetail(r.data);return;}}}
-    SA=requestAnimationFrame(tick);
+    SA=requestAnimationFrame(tickScan);
   }
-  SA=requestAnimationFrame(tick);
+  SA=requestAnimationFrame(tickScan);
 }
 function stopScan(){if(SA){cancelAnimationFrame(SA);SA=null;}if(SS){SS.getTracks().forEach(t=>t.stop());SS=null;}const v=document.getElementById('qrV');if(v)v.srcObject=null;}
 
@@ -1428,7 +1628,7 @@ function renderML(list){
   document.getElementById('mList').innerHTML=list.length?list.map(m=>
     `<div class="mc" onclick="openDetail('${m.id}')">
       <div class="mc-icon" style="background:${m.status==='e'?'#FFEBEE':m.status==='m'?'#FFF3E0':'#E8F5E9'}">${m.icon||'⚙️'}</div>
-      <div style="flex:1;min-width:0"><div class="mc-name">${m.name}</div><div class="mc-sub">${m.model} · ${m.location}</div></div>
+      <div style="flex:1;min-width:0"><div class="mc-name">${escHtml(m.name)}</div><div class="mc-sub">${escHtml(m.model)} · ${escHtml(m.location)}</div></div>
       <span class="badge ${bc(m.status)}">${m.status_label}</span>
     </div>`).join('')
   :'<div class="empty-state">Žiadne stroje. Admin musí pridať stroje.</div>';
@@ -1450,8 +1650,8 @@ function openDetail(id){
     <div class="dmc-card">
       <div style="width:64px;height:64px;border-radius:14px;background:${m.status==='e'?'#FFEBEE':m.status==='m'?'#FFF3E0':'#E8F5E9'};display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0">${m.icon||'⚙️'}</div>
       <div style="flex:1;min-width:0">
-        <div class="dmc-name">${m.name}</div><div class="dmc-model">${m.model}</div>
-        <div class="dmc-loc">${m.location}</div><span class="badge ${bc(m.status)}">${m.status_label}</span>
+        <div class="dmc-name">${escHtml(m.name)}</div><div class="dmc-model">${escHtml(m.model)}</div>
+        <div class="dmc-loc">${escHtml(m.location)}</div><span class="badge ${bc(m.status)}">${m.status_label}</span>
       </div>
     </div>
     <div class="seg"><button class="seg-b on" id="segSpec" onclick="swSeg('spec')">Špecifikácie</button><button class="seg-b" id="segParts" onclick="swSeg('parts')">Diely & Úlohy</button></div>
@@ -1460,14 +1660,14 @@ function openDetail(id){
         <div class="dsb">${specs.map(r=>`<div class="drow"><div class="drk">${r[0]}</div><div class="drv">${r[1]}</div></div>`).join('')}</div>
       </div>
       <div class="dsec"><div class="dsh" onclick="togSec(this)"><div class="dsh-title">Dokumentácia</div><div class="dsh-arr op">▾</div></div>
-        <div class="dsb">${m.docs.length?m.docs.map(d=>`<div class="docrow"><div class="docic">${d.icon}</div><div style="flex:1"><div style="font-size:14px;font-weight:600">${d.name}</div><div style="font-size:12px;color:var(--gray)">${d.meta||''}</div></div><span style="color:var(--gray2);font-size:18px">›</span></div>`).join(''):'<div style="padding:14px 16px;font-size:13px;color:var(--gray)">Žiadna dokumentácia</div>'}</div>
+        <div class="dsb">${m.docs.length?m.docs.map(d=>`<div class="docrow"><div class="docic">${d.icon}</div><div style="flex:1"><div style="font-size:14px;font-weight:600">${escHtml(d.name)}</div><div style="font-size:12px;color:var(--gray)">${escHtml(d.meta||'')}</div></div><span style="color:var(--gray2);font-size:18px">›</span></div>`).join(''):'<div style="padding:14px 16px;font-size:13px;color:var(--gray)">Žiadna dokumentácia</div>'}</div>
       </div>
       <div style="height:16px"></div>
     </div>
     <div id="pParts" style="display:none">
       <div class="ptabs"><button class="ptab-b on" id="ptP" onclick="swPT('parts')">Náhradné diely</button><button class="ptab-b" id="ptT" onclick="swPT('tasks')">Úlohy</button></div>
       <div id="ppParts">
-        ${m.parts.length?m.parts.map((p,pi)=>{const sc=p.stock_status==='ok'?'sok':p.stock_status==='low'?'slow':'sout';const si=p.stock_status==='ok'?'✅':p.stock_status==='low'?'⚠️':'❌';const qty=p.quantity??0;return`<div class="pcard"><div class="pcard-top"><div class="pimg">${p.icon||'🔩'}</div><div style="flex:1;min-width:0"><div class="pname">${p.name}</div><div class="ppn">P/N: ${p.part_number||'—'}</div><div class="pstock ${sc}" id="pstock_${m.id}_${pi}">${si} ${p.stock_label||''}</div><div style="font-size:11px;color:var(--gray);margin-top:2px">Sklad: <strong id="pqty_${m.id}_${pi}" style="color:${sc==='sok'?'var(--g1)':sc==='slow'?'var(--ora)':'var(--red)'}">${qty} ks</strong></div></div></div><div class="pacts"><button class="pact pact-p" id="usebtn_${m.id}_${pi}" onclick="toggleUseQty('use_${m.id}_${pi}',this)">Označiť použitý</button></div><div id="use_${m.id}_${pi}" style="display:none;padding:10px 14px;background:var(--gray3);border-top:.5px solid var(--border);align-items:center;gap:8px"><span style="font-size:12px;color:var(--gray);flex:1">Počet:</span><button class="doplnq-btn m" onclick="let v=document.getElementById('uqty_${m.id}_${pi}');v.textContent=Math.max(1,parseInt(v.textContent)-1)">−</button><span class="doplnq-val" id="uqty_${m.id}_${pi}">1</span><button class="doplnq-btn p" onclick="let v=document.getElementById('uqty_${m.id}_${pi}');v.textContent=Math.min(${Math.max(1,qty)},parseInt(v.textContent)+1)">+</button><button class="dopln-confirm" style="background:var(--g1)" onclick="markUsed(${p.id},'${m.id}',${pi},'uqty_${m.id}_${pi}')">✓ Potvrdiť</button></div></div>`;
+        ${m.parts.length?m.parts.map((p,pi)=>{const sc=p.stock_status==='ok'?'sok':p.stock_status==='low'?'slow':'sout';const si=p.stock_status==='ok'?'✅':p.stock_status==='low'?'⚠️':'❌';const qty=p.quantity??0;return`<div class="pcard"><div class="pcard-top"><div class="pimg">${p.icon||'🔩'}</div><div style="flex:1;min-width:0"><div class="pname">${escHtml(p.name)}</div><div class="ppn">P/N: ${escHtml(p.part_number||'—')}</div><div class="pstock ${sc}" id="pstock_${m.id}_${pi}">${si} ${escHtml(p.stock_label||'')}</div><div style="font-size:11px;color:var(--gray);margin-top:2px">Sklad: <strong id="pqty_${m.id}_${pi}" style="color:${sc==='sok'?'var(--g1)':sc==='slow'?'var(--ora)':'var(--red)'}">${qty} ks</strong></div></div></div><div class="pacts"><button class="pact pact-p" id="usebtn_${m.id}_${pi}" onclick="toggleUseQty('use_${m.id}_${pi}',this)">Označiť použitý</button></div><div id="use_${m.id}_${pi}" style="display:none;padding:10px 14px;background:var(--gray3);border-top:.5px solid var(--border);align-items:center;gap:8px"><span style="font-size:12px;color:var(--gray);flex:1">Počet:</span><button class="doplnq-btn m" onclick="let v=document.getElementById('uqty_${m.id}_${pi}');v.textContent=Math.max(1,parseInt(v.textContent)-1)">−</button><span class="doplnq-val" id="uqty_${m.id}_${pi}">1</span><button class="doplnq-btn p" onclick="let v=document.getElementById('uqty_${m.id}_${pi}');v.textContent=Math.min(${Math.max(1,qty)},parseInt(v.textContent)+1)">+</button><button class="dopln-confirm" style="background:var(--g1)" onclick="markUsed(${p.id},'${m.id}',${pi},'uqty_${m.id}_${pi}')">✓ Potvrdiť</button></div></div>`;
 }).join(''):'<div style="padding:20px;font-size:13px;color:var(--gray);text-align:center">Žiadne náhradné diely</div>'}:'<div style="padding:20px;font-size:13px;color:var(--gray);text-align:center">Žiadne úlohy</div>'}
         <div style="height:16px"></div>
       </div>
@@ -1494,11 +1694,31 @@ function swSeg(t){document.getElementById('segSpec').classList.toggle('on',t==='
 function swPT(t){document.getElementById('ptP').classList.toggle('on',t==='parts');document.getElementById('ptT').classList.toggle('on',t==='tasks');document.getElementById('ppParts').style.display=t==='parts'?'':'none';document.getElementById('ppTasks').style.display=t==='tasks'?'':'none';}
 function togSec(h){const b=h.nextElementSibling,a=h.querySelector('.dsh-arr'),op=a.classList.contains('op');b.style.display=op?'none':'';a.classList.toggle('op',!op);}
 async function togTK(taskId,machineId){
-  const cb=document.querySelector(`#tkc-${taskId} .tkbox`);const isDone=cb.classList.contains('ck');
+  const cb=document.querySelector(`#tkc-${taskId} .tkbox`);
+  if(!cb)return;
+  const isDone=cb.classList.contains('ck');
   cb.classList.toggle('ck',!isDone);
-  await sb.from('tasks').update({is_done:!isDone}).eq('id',taskId);
-  const t=MACHINES.find(m=>m.id===machineId)?.tasks.find(t=>t.id===taskId);if(t)t.is_done=!isDone;
-  const gt=TASKS.find(t=>t.id===taskId);if(gt)gt.is_done=!isDone;
+  const updateData={is_done:!isDone};
+  // Track completion details
+  if(!isDone){
+    updateData.completed_at=new Date().toISOString();
+    updateData.completed_by=CU?.id||null;
+  }else{
+    updateData.completed_at=null;
+    updateData.completed_by=null;
+  }
+  const{error}=await sb.from('tasks').update(updateData).eq('id',taskId);
+  if(error){
+    // Revert UI on error
+    cb.classList.toggle('ck',isDone);
+    showToast('❌ '+error.message);
+    return;
+  }
+  const t=MACHINES.find(m=>m.id===machineId)?.tasks.find(t=>t.id===taskId);
+  if(t){t.is_done=!isDone;t.completed_at=updateData.completed_at;t.completed_by=updateData.completed_by;}
+  const gt=TASKS.find(t=>t.id===taskId);
+  if(gt){gt.is_done=!isDone;gt.completed_at=updateData.completed_at;gt.completed_by=updateData.completed_by;}
+  if(!isDone)showToast('✅ Úloha označená ako dokončená');
 }
 
 // ══════════════════════════════
@@ -1534,7 +1754,7 @@ function renderMapPins(){
 
 function openMapPin(id){
   const loc=LOCATIONS[id]||{name:'Lokalita '+id.replace('p',''),description:''};
-  document.getElementById('msName').textContent=loc.name;
+  document.getElementById('msName').textContent=loc.name||'';
   document.getElementById('msSub').textContent=loc.description||'';
   // Find machines at this location
   const machines=MACHINES.filter(m=>m.location&&m.location.toLowerCase().includes(loc.name.toLowerCase()));
@@ -1543,8 +1763,8 @@ function openMapPin(id){
       <div class="ms-mrow" onclick="openMachineFromMap('${m.id}')" style="cursor:pointer">
         <div class="ms-mic" style="background:${m.status==='e'?'#FFEBEE':m.status==='m'?'#FFF3E0':'#E8F5E9'}">${m.icon||'⚙️'}</div>
         <div style="flex:1;min-width:0">
-          <div class="ms-mn">${m.name}</div>
-          <div class="ms-ml">${m.location}</div>
+          <div class="ms-mn">${escHtml(m.name)}</div>
+          <div class="ms-ml">${escHtml(m.location)}</div>
         </div>
         <span class="badge ${bc(m.status)}">${m.status_label}</span>
         <span style="color:#C7C7CC;font-size:18px;margin-left:8px">›</span>
@@ -1576,7 +1796,7 @@ function showAllMachinesForLocation(locName){
     ?filtered.map(m=>`
       <div class="mc" onclick="openDetail('${m.id}')">
         <div class="mc-icon" style="background:${m.status==='e'?'#FFEBEE':m.status==='m'?'#FFF3E0':'#E8F5E9'}">${m.icon||'⚙️'}</div>
-        <div style="flex:1;min-width:0"><div class="mc-name">${m.name}</div><div class="mc-sub">${m.model} · ${m.location}</div></div>
+        <div style="flex:1;min-width:0"><div class="mc-name">${escHtml(m.name)}</div><div class="mc-sub">${escHtml(m.model)} · ${escHtml(m.location)}</div></div>
         <span class="badge ${bc(m.status)}">${m.status_label}</span>
       </div>`).join('')
     :'<div class="empty-state">Žiadne stroje</div>';
@@ -1655,39 +1875,125 @@ window.addEventListener('resize',()=>{mapReady=false;if(CT==='map')initMap();});
 // ══════════════════════════════
 // ADMIN
 // ══════════════════════════════
-function aGoTo(id){['aHome','aMachines','aDocs','aParts','aTasks','aLocations'].forEach(x=>document.getElementById(x).classList.toggle('off',x!==id));}
+function aGoTo(id){
+  ['aHome','aMachines','aDocs','aParts','aTasks','aLocations','aUsers'].forEach(x=>document.getElementById(x)?.classList.toggle('off',x!==id));
+  if(id==='aUsers')renderAdminUsers();
+}
 function aGoHome(){aGoTo('aHome');}
-function fillSelects(){const opts=MACHINES.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');['dMachine','ptMachine','tkMachine'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});}
+function fillSelects(){const opts=MACHINES.map(m=>`<option value="${m.id}">${escHtml(m.name)}</option>`).join('');['dMachine','ptMachine','tkMachine'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});}
 function renderAdminStats(){document.getElementById('astat-m').textContent=MACHINES.length;document.getElementById('astat-e').textContent=MACHINES.filter(m=>m.status==='e').length;document.getElementById('astat-t').textContent=TASKS.filter(t=>!t.is_done).length;const ne=document.getElementById('astat-notif');if(ne)ne.textContent=NOTIFICATIONS.length;}
 function renderAdminMachines(){
   document.getElementById('adminMachineList').innerHTML=MACHINES.length?
-    `<div class="admin-section">${MACHINES.map(m=>`<div class="admin-machine-item"><div style="font-size:24px;flex-shrink:0">${m.icon||'⚙️'}</div><div class="ami-info"><div class="ami-name">${m.name}</div><div class="ami-sub">${m.location} · <span class="badge ${bc(m.status)}" style="font-size:10px;padding:2px 8px">${m.status_label}</span></div></div><div class="ami-btns"><button class="ami-btn ami-edit" onclick="openEditMachine('${m.id}')">✏️</button><button class="ami-btn ami-del" onclick="delMachine('${m.id}')">🗑</button></div></div>`).join('')}</div>`
+    `<div class="admin-section">${MACHINES.map(m=>`<div class="admin-machine-item"><div style="font-size:24px;flex-shrink:0">${m.icon||'⚙️'}</div><div class="ami-info"><div class="ami-name">${escHtml(m.name)}</div><div class="ami-sub">${escHtml(m.location)} · <span class="badge ${bc(m.status)}" style="font-size:10px;padding:2px 8px">${m.status_label}</span></div></div><div class="ami-btns"><button class="ami-btn ami-edit" onclick="openEditMachine('${m.id}')">✏️</button><button class="ami-btn ami-del" onclick="delMachine('${m.id}')">🗑</button></div></div>`).join('')}</div>`
     :'<div class="empty-state">Žiadne stroje</div>';
 }
 function renderAdminDocs(){
-  document.getElementById('adminDocsList').innerHTML=MACHINES.map(m=>`<div class="admin-section" style="margin-bottom:10px"><div style="font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;padding:12px 16px 6px">${m.icon||''} ${m.name}</div>${m.docs.map(d=>`<div class="admin-machine-item"><div style="font-size:20px">${d.icon}</div><div class="ami-info"><div class="ami-name">${d.name}</div><div class="ami-sub">${d.meta||''}</div></div><button class="ami-btn ami-del" onclick="delDoc(${d.id})">🗑</button></div>`).join('')}<div style="padding:8px 16px 12px"><button onclick="openAddDoc('${m.id}')" style="width:100%;padding:10px;background:var(--gl);color:var(--g1);border:1.5px dashed var(--g1);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">+ Pridať dokument</button></div></div>`).join('');
+  document.getElementById('adminDocsList').innerHTML=MACHINES.map(m=>`<div class="admin-section" style="margin-bottom:10px"><div style="font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;padding:12px 16px 6px">${m.icon||''} ${escHtml(m.name)}</div>${m.docs.map(d=>`<div class="admin-machine-item"><div style="font-size:20px">${d.icon}</div><div class="ami-info"><div class="ami-name">${escHtml(d.name)}</div><div class="ami-sub">${escHtml(d.meta||'')}</div></div><button class="ami-btn ami-del" onclick="delDoc(${d.id})">🗑</button></div>`).join('')}<div style="padding:8px 16px 12px"><button onclick="openAddDoc('${m.id}')" style="width:100%;padding:10px;background:var(--gl);color:var(--g1);border:1.5px dashed var(--g1);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">+ Pridať dokument</button></div></div>`).join('');
 }
 function renderAdminParts(){
-  document.getElementById('adminPartsList').innerHTML=MACHINES.map(m=>`<div class="admin-section" style="margin-bottom:10px"><div style="font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;padding:12px 16px 6px">${m.icon||''} ${m.name}</div>${m.parts.map(p=>{const c=p.stock_status==='ok'?'var(--g1)':p.stock_status==='low'?'var(--ora)':'var(--red)';return`<div class="admin-machine-item"><div style="font-size:20px">${p.icon||'🔩'}</div><div class="ami-info"><div class="ami-name">${p.name}</div><div class="ami-sub" style="color:${c}">${p.stock_label||''} · ${p.part_number||''}</div></div><button class="ami-btn ami-del" onclick="delPart(${p.id})">🗑</button></div>`;}). join('')}<div style="padding:8px 16px 12px"><button onclick="openAddPart('${m.id}')" style="width:100%;padding:10px;background:var(--gl);color:var(--g1);border:1.5px dashed var(--g1);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">+ Pridať diel</button></div></div>`).join('');
+  document.getElementById('adminPartsList').innerHTML=MACHINES.map(m=>`<div class="admin-section" style="margin-bottom:10px"><div style="font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;padding:12px 16px 6px">${m.icon||''} ${escHtml(m.name)}</div>${m.parts.map(p=>{const c=p.stock_status==='ok'?'var(--g1)':p.stock_status==='low'?'var(--ora)':'var(--red)';return`<div class="admin-machine-item"><div style="font-size:20px">${p.icon||'🔩'}</div><div class="ami-info"><div class="ami-name">${escHtml(p.name)}</div><div class="ami-sub" style="color:${c}">${escHtml(p.stock_label||'')} · ${p.part_number||''}</div></div><button class="ami-btn ami-del" onclick="delPart(${p.id})">🗑</button></div>`;}). join('')}<div style="padding:8px 16px 12px"><button onclick="openAddPart('${m.id}')" style="width:100%;padding:10px;background:var(--gl);color:var(--g1);border:1.5px dashed var(--g1);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">+ Pridať diel</button></div></div>`).join('');
 }
 function renderAdminTasks(){
-  document.getElementById('adminTasksList').innerHTML=MACHINES.map(m=>`<div class="admin-section" style="margin-bottom:10px"><div style="font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;padding:12px 16px 6px">${m.icon||''} ${m.name}</div>${m.tasks.map(t=>`<div class="admin-machine-item"><div style="font-size:20px">${t.is_urgent?'🔴':'☑️'}</div><div class="ami-info"><div class="ami-name">${t.name}</div><div class="ami-sub">${t.description||''}</div></div><button class="ami-btn ami-del" onclick="delTask('${t.id}')">🗑</button></div>`).join('')}<div style="padding:8px 16px 12px"><button onclick="openAddTask('${m.id}')" style="width:100%;padding:10px;background:var(--gl);color:var(--g1);border:1.5px dashed var(--g1);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">+ Pridať úlohu</button></div></div>`).join('');
+  document.getElementById('adminTasksList').innerHTML=MACHINES.map(m=>`<div class="admin-section" style="margin-bottom:10px"><div style="font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;padding:12px 16px 6px">${m.icon||''} ${escHtml(m.name)}</div>${m.tasks.map(t=>`<div class="admin-machine-item"><div style="font-size:20px">${t.is_urgent?'🔴':'☑️'}</div><div class="ami-info"><div class="ami-name">${escHtml(t.name)}</div><div class="ami-sub">${escHtml(t.description||'')}</div></div><button class="ami-btn ami-del" onclick="delTask('${t.id}')">🗑</button></div>`).join('')}<div style="padding:8px 16px 12px"><button onclick="openAddTask('${m.id}')" style="width:100%;padding:10px;background:var(--gl);color:var(--g1);border:1.5px dashed var(--g1);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">+ Pridať úlohu</button></div></div>`).join('');
 }
 
 // ── ADMIN LOCATIONS ──
+async function renderAdminUsers(){
+  const{data:profiles}=await sb.from('profiles').select('*').order('full_name');
+  const list=(profiles||[]).map(u=>{
+    const isMe=u.id===CU?.id;
+    const role=u.role||'worker';
+    const isAdmin=role==='admin';
+    return `<div class="loc-item">
+      <div class="loc-pin-ic" style="background:${isAdmin?'#F3E5F5':'#E8F5E9'}">${isAdmin?'⚙️':'👷'}</div>
+      <div style="flex:1;min-width:0">
+        <div class="loc-name">${escHtml(u.full_name||'(bez mena)')}${isMe?' <span style="color:var(--g1);font-size:11px">(vy)</span>':''}</div>
+        <div style="font-size:11px;color:var(--gray);margin-top:2px">${isAdmin?'Administrátor':'Údržbár'}</div>
+      </div>
+      ${!isMe?`<button class="loc-edit-btn" onclick="toggleUserRole('${u.id}','${role==='admin'?'worker':'admin'}','${escHtml(u.full_name||'')}')">${isAdmin?'→ Údržbár':'→ Admin'}</button>`:''}
+    </div>`;
+  }).join('');
+  document.getElementById('adminUsersList').innerHTML=list||'<div class="empty-state">Žiadni používatelia</div>';
+}
+
+async function toggleUserRole(userId,newRole,name){
+  if(!confirm('Zmeniť rolu '+name+' na "'+(newRole==='admin'?'Administrátor':'Údržbár')+'"?'))return;
+  const{error}=await sb.from('profiles').update({role:newRole}).eq('id',userId);
+  if(error){alert('Chyba: '+error.message);return;}
+  showToast('✅ Rola zmenená');
+  renderAdminUsers();
+}
+
 function renderAdminLocations(){
   const list=PIN_POSITIONS.map(p=>{
     const loc=LOCATIONS[p.id]||{id:p.id,name:'Lokalita '+p.id.replace('p',''),description:''};
     return`<div class="loc-item">
       <div class="loc-pin-ic">📍</div>
       <div style="flex:1;min-width:0">
-        <div class="loc-name">${loc.name}</div>
-        <div style="font-size:11px;color:var(--gray);margin-top:2px">Špendlík ${p.id.replace('p','')} · ${loc.description||'bez popisu'}</div>
+        <div class="loc-name">${escHtml(loc.name)}</div>
+        <div style="font-size:11px;color:var(--gray);margin-top:2px">Špendlík ${p.id.replace('p','')} · ${escHtml(loc.description||'')}</div>
       </div>
       <button class="loc-edit-btn" onclick="openEditLocation('${p.id}')">✏️ Upraviť</button>
     </div>`;
   }).join('');
   document.getElementById('adminLocList').innerHTML=list;
+}
+
+function openEditProfile(){
+  document.getElementById('profEditName').value=document.getElementById('profName').textContent||'';
+  openModal('modalProfile');
+}
+async function saveProfile(){
+  const name=document.getElementById('profEditName').value.trim();
+  if(!name){alert('Zadajte meno');return;}
+  const{error}=await sb.from('profiles').update({full_name:name}).eq('id',CU.id);
+  if(error){alert('Chyba: '+error.message);return;}
+  document.getElementById('profName').textContent=name;
+  document.getElementById('dashName').textContent=name;
+  const init=name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('dashAvatar').textContent=init;
+  document.getElementById('profAvatar').textContent=init;
+  closeModal('modalProfile');
+  showToast('✅ Profil uložený');
+}
+function openChangePassword(){
+  document.getElementById('newPass1').value='';
+  document.getElementById('newPass2').value='';
+  openModal('modalPassword');
+}
+async function changePassword(){
+  const p1=document.getElementById('newPass1').value;
+  const p2=document.getElementById('newPass2').value;
+  if(p1.length<6){alert('Heslo musí mať aspoň 6 znakov');return;}
+  if(p1!==p2){alert('Heslá sa nezhodujú');return;}
+  const{error}=await sb.auth.updateUser({password:p1});
+  if(error){alert('Chyba: '+error.message);return;}
+  closeModal('modalPassword');
+  showToast('✅ Heslo zmenené');
+}
+
+async function renderAdminUsers(){
+  const{data:profiles,error}=await sb.from('profiles').select('id,full_name,role');
+  const list=document.getElementById('adminUserList');
+  if(error||!profiles){list.innerHTML='<div class="empty-state">Chyba načítania alebo nemáte oprávnenie</div>';return;}
+  if(!profiles.length){list.innerHTML='<div class="empty-state">Žiadni používatelia</div>';return;}
+  list.innerHTML=profiles.map(p=>{
+    const isMe=p.id===CU?.id;
+    return`<div class="admin-machine-item">
+      <div style="width:40px;height:40px;border-radius:50%;background:${p.role==='admin'?'#F3E5F5':'var(--gl)'};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:${p.role==='admin'?'#7B1FA2':'var(--g1)'};flex-shrink:0">${(p.full_name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
+      <div class="ami-info"><div class="ami-name">${escHtml(p.full_name||'(bez mena)')}${isMe?' <span style="font-size:10px;color:var(--gray)">(ja)</span>':''}</div><div class="ami-sub">${p.role==='admin'?'⚙️ Administrátor':'👷 Údržbár'}</div></div>
+      ${isMe?'':`<button class="ami-btn ${p.role==='admin'?'ami-del':'ami-edit'}" onclick="toggleUserRole('${p.id}','${p.role}')">${p.role==='admin'?'↓ Údržbár':'↑ Admin'}</button>`}
+    </div>`;
+  }).join('');
+}
+
+async function toggleUserRole(userId,currentRole){
+  const newRole=currentRole==='admin'?'worker':'admin';
+  if(!confirm('Zmeniť rolu na '+(newRole==='admin'?'Administrátor':'Údržbár')+'?'))return;
+  const{error}=await sb.from('profiles').update({role:newRole}).eq('id',userId);
+  if(error){alert('Chyba: '+error.message);return;}
+  showToast('✅ Rola zmenená');
+  renderAdminUsers();
 }
 
 function openEditLocation(id){
@@ -1704,12 +2010,14 @@ async function saveLocation(){
   const name=document.getElementById('locName').value.trim();
   if(!name){alert('Zadajte názov lokácie');return;}
   const desc=document.getElementById('locDesc').value.trim();
+  const btn=document.querySelector('#modalLocation .modal-save');
+  if(btn){btn.disabled=true;btn.textContent='Ukladám...';}
   // Try update first, then insert if not exists
   const{error:ue}=await sb.from('locations').upsert(
     {id,name,description:desc,updated_at:new Date().toISOString()},
     {onConflict:'id'}
   );
-  if(ue){alert('Chyba uloženia: '+ue.message);return;}
+  if(ue){alert('Chyba uloženia: '+ue.message);if(btn){btn.disabled=false;btn.textContent='Uložiť názov';}return;}
   // Reload locations from DB to ensure fresh data
   const{data:freshLocs}=await sb.from('locations').select('*');
   if(freshLocs){
@@ -1721,7 +2029,7 @@ async function saveLocation(){
   // Re-render both admin list and map pins
   renderAdminLocations();
   renderMapPins();
-  // Also refresh location dropdown if open
+  if(btn){btn.disabled=false;btn.textContent='Uložiť názov';}
   showToast('✅ Lokácia uložená: '+name);
 }
 
@@ -1774,22 +2082,36 @@ async function saveMachine(){
   if(!name||!model||!loc){alert('Vyplňte povinné polia (*)');return;}
   const st=document.getElementById('mStatus').value,editId=document.getElementById('mEditId').value;
   const data={name,model,location:loc,status:st,status_label:stLabel(st),icon:document.getElementById('mIcon').value||'⚙️',manufacturer:document.getElementById('mVyr').value,year:document.getElementById('mRok').value,serial_number:document.getElementById('mSN').value,technician:document.getElementById('mTech').value};
+  const btn=document.querySelector('#modalMachine .modal-save');
+  if(btn){btn.disabled=true;btn.textContent='Ukladám...';}
   let dbErr;
-  if(editId){const{error}=await sb.from('machines').update(data).eq('id',editId);dbErr=error;}
-  else{const{error}=await sb.from('machines').insert({id:'M-'+uid(),...data});dbErr=error;}
-  if(dbErr){alert('Chyba uloženia: '+dbErr.message);return;}
+  try{
+    if(editId){const{error}=await sb.from('machines').update(data).eq('id',editId);dbErr=error;}
+    else{const{error}=await sb.from('machines').insert({id:'M-'+uid(),...data});dbErr=error;}
+    if(dbErr){alert('Chyba uloženia: '+dbErr.message);return;}
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='Uložiť stroj';}
+  }
   await loadData();closeModal('modalMachine');
   renderAdminMachines();renderAdminStats();renderDemos();renderML(MACHINES);
   showToast(editId?'✅ Stroj upravený':'✅ Stroj pridaný');
 }
 async function delMachine(id){if(!confirm('Odstrániť stroj?'))return;await sb.from('machines').delete().eq('id',id);await loadData();renderAdminMachines();renderAdminDocs();renderAdminParts();renderAdminTasks();renderAdminStats();renderDemos();renderML(MACHINES);showToast('🗑 Stroj odstránený');}
 function openAddDoc(mid){fillSelects();document.getElementById('dMachine').value=mid;['dName','dIcon','dSize'].forEach(id=>document.getElementById(id).value='');document.getElementById('dIcon').value='📄';openModal('modalDoc');}
-async function saveDoc(){const mid=document.getElementById('dMachine').value,name=document.getElementById('dName').value.trim();if(!name){alert('Zadajte názov');return;}const{error:de}=await sb.from('documents').insert({machine_id:mid,name,icon:document.getElementById('dIcon').value||'📄',meta:document.getElementById('dSize').value});if(de){alert('Chyba: '+de.message);return;}await loadData();closeModal('modalDoc');renderAdminDocs();showToast('✅ Dokument pridaný');}
+async function saveDoc(){const mid=document.getElementById('dMachine').value,name=document.getElementById('dName').value.trim();if(!name){alert('Zadajte názov');return;}const btn=document.querySelector('#modalDoc .modal-save');if(btn){btn.disabled=true;btn.textContent='Ukladám...';}
+  try{
+    const{error:de}=await sb.from('documents').insert({machine_id:mid,name,icon:document.getElementById('dIcon').value||'📄',meta:document.getElementById('dSize').value});
+    if(de){alert('Chyba: '+de.message);return;}
+    await loadData();closeModal('modalDoc');renderAdminDocs();showToast('✅ Dokument pridaný');
+  }finally{if(btn){btn.disabled=false;btn.textContent='Uložiť dokument';}}}
 async function delDoc(id){if(!confirm('Odstrániť?'))return;await sb.from('documents').delete().eq('id',id);await loadData();renderAdminDocs();showToast('🗑 Odstránené');}
 function openAddPart(mid){fillSelects();document.getElementById('ptMachine').value=mid;['ptName','ptPN'].forEach(id=>document.getElementById(id).value='');document.getElementById('ptIcon').value='🔩';document.getElementById('ptQty').value='0';document.getElementById('ptMinQty').value='0';openModal('modalPart');}
 async function savePart(){
   const mid=document.getElementById('ptMachine').value,name=document.getElementById('ptName').value.trim();
   if(!name){alert('Zadajte názov');return;}
+  const btn=document.querySelector('#modalPart .modal-save');
+  if(btn){btn.disabled=true;btn.textContent='Ukladám...';}
+  try{
   const qty=parseInt(document.getElementById('ptQty').value)||0;
   const minQty=parseInt(document.getElementById('ptMinQty').value)||0;
   const stockStatus=qty===0?'out':qty<=minQty?'low':'ok';
@@ -1803,10 +2125,26 @@ async function savePart(){
   });
   if(pe){alert('Chyba: '+pe.message);return;}
   await loadData();closeModal('modalPart');renderAdminParts();showToast('✅ Diel pridaný');
+  }finally{if(btn){btn.disabled=false;btn.textContent='Uložiť diel';}}
 }
 async function delPart(id){if(!confirm('Odstrániť?'))return;await sb.from('parts').delete().eq('id',id);await loadData();renderAdminParts();showToast('🗑 Odstránené');}
 function openAddTask(mid){fillSelects();document.getElementById('tkMachine').value=mid;['tkName','tkSub'].forEach(id=>document.getElementById(id).value='');document.getElementById('tkUrgent').value='0';openModal('modalTask');}
-async function saveTask(){const mid=document.getElementById('tkMachine').value,name=document.getElementById('tkName').value.trim();if(!name){alert('Zadajte názov');return;}const{error:te}=await sb.from('tasks').insert({id:'t'+uid(),machine_id:mid,name,description:document.getElementById('tkSub').value,is_urgent:document.getElementById('tkUrgent').value==='1',is_done:false});if(te){alert('Chyba: '+te.message);return;}await loadData();closeModal('modalTask');renderAdminTasks();renderAdminStats();showToast('✅ Úloha pridaná');}
+async function saveTask(){
+  const mid=document.getElementById('tkMachine').value;
+  const name=document.getElementById('tkName').value.trim();
+  if(!mid){alert('Vyberte stroj');return;}
+  if(!name){alert('Zadajte názov úlohy');return;}
+  const desc=document.getElementById('tkSub').value.trim();
+  const btn=document.querySelector('#modalTask .modal-save');
+  if(btn){btn.disabled=true;btn.textContent='Ukladám...';}
+  try{
+    const{error:te}=await sb.from('tasks').insert({id:'t'+uid(),machine_id:mid,name,description:desc,is_urgent:document.getElementById('tkUrgent').value==='1',is_done:false});
+    if(te){alert('Chyba: '+te.message);return;}
+    await loadData();closeModal('modalTask');renderAdminTasks();renderAdminStats();showToast('✅ Úloha pridaná');
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='Uložiť úlohu';}
+  }
+}
 async function delTask(id){if(!confirm('Odstrániť?'))return;await sb.from('tasks').delete().eq('id',id);await loadData();renderAdminTasks();renderAdminStats();showToast('🗑 Odstránené');}
 </script>
 </body>

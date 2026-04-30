@@ -1,5 +1,5 @@
-const CACHE = 'zeo-udrzba-v2';
-const ASSETS = ['/', '/index.html', '/manifest.json', '/logo.png', '/icon-192.png', '/icon-512.png'];
+const CACHE = 'zeo-udrzba-v3';
+const ASSETS = ['/manifest.json', '/logo.png', '/icon-192.png', '/icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -17,16 +17,35 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      const network = fetch(e.request).then(res => {
+  const url = new URL(e.request.url);
+  const isHTML = e.request.mode === 'navigate' ||
+                 (e.request.headers.get('accept') || '').includes('text/html') ||
+                 url.pathname === '/' ||
+                 url.pathname.endsWith('.html');
+
+  if (isHTML) {
+    e.respondWith(
+      fetch(e.request).then(res => {
         if (res.ok) {
           const clone = res.clone();
           caches.open(CACHE).then(c => c.put(e.request, clone));
         }
         return res;
-      }).catch(() => cached);
-      return cached || network;
+      }).catch(() => caches.match(e.request).then(cached => cached || caches.match('/index.html')))
+    );
+    return;
+  }
+
+  e.respondWith(
+    caches.match(e.request).then(cached => {
+      if (cached) return cached;
+      return fetch(e.request).then(res => {
+        if (res.ok) {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+        }
+        return res;
+      });
     })
   );
 });
