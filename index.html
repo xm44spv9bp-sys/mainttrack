@@ -903,6 +903,9 @@ function setupDashboard(name){
   }).join(''):'<div class="empty-state">Žiadne urgentné úlohy 🎉</div>';
 }
 
+function openMachinesFromNotif(){goTab('machines');}
+function openMachinesTab(){goTab('machines');}
+
 // ── CLOCK ──
 function startClock(){
   function tick(){
@@ -949,7 +952,7 @@ function showAllNotifications(){
     <div class="notif-detail-box" id="and${i}">
       <div class="notif-detail-text">${n.message}</div>
       ${n.link_type==='part'?'<span class="notif-action-link" onclick="goTabSklad()">→ Prejsť do Skladu</span>':
-        n.link_type==='machine'?'<span class="notif-action-link" onclick="goTab('machines')">→ Zobraziť stroje</span>':''}
+        n.link_type==='machine'?'<span class="notif-action-link" onclick="openMachinesTab()">→ Zobraziť stroje</span>':''}
     </div>`).join('')+'</div>';
 }
 function toggleAllNotifDetail(id){
@@ -1007,7 +1010,7 @@ function renderDashNotifications(){
     <div class="notif-detail-box" id="nd${i}">
       <div class="notif-detail-text">${n.message}</div>
       ${n.link_type==='part'?'<span class="notif-action-link" onclick="goTabSklad()">→ Prejsť do Skladu</span>':
-        n.link_type==='machine'?'<span class="notif-action-link" onclick="goTab('machines')">→ Zobraziť stroje</span>':''}
+        n.link_type==='machine'?'<span class="notif-action-link" onclick="openMachinesTab()">→ Zobraziť stroje</span>':''}
     </div>`).join('')+'</div>';
   const showAllBtn=document.getElementById('showAllNotifBtn');
   if(showAllBtn){showAllBtn.style.display=NOTIFICATIONS.length>3?'block':'none';showAllBtn.textContent='Zobraziť všetky upozornenia ('+NOTIFICATIONS.length+') →';}
