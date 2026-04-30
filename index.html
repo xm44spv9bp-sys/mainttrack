@@ -1337,33 +1337,57 @@ async function markUsed(partId, machineId, partIdx, qtyElId){
   const usedQty=parseInt(document.getElementById(qtyElId).textContent)||1;
   const m=MACHINES.find(m=>m.id===machineId);if(!m)return;
   const p=m.parts.find(p=>p.id===partId);if(!p)return;
+  // Block if no stock
+  if((p.quantity||0)<=0){showToast('❌ Diel nie je na sklade');return;}
+  if(usedQty>(p.quantity||0)){showToast('❌ Nemáte toľko kusov');return;}
   const newQty=Math.max(0,(p.quantity||0)-usedQty);
   const result=await updatePartInDB(partId,machineId,newQty);
   if(!result)return;
-  // Update UI in place - no reload
+  // Update UI in place
   const qtyEl=document.getElementById('pqty_'+machineId+'_'+partIdx);
   const stockEl=document.getElementById('pstock_'+machineId+'_'+partIdx);
   if(qtyEl)qtyEl.textContent=newQty+' ks';
   if(stockEl){
     const sc=result.p.stock_status;
     const si=sc==='ok'?'✅':sc==='low'?'⚠️':'❌';
-    stockEl.textContent=si+' '+(result.p.stock_label||'');
+    const suffix=newQty===0?' (Nedostupný)':newQty<=(p.min_quantity||0)?' (Pod minimom)':'';
+    stockEl.innerHTML=si+' <strong id="pqty_'+machineId+'_'+partIdx+'">'+newQty+' ks</strong>'+suffix;
     stockEl.className='pstock '+(sc==='ok'?'sok':sc==='low'?'slow':'sout');
   }
   // Close the expand
   const expandEl=document.getElementById('use_'+machineId+'_'+partIdx);
   if(expandEl)expandEl.style.display='none';
   const btn=document.getElementById('usebtn_'+machineId+'_'+partIdx);
-  if(btn){btn.textContent='Označiť použitý';btn.style.background='';}
-  // Reload notifications from DB (SQL trigger creates them automatically)
-  // Wait a moment for trigger to fire
-  await new Promise(r=>setTimeout(r,300));
+  if(btn){
+    if(newQty<=0){
+      btn.textContent='❌ Nedostupný';
+      btn.disabled=true;
+      btn.style.opacity='.4';
+      btn.style.cursor='not-allowed';
+    } else {
+      btn.textContent='Označiť použitý';
+      btn.style.background='';
+    }
+  }
+  showToast('✅ Použitých '+usedQty+' ks — zostatok: '+newQty+' ks');
+  // Manually create notification to ensure it exists (in case SQL trigger not setup)
+  try{
+    if(newQty===0){
+      await sb.from('notifications').insert({type:'error',title:'Diel nedostupný',message:p.name+' klesol na 0 ks po použití '+usedQty+' ks.',link_type:'part',link_id:String(partId)});
+    }else if(newQty<=(p.min_quantity||0)){
+      await sb.from('notifications').insert({type:'warning',title:'Pod minimálnym množstvom',message:p.name+' klesol na '+newQty+' ks (min: '+(p.min_quantity||0)+' ks).',link_type:'part',link_id:String(partId)});
+    }
+  }catch(e){}
+  // Reload notifications and update dashboard
+  await new Promise(r=>setTimeout(r,400));
   try{
     const{data:fresh}=await sb.from('notifications').select('*').order('created_at',{ascending:false}).limit(100);
     NOTIFICATIONS=fresh||[];
+    // Deduplicate by id (in case trigger + manual both fired)
+    const seen=new Set();
+    NOTIFICATIONS=NOTIFICATIONS.filter(n=>{if(seen.has(n.id))return false;seen.add(n.id);return true;});
   }catch(e){}
   renderDashNotifications();
-  showToast('✅ Použitých '+usedQty+' ks — zostatok: '+newQty+' ks');
 }
 
 async function updatePartInDB(partId,machineId,newQty){
@@ -1419,14 +1443,22 @@ async function confirmDopln(partId,machineId,addQtyId){
   if(addQty<=0)return;
   const m=MACHINES.find(m=>m.id===machineId);if(!m)return;
   const p=m.parts.find(p=>p.id===partId);if(!p)return;
+  const wasLow=(p.quantity||0)<=(p.min_quantity||0);
   const newQty=(p.quantity||0)+addQty;
   const result=await updatePartInDB(partId,machineId,newQty);
   if(!result)return;
-  // Wait for SQL trigger then reload notifications
-  await new Promise(r=>setTimeout(r,300));
+  // Manual notification for restocking above minimum
+  try{
+    if(wasLow&&newQty>(p.min_quantity||0)){
+      await sb.from('notifications').insert({type:'success',title:'Sklad doplnený',message:p.name+' bol doplnený na '+newQty+' ks.',link_type:'part',link_id:String(partId)});
+    }
+  }catch(e){}
+  await new Promise(r=>setTimeout(r,400));
   try{
     const{data:fresh}=await sb.from('notifications').select('*').order('created_at',{ascending:false}).limit(100);
     NOTIFICATIONS=fresh||[];
+    const seen=new Set();
+    NOTIFICATIONS=NOTIFICATIONS.filter(n=>{if(seen.has(n.id))return false;seen.add(n.id);return true;});
   }catch(e){}
   renderSklad();
   renderDashNotifications();
@@ -1672,7 +1704,7 @@ function openDetail(id){
     <div id="pParts" style="display:none">
       <div class="ptabs"><button class="ptab-b on" id="ptP" onclick="swPT('parts')">Náhradné diely</button><button class="ptab-b" id="ptT" onclick="swPT('tasks')">Úlohy</button></div>
       <div id="ppParts">
-        ${m.parts.length?m.parts.map((p,pi)=>{const sc=p.stock_status==='ok'?'sok':p.stock_status==='low'?'slow':'sout';const si=p.stock_status==='ok'?'✅':p.stock_status==='low'?'⚠️':'❌';const qty=p.quantity??0;return`<div class="pcard"><div class="pcard-top"><div class="pimg">${p.icon||'🔩'}</div><div style="flex:1;min-width:0"><div class="pname">${escHtml(p.name)}</div><div class="ppn">P/N: ${escHtml(p.part_number||'—')}</div><div class="pstock ${sc}" id="pstock_${m.id}_${pi}">${si} ${escHtml(p.stock_label||'')}</div><div style="font-size:11px;color:var(--gray);margin-top:2px">Sklad: <strong id="pqty_${m.id}_${pi}" style="color:${sc==='sok'?'var(--g1)':sc==='slow'?'var(--ora)':'var(--red)'}">${qty} ks</strong></div></div></div><div class="pacts"><button class="pact pact-p" id="usebtn_${m.id}_${pi}" onclick="toggleUseQty('use_${m.id}_${pi}',this)">Označiť použitý</button></div><div id="use_${m.id}_${pi}" style="display:none;padding:10px 14px;background:var(--gray3);border-top:.5px solid var(--border);align-items:center;gap:8px"><span style="font-size:12px;color:var(--gray);flex:1">Počet:</span><button class="doplnq-btn m" onclick="let v=document.getElementById('uqty_${m.id}_${pi}');v.textContent=Math.max(1,parseInt(v.textContent)-1)">−</button><span class="doplnq-val" id="uqty_${m.id}_${pi}">1</span><button class="doplnq-btn p" onclick="let v=document.getElementById('uqty_${m.id}_${pi}');v.textContent=Math.min(${Math.max(1,qty)},parseInt(v.textContent)+1)">+</button><button class="dopln-confirm" style="background:var(--g1)" onclick="markUsed(${p.id},'${m.id}',${pi},'uqty_${m.id}_${pi}')">✓ Potvrdiť</button></div></div>`;
+        ${m.parts.length?m.parts.map((p,pi)=>{const sc=p.stock_status==='ok'?'sok':p.stock_status==='low'?'slow':'sout';const si=p.stock_status==='ok'?'✅':p.stock_status==='low'?'⚠️':'❌';const qty=p.quantity??0;return`<div class="pcard"><div class="pcard-top"><div class="pimg">${p.icon||'🔩'}</div><div style="flex:1;min-width:0"><div class="pname">${escHtml(p.name)}</div><div class="ppn">P/N: ${escHtml(p.part_number||'—')}</div><div class="pstock ${sc}" id="pstock_${m.id}_${pi}">${si} <strong id="pqty_${m.id}_${pi}">${qty} ks</strong>${qty===0?' (Nedostupný)':qty<=(p.min_quantity||0)?' (Pod minimom)':''}</div></div></div><div class="pacts"><button class="pact pact-p" id="usebtn_${m.id}_${pi}" onclick="toggleUseQty('use_${m.id}_${pi}',this)" ${qty<=0?'disabled style="opacity:.4;cursor:not-allowed"':''}>${qty<=0?'❌ Nedostupný':'Označiť použitý'}</button></div><div id="use_${m.id}_${pi}" style="display:none;padding:10px 14px;background:var(--gray3);border-top:.5px solid var(--border);align-items:center;gap:8px"><span style="font-size:12px;color:var(--gray);flex:1">Počet:</span><button class="doplnq-btn m" onclick="let v=document.getElementById('uqty_${m.id}_${pi}');v.textContent=Math.max(1,parseInt(v.textContent)-1)">−</button><span class="doplnq-val" id="uqty_${m.id}_${pi}">1</span><button class="doplnq-btn p" onclick="let v=document.getElementById('uqty_${m.id}_${pi}');v.textContent=Math.min(${Math.max(1,qty)},parseInt(v.textContent)+1)">+</button><button class="dopln-confirm" style="background:var(--g1)" onclick="markUsed(${p.id},'${m.id}',${pi},'uqty_${m.id}_${pi}')">✓ Potvrdiť</button></div></div>`;
 }).join(''):'<div style="padding:20px;font-size:13px;color:var(--gray);text-align:center">Žiadne náhradné diely</div>'}:'<div style="padding:20px;font-size:13px;color:var(--gray);text-align:center">Žiadne úlohy</div>'}
         <div style="height:16px"></div>
       </div>
