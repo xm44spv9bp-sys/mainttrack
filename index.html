@@ -760,6 +760,8 @@ const sb=supabase.createClient(SUPA_URL,ANON_KEY);
 const PIN_POSITIONS=[{"id": "p1", "x": 50.1, "y": 15.8}, {"id": "p2", "x": 66.5, "y": 19.3}, {"id": "p3", "x": 66.4, "y": 25.8}, {"id": "p4", "x": 32.2, "y": 26.3}, {"id": "p5", "x": 54.9, "y": 30.7}, {"id": "p6", "x": 32.4, "y": 33.0}, {"id": "p7", "x": 20.3, "y": 37.0}, {"id": "p8", "x": 55.4, "y": 39.1}, {"id": "p9", "x": 31.6, "y": 40.6}, {"id": "p10", "x": 31.7, "y": 47.7}, {"id": "p11", "x": 61.8, "y": 47.9}, {"id": "p12", "x": 45.1, "y": 49.2}, {"id": "p13", "x": 30.2, "y": 55.9}, {"id": "p14", "x": 35.9, "y": 63.8}, {"id": "p15", "x": 46.5, "y": 64.2}, {"id": "p16", "x": 24.4, "y": 66.3}, {"id": "p17", "x": 50.9, "y": 74.6}, {"id": "p18", "x": 63.2, "y": 77.7}, {"id": "p19", "x": 26.7, "y": 83.0}, {"id": "p20", "x": 65.2, "y": 85.4}];
 
 let CU=null,userRole='worker',CT='dash',SS=null,SA=null;
+let NOTIFICATIONS=[];
+let SKLAD_TAB='all';
 let MACHINES=[],TASKS=[],RECENT=[],LOCATIONS={};
 let booting=false;
 
@@ -830,7 +832,6 @@ async function bootApp(){
   finally{booting=false;}
 }
 
-let NOTIFICATIONS=[];
 async function loadData(){
   const[{data:machines,error:mErr},{data:docs},{data:parts},{data:tasks}]=await Promise.all([
     sb.from('machines').select('*').order('name'),
@@ -887,7 +888,7 @@ function setupDashboard(name){
   const totalParts=MACHINES.reduce((s,m)=>s+m.parts.length,0);
   document.getElementById('st-parts').textContent=totalParts;
   startClock();
-  renderDashNotifications();
+  try{renderDashNotifications();}catch(e){console.warn('notifications:',e);}
   const recent=RECENT.length?MACHINES.filter(m=>RECENT.includes(m.id)).slice(0,3):MACHINES.slice(0,3);
   document.getElementById('dashRecent').innerHTML=recent.length?recent.map(m=>`
     <div class="recent-card" onclick="openDetail('${m.id}')">
@@ -959,8 +960,6 @@ function toggleAllNotifDetail(id){
 // ══════════════════════════════
 // SKLAD & NOTIFICATIONS
 // ══════════════════════════════
-
-let SKLAD_TAB = 'all';
 
 function switchSkladTab(tab){
   SKLAD_TAB=tab;
