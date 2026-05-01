@@ -1417,14 +1417,22 @@ async function updatePartInDB(partId,machineId,newQty){
   const min=p.min_quantity||0;
   const newStatus=newQty===0?'out':newQty<=min?'low':'ok';
   const newLabel=newQty===0?'Nedostupný':newQty<=min?'Posledné kusy ('+newQty+' ks)':'Na sklade ('+newQty+' ks)';
-  // Mark as pending - prevents Realtime from overwriting
   _pendingPartUpdates[partId]=Date.now();
-  const{error}=await sb.from('parts').update({quantity:newQty,stock_status:newStatus,stock_label:newLabel}).eq('id',partId);
-  // Update local cache immediately
-  p.quantity=newQty;p.stock_status=newStatus;p.stock_label=newLabel;
-  // Clear pending flag after Realtime would have processed
+  // Try DB update FIRST
+  const{data,error}=await sb.from('parts').update({quantity:newQty,stock_status:newStatus,stock_label:newLabel}).eq('id',partId).select();
   setTimeout(()=>{delete _pendingPartUpdates[partId];},2000);
-  if(error){showToast('❌ '+error.message);return null;}
+  if(error){
+    showToast('❌ Chyba: '+error.message);
+    console.error('updatePartInDB error:',error);
+    return null;
+  }
+  if(!data||!data.length){
+    showToast('❌ Diel sa neuložil — chýbajú práva?');
+    console.error('updatePartInDB: no rows updated. RLS issue?');
+    return null;
+  }
+  // ONLY update local cache after confirmed DB write
+  p.quantity=newQty;p.stock_status=newStatus;p.stock_label=newLabel;
   return{p,newStatus,min};
 }
 
@@ -1468,16 +1476,20 @@ async function confirmDopln(partId,machineId,addQtyId){
   if(addQty<=0)return;
   const m=MACHINES.find(m=>m.id===machineId);if(!m)return;
   const p=m.parts.find(p=>p.id===partId);if(!p)return;
-  const wasLow=(p.quantity||0)<=(p.min_quantity||0);
-  const newQty=(p.quantity||0)+addQty;
+  const oldQty=p.quantity||0;
+  const newQty=oldQty+addQty;
   const result=await updatePartInDB(partId,machineId,newQty);
   if(!result)return;
-  // Manual notification for restocking above minimum
+  // Always create notification when restocking
   try{
-    if(wasLow&&newQty>(p.min_quantity||0)){
-      await sb.from('notifications').insert({type:'success',title:'Sklad doplnený',message:p.name+' bol doplnený na '+newQty+' ks.',link_type:'part',link_id:String(partId)});
-    }
-  }catch(e){}
+    await sb.from('notifications').insert({
+      type:'success',
+      title:'Sklad doplnený',
+      message:p.name+' bol doplnený o '+addQty+' ks. Nový stav: '+newQty+' ks.',
+      link_type:'part',
+      link_id:String(partId)
+    });
+  }catch(e){console.warn('notif insert:',e);}
   await new Promise(r=>setTimeout(r,400));
   try{
     const{data:fresh}=await sb.from('notifications').select('*').order('created_at',{ascending:false}).limit(100);
