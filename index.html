@@ -814,7 +814,16 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
 <script>
 const SUPA_URL='https://psfyfgwvgabwyeztvoki.supabase.co';
 const ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzZnlmZ3d2Z2Fid3llenR2b2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNzgwODQsImV4cCI6MjA5Mjg1NDA4NH0.kAFpVVPiNncRNXqMp8Fh__M16Vi3AAcEDvPtRSp11M0';
-const sb=supabase.createClient(SUPA_URL,ANON_KEY);
+const sb=supabase.createClient(SUPA_URL,ANON_KEY,{
+  auth:{persistSession:true,autoRefreshToken:true},
+  global:{
+    fetch:(url,options={})=>{
+      // Force no-cache for all Supabase requests
+      const opts={...options,cache:'no-store',headers:{...(options.headers||{}),'Cache-Control':'no-cache, no-store, must-revalidate','Pragma':'no-cache'}};
+      return fetch(url,opts);
+    }
+  }
+});
 
 // Pin positions (auto-detected from image)
 const PIN_POSITIONS=[{"id": "p1", "x": 50.1, "y": 15.8}, {"id": "p2", "x": 66.5, "y": 19.3}, {"id": "p3", "x": 66.4, "y": 25.8}, {"id": "p4", "x": 32.2, "y": 26.3}, {"id": "p5", "x": 54.9, "y": 30.7}, {"id": "p6", "x": 32.4, "y": 33.0}, {"id": "p7", "x": 20.3, "y": 37.0}, {"id": "p8", "x": 55.4, "y": 39.1}, {"id": "p9", "x": 31.6, "y": 40.6}, {"id": "p10", "x": 31.7, "y": 47.7}, {"id": "p11", "x": 61.8, "y": 47.9}, {"id": "p12", "x": 45.1, "y": 49.2}, {"id": "p13", "x": 30.2, "y": 55.9}, {"id": "p14", "x": 35.9, "y": 63.8}, {"id": "p15", "x": 46.5, "y": 64.2}, {"id": "p16", "x": 24.4, "y": 66.3}, {"id": "p17", "x": 50.9, "y": 74.6}, {"id": "p18", "x": 63.2, "y": 77.7}, {"id": "p19", "x": 26.7, "y": 83.0}, {"id": "p20", "x": 65.2, "y": 85.4}];
@@ -947,6 +956,40 @@ async function bootApp(){
   }catch(e){console.error('bootApp error:',e);showView('vLogin');showErr('Chyba načítania: '+e.message);}
   finally{booting=false;}
 }
+
+// ── VISIBILITY CHANGE - reload data when app reopens ──
+let _lastVisibilityHide=0;
+document.addEventListener('visibilitychange',async()=>{
+  if(document.visibilityState==='visible'&&CU){
+    const elapsed=Date.now()-_lastVisibilityHide;
+    // If app was hidden for more than 3 seconds, force reload data
+    if(elapsed>3000){
+      console.log('[visibility] reloading after',elapsed,'ms hidden');
+      try{
+        await loadData();
+        if(CT==='dash'){
+          renderML(MACHINES);renderDemos();renderDashNotifications();
+          // Update stats
+          const sm=document.getElementById('st-machines');if(sm)sm.textContent=MACHINES.length;
+          const st=document.getElementById('st-tasks');if(st)st.textContent=TASKS.filter(t=>!t.is_done).length;
+          const sp=document.getElementById('st-parts');if(sp){const tp=MACHINES.reduce((s,m)=>s+m.parts.length,0);sp.textContent=tp;}
+        }
+        if(CT==='sklad')renderSklad();
+        if(CT==='machines')renderML(MACHINES);
+      }catch(e){console.error('reload on visibility:',e);}
+    }
+  }else if(document.visibilityState==='hidden'){
+    _lastVisibilityHide=Date.now();
+  }
+});
+
+// Also reload on pageshow (iOS PWA back from background)
+window.addEventListener('pageshow',async(e)=>{
+  if(e.persisted&&CU){
+    console.log('[pageshow] persisted - reloading');
+    try{await loadData();}catch(err){}
+  }
+});
 
 // ── REALTIME + POLLING ──
 let realtimeChannel=null;
