@@ -1546,7 +1546,7 @@ function renderSklad(){
     list.innerHTML=Object.values(byMachine).map(g=>`
       <div style="font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;margin:4px 0 8px">${g.icon} ${escHtml(g.name)}</div>
       <div class="pcard" style="margin-bottom:12px">
-        ${g.parts.map((p,pi)=>partRow(p,pi+'_all','all')).join('')}
+        ${g.parts.map((p,pi)=>partRow(p,'all_'+p.id,'all')).join('')}
       </div>`).join('')||'<div class="empty-state">Žiadne diely</div>';
   } else {
     // Warn tab - grouped by severity
@@ -1556,7 +1556,7 @@ function renderSklad(){
           <span class="wg-ic">❌</span><span class="wg-title">Nedostupné diely</span>
           <span class="wg-cnt">${errParts.length}</span><span class="wg-arr" id="aarr">▾</span>
         </div>
-        <div class="wg-body" id="werr">${errParts.map((p,i)=>partRow(p,'e'+i,'warn')).join('')}</div>
+        <div class="wg-body" id="werr">${errParts.map((p,i)=>partRow(p,'e_'+p.id,'warn')).join('')}</div>
       </div>`:'')
     +(lowParts.length?`
       <div class="wg low">
@@ -1564,7 +1564,7 @@ function renderSklad(){
           <span class="wg-ic">⚠️</span><span class="wg-title">Pod minimálnym množstvom</span>
           <span class="wg-cnt">${lowParts.length}</span><span class="wg-arr" id="larr">▾</span>
         </div>
-        <div class="wg-body" id="wlow">${lowParts.map((p,i)=>partRow(p,'l'+i,'warn')).join('')}</div>
+        <div class="wg-body" id="wlow">${lowParts.map((p,i)=>partRow(p,'l_'+p.id,'warn')).join('')}</div>
       </div>`:'')
     +(okParts.length?`
       <div class="wg ok">
@@ -1572,7 +1572,7 @@ function renderSklad(){
           <span class="wg-ic">✅</span><span class="wg-title">V poriadku</span>
           <span class="wg-cnt">${okParts.length}</span><span class="wg-arr cl" id="oarr">▾</span>
         </div>
-        <div class="wg-body" id="wok" style="display:none">${okParts.map((p,i)=>partRow(p,'o'+i,'all')).join('')}</div>
+        <div class="wg-body" id="wok" style="display:none">${okParts.map((p,i)=>partRow(p,'o_'+p.id,'all')).join('')}</div>
       </div>`:'')
     ||'<div class="empty-state">Žiadne upozornenia 🎉</div>';
   }
