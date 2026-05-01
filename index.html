@@ -1732,6 +1732,11 @@ function goTab(t){
   CT=t;
   if(t==='scan')startScan();else stopScan();
   if(t==='map')initMap();
+  else{
+    // Close map sheet when leaving map tab
+    document.getElementById('mapOv')?.classList.remove('on');
+    document.getElementById('mapSheet')?.classList.remove('on');
+  }
 }
 
 // ── SCAN ──
@@ -1965,6 +1970,9 @@ function applyMap(anim){
   mi.style.transform=`translate(${mTx}px,${mTy}px) scale(${mScale})`;
 }
 function initMap(){
+  // Always close sheet when opening map
+  document.getElementById('mapOv')?.classList.remove('on');
+  document.getElementById('mapSheet')?.classList.remove('on');
   if(mapReady)return;
   const wrap=document.getElementById('mapWrap');
   const cw=wrap.clientWidth,ch=wrap.clientHeight;
