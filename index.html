@@ -1391,23 +1391,32 @@ async function markUsed(partId, machineId, partIdx, qtyElId){
     }
   }
   showToast('✅ Použitých '+usedQty+' ks — zostatok: '+newQty+' ks');
-  // Manually create notification to ensure it exists (in case SQL trigger not setup)
+  // Always create notification when part is used
   try{
+    let notifType='info';
+    let notifTitle='Diel použitý';
+    let notifMsg=p.name+': použitých '+usedQty+' ks — zostatok '+newQty+' ks';
     if(newQty===0){
-      await sb.from('notifications').insert({type:'error',title:'Diel nedostupný',message:p.name+' klesol na 0 ks po použití '+usedQty+' ks.',link_type:'part',link_id:String(partId)});
+      notifType='error';
+      notifTitle='Diel nedostupný';
+      notifMsg=p.name+' klesol na 0 ks po použití '+usedQty+' ks. Nutná objednávka.';
     }else if(newQty<=(p.min_quantity||0)){
-      await sb.from('notifications').insert({type:'warning',title:'Pod minimálnym množstvom',message:p.name+' klesol na '+newQty+' ks (min: '+(p.min_quantity||0)+' ks).',link_type:'part',link_id:String(partId)});
+      notifType='warning';
+      notifTitle='Pod minimálnym množstvom';
+      notifMsg=p.name+' klesol na '+newQty+' ks (min: '+(p.min_quantity||0)+' ks).';
     }
-  }catch(e){}
-  // Reload notifications and update dashboard
-  await new Promise(r=>setTimeout(r,400));
-  try{
-    const{data:fresh}=await sb.from('notifications').select('*').order('created_at',{ascending:false}).limit(100);
-    NOTIFICATIONS=fresh||[];
-    // Deduplicate by id (in case trigger + manual both fired)
-    const seen=new Set();
-    NOTIFICATIONS=NOTIFICATIONS.filter(n=>{if(seen.has(n.id))return false;seen.add(n.id);return true;});
-  }catch(e){}
+    const{data:newNotif,error:nErr}=await sb.from('notifications').insert({
+      type:notifType,title:notifTitle,message:notifMsg,
+      link_type:'part',link_id:String(partId)
+    }).select().single();
+    if(nErr){console.warn('notif insert failed:',nErr);}
+    else if(newNotif){
+      // Add to local cache immediately
+      NOTIFICATIONS.unshift(newNotif);
+      if(NOTIFICATIONS.length>100)NOTIFICATIONS=NOTIFICATIONS.slice(0,100);
+    }
+  }catch(e){console.warn('notif error:',e);}
+  // Re-render dashboard - works even if user is on detail view
   renderDashNotifications();
 }
 
@@ -1459,13 +1468,28 @@ function quickQty(partId,machineId,delta,uid){
     const finalQty=_qtyQueue[partId];
     delete _qtyQueue[partId];
     delete _qtyTimers[partId];
+    const startQty=p.quantity;
     const result=await updatePartInDB(partId,machineId,finalQty);
     if(result){
-      await new Promise(r=>setTimeout(r,300));
-      try{
-        const{data:fresh}=await sb.from('notifications').select('*').order('created_at',{ascending:false}).limit(100);
-        NOTIFICATIONS=fresh||[];
-      }catch(e){}
+      // Create notification when status changes
+      const min=p.min_quantity||0;
+      let notifType=null,notifTitle=null,notifMsg=null;
+      if(finalQty===0){
+        notifType='error';notifTitle='Diel nedostupný';
+        notifMsg=p.name+' klesol na 0 ks.';
+      }else if(finalQty<=min&&startQty>min){
+        notifType='warning';notifTitle='Pod minimálnym množstvom';
+        notifMsg=p.name+' klesol na '+finalQty+' ks (min: '+min+').';
+      }else if(finalQty>min&&startQty<=min){
+        notifType='success';notifTitle='Sklad doplnený';
+        notifMsg=p.name+' bol doplnený na '+finalQty+' ks.';
+      }
+      if(notifType){
+        try{
+          const{data:nn}=await sb.from('notifications').insert({type:notifType,title:notifTitle,message:notifMsg,link_type:'part',link_id:String(partId)}).select().single();
+          if(nn){NOTIFICATIONS.unshift(nn);if(NOTIFICATIONS.length>100)NOTIFICATIONS=NOTIFICATIONS.slice(0,100);}
+        }catch(e){}
+      }
       renderDashNotifications();
     }
   },500);
@@ -1480,23 +1504,21 @@ async function confirmDopln(partId,machineId,addQtyId){
   const newQty=oldQty+addQty;
   const result=await updatePartInDB(partId,machineId,newQty);
   if(!result)return;
-  // Always create notification when restocking
+  // Create notification + add to local cache immediately
   try{
-    await sb.from('notifications').insert({
+    const{data:newNotif,error:nErr}=await sb.from('notifications').insert({
       type:'success',
       title:'Sklad doplnený',
       message:p.name+' bol doplnený o '+addQty+' ks. Nový stav: '+newQty+' ks.',
       link_type:'part',
       link_id:String(partId)
-    });
-  }catch(e){console.warn('notif insert:',e);}
-  await new Promise(r=>setTimeout(r,400));
-  try{
-    const{data:fresh}=await sb.from('notifications').select('*').order('created_at',{ascending:false}).limit(100);
-    NOTIFICATIONS=fresh||[];
-    const seen=new Set();
-    NOTIFICATIONS=NOTIFICATIONS.filter(n=>{if(seen.has(n.id))return false;seen.add(n.id);return true;});
-  }catch(e){}
+    }).select().single();
+    if(nErr){console.warn('notif insert:',nErr);}
+    else if(newNotif){
+      NOTIFICATIONS.unshift(newNotif);
+      if(NOTIFICATIONS.length>100)NOTIFICATIONS=NOTIFICATIONS.slice(0,100);
+    }
+  }catch(e){console.warn('notif error:',e);}
   renderSklad();
   renderDashNotifications();
   showToast('✅ '+p.name+' doplnený o '+addQty+' ks');
