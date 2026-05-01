@@ -1428,18 +1428,21 @@ async function updatePartInDB(partId,machineId,newQty){
   const newLabel=newQty===0?'Nedostupný':newQty<=min?'Posledné kusy ('+newQty+' ks)':'Na sklade ('+newQty+' ks)';
   _pendingPartUpdates[partId]=Date.now();
   // Try DB update FIRST
-  const{data,error}=await sb.from('parts').update({quantity:newQty,stock_status:newStatus,stock_label:newLabel}).eq('id',partId).select();
+  console.log('[updatePartInDB] partId='+partId+' newQty='+newQty);
+  const{data,error,status,statusText}=await sb.from('parts').update({quantity:newQty,stock_status:newStatus,stock_label:newLabel}).eq('id',partId).select();
   setTimeout(()=>{delete _pendingPartUpdates[partId];},2000);
+  console.log('[updatePartInDB] response:',{data,error,status,statusText});
   if(error){
-    showToast('❌ Chyba: '+error.message);
+    showToast('❌ DB chyba: '+error.message);
     console.error('updatePartInDB error:',error);
     return null;
   }
   if(!data||!data.length){
-    showToast('❌ Diel sa neuložil — chýbajú práva?');
-    console.error('updatePartInDB: no rows updated. RLS issue?');
+    showToast('⚠️ DB neuložila zmenu (skontroluj RLS)');
+    console.error('updatePartInDB: 0 rows updated. RLS or partId mismatch?',partId);
     return null;
   }
+  console.log('[updatePartInDB] ✅ saved:',data[0]);
   // ONLY update local cache after confirmed DB write
   p.quantity=newQty;p.stock_status=newStatus;p.stock_label=newLabel;
   return{p,newStatus,min};
