@@ -817,11 +817,7 @@ const ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb=supabase.createClient(SUPA_URL,ANON_KEY,{
   auth:{persistSession:true,autoRefreshToken:true},
   global:{
-    fetch:(url,options={})=>{
-      // Force no-cache for all Supabase requests
-      const opts={...options,cache:'no-store',headers:{...(options.headers||{}),'Cache-Control':'no-cache, no-store, must-revalidate','Pragma':'no-cache'}};
-      return fetch(url,opts);
-    }
+    fetch:(url,options={})=>fetch(url,{...options,cache:'no-store'})
   }
 });
 
