@@ -1,4 +1,4 @@
-const CACHE = 'zeo-udrzba-v6';
+const CACHE = 'zeo-udrzba-v7';
 const ASSETS = ['/manifest.json', '/logo.png', '/icon-192.png', '/icon-512.png'];
 
 self.addEventListener('install', e => {
