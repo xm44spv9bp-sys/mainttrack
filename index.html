@@ -1959,6 +1959,9 @@ function openMachineFromMap(machineId){
 }
 
 function showAllMachinesForLocation(locName){
+  // Make sure 'map' is in history so back button returns there
+  navPush('map');
+  navPush('machines');
   // Navigate to machines tab - but DON'T reset filter (we do it manually below)
   ['tDash','tScan','tMachines','tMap','tProfile','tSklad','tNotifications'].forEach(id=>{
     document.getElementById(id)?.classList.add('off');
