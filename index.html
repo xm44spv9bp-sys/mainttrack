@@ -2645,42 +2645,79 @@ async function renderDocContent(body,url,ext,name){
   if(['jpg','jpeg','png','gif','webp'].includes(ext)){
     body.innerHTML='<img src="'+url+'" alt="'+escHtml(name)+'" draggable="false" oncontextmenu="return false" style="max-width:100%;height:auto;object-fit:contain;border-radius:8px;-webkit-user-select:none;user-select:none;pointer-events:none">';
   } else if(ext==='pdf'){
-    // PDF viewer - render at 2x quality, CSS zoom for responsiveness
-    body.innerHTML=''; // Clear loading spinner
+    body.innerHTML='';
     body.style.cssText='flex:1;overflow:scroll;-webkit-overflow-scrolling:touch;display:block;padding:0;background:#111';
 
     // Zoom bar
     const zBar=document.createElement('div');
-    zBar.style.cssText='position:sticky;top:0;left:0;z-index:10;display:flex;justify-content:center;align-items:center;gap:12px;padding:8px 16px;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);width:100%;box-sizing:border-box';
+    zBar.style.cssText='position:sticky;top:0;left:0;z-index:10;display:flex;justify-content:center;align-items:center;gap:12px;padding:8px 16px;background:rgba(0,0,0,.85);width:100%;box-sizing:border-box';
     const zminus=document.createElement('button');zminus.textContent='−';
-    zminus.style.cssText='background:rgba(255,255,255,.2);border:none;color:#fff;width:42px;height:42px;border-radius:50%;font-size:24px;cursor:pointer;line-height:1';
+    zminus.style.cssText='background:rgba(255,255,255,.2);border:none;color:#fff;width:42px;height:42px;border-radius:50%;font-size:24px;cursor:pointer';
     const zlbl=document.createElement('span');
     zlbl.style.cssText='color:#fff;font-size:14px;font-weight:700;min-width:56px;text-align:center';
     zlbl.textContent='100%';
     const zplus=document.createElement('button');zplus.textContent='+';
-    zplus.style.cssText='background:rgba(255,255,255,.2);border:none;color:#fff;width:42px;height:42px;border-radius:50%;font-size:24px;cursor:pointer;line-height:1';
+    zplus.style.cssText='background:rgba(255,255,255,.2);border:none;color:#fff;width:42px;height:42px;border-radius:50%;font-size:24px;cursor:pointer';
     const zcnt=document.createElement('span');
     zcnt.style.cssText='color:rgba(255,255,255,.4);font-size:11px';
     zBar.append(zminus,zlbl,zplus,zcnt);
     body.appendChild(zBar);
 
-    // Pages container - zoom applied here via CSS
     const pagesEl=document.createElement('div');
-    pagesEl.id='pdfPages';
-    pagesEl.style.cssText='padding:8px;transform-origin:top left;transition:transform .15s;display:inline-block;min-width:100%';
+    pagesEl.style.cssText='padding:6px';
     body.appendChild(pagesEl);
 
-    let cssZoom=1.0;
+    let pdfDoc=null;
+    let pdfScale=1.0;
+    const W=body.clientWidth-12;
 
-    function applyZoom(){
-      pagesEl.style.transformOrigin='top left';
-      pagesEl.style.transform='scale('+cssZoom+')';
-      // Adjust container so scroll area is correct
-      pagesEl.style.width=(100/cssZoom)+'%';
-      zlbl.textContent=Math.round(cssZoom*100)+'%';
+    // Render a single page at current pdfScale
+    async function renderOnePage(wrap){
+      if(!pdfDoc||wrap.dataset.rendering==='1')return;
+      wrap.dataset.rendering='1';
+      const pageNum=parseInt(wrap.dataset.page);
+      const page=await pdfDoc.getPage(pageNum);
+      const naturalVp=page.getViewport({scale:1});
+      // Scale to fit screen width × pdfScale
+      const scale=(W/naturalVp.width)*pdfScale*(window.devicePixelRatio||2);
+      const vp=page.getViewport({scale});
+      let canvas=wrap.querySelector('canvas');
+      if(!canvas){canvas=document.createElement('canvas');canvas.oncontextmenu=()=>false;canvas.style.cssText='-webkit-touch-callout:none;user-select:none;display:block';wrap.innerHTML='';wrap.appendChild(canvas);}
+      canvas.width=vp.width;
+      canvas.height=vp.height;
+      canvas.style.width=Math.round(W*pdfScale)+'px';
+      canvas.style.height='auto';
+      await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+      wrap.dataset.rendering='0';
     }
-    zminus.onclick=()=>{cssZoom=Math.max(0.5,parseFloat((cssZoom-0.2).toFixed(2)));applyZoom();};
-    zplus.onclick=()=>{cssZoom=Math.min(4.0,parseFloat((cssZoom+0.2).toFixed(2)));applyZoom();};
+
+    // Render visible pages only
+    let scrollTimer=null;
+    function renderVisible(){
+      clearTimeout(scrollTimer);
+      scrollTimer=setTimeout(async()=>{
+        const wraps=pagesEl.querySelectorAll('[data-page]');
+        for(const w of wraps){
+          const r=w.getBoundingClientRect();
+          if(r.top<window.innerHeight+800&&r.bottom>-400){
+            await renderOnePage(w);
+          }
+        }
+      },50);
+    }
+
+    // On zoom - mark all as needing re-render, then render visible
+    async function setZoom(delta){
+      pdfScale=Math.min(4,Math.max(0.5,parseFloat((pdfScale+delta).toFixed(2))));
+      zlbl.textContent=Math.round(pdfScale*100)+'%';
+      // Mark all pages as needing re-render
+      pagesEl.querySelectorAll('[data-page]').forEach(w=>w.dataset.rendering='0');
+      renderVisible();
+    }
+    zminus.onclick=()=>setZoom(-0.25);
+    zplus.onclick=()=>setZoom(0.25);
+
+    body.addEventListener('scroll',renderVisible,{passive:true});
 
     try{
       if(!window.pdfjsLib){
@@ -2691,49 +2728,25 @@ async function renderDocContent(body,url,ext,name){
         });
         pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
       }
-      const arrBuf=await (await fetch(url)).arrayBuffer();
-      const pdfDoc=await pdfjsLib.getDocument({data:arrBuf}).promise;
+      const data=await (await fetch(url)).arrayBuffer();
+      pdfDoc=await pdfjsLib.getDocument({data}).promise;
       zcnt.textContent=pdfDoc.numPages+' strán';
 
-      // Render pages lazily
-      const W=body.clientWidth-16;
+      // Build page placeholders
       for(let p=1;p<=pdfDoc.numPages;p++){
         const wrap=document.createElement('div');
-        wrap.style.cssText='margin-bottom:6px;background:#fff;border-radius:6px;overflow:hidden;min-height:100px';
-        wrap.dataset.page=p;wrap.dataset.done='0';
+        wrap.dataset.page=p;
+        wrap.dataset.rendering='0';
+        // Placeholder height estimate
+        const ph=document.createElement('div');
+        ph.style.cssText='height:320px;background:#333;border-radius:6px;margin-bottom:6px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.2);font-size:12px';
+        ph.textContent='Strana '+p;
+        wrap.appendChild(ph);
+        wrap.style.cssText='margin-bottom:6px';
         pagesEl.appendChild(wrap);
       }
-
-      async function renderVisible(){
-        const items=pagesEl.querySelectorAll('[data-page]');
-        for(const w of items){
-          if(w.dataset.done==='1')continue;
-          const r=w.getBoundingClientRect();
-          if(r.top<window.innerHeight+600&&r.bottom>-200){
-            w.dataset.done='1';
-            const page=await pdfDoc.getPage(parseInt(w.dataset.page));
-            // Render at high fixed resolution for sharp text
-            const naturalVp=page.getViewport({scale:1});
-            const targetW=Math.max(1200, W*2); // at least 1200px wide
-            const renderScale=targetW/naturalVp.width;
-            const vp=page.getViewport({scale:renderScale});
-            const cv=document.createElement('canvas');
-            cv.width=vp.width;cv.height=vp.height;
-            // CSS width = screen width so image-pixels map to screen pixels
-            cv.style.width=W+'px';
-            cv.style.height='auto';
-            cv.style.display='block';
-            cv.style.webkitTouchCallout='none';
-            cv.style.userSelect='none';
-            cv.oncontextmenu=()=>false;
-            w.appendChild(cv);
-            await page.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
-          }
-        }
-      }
-
-      body.addEventListener('scroll',()=>renderVisible(),{passive:true});
-      await renderVisible();
+      // Render visible pages
+      renderVisible();
 
     }catch(e){
       body.innerHTML='<div style="color:#fff;text-align:center;padding:40px"><div style="font-size:48px;margin-bottom:12px">📄</div><div>Chyba: '+e.message+'</div></div>';
