@@ -2646,71 +2646,38 @@ async function renderDocContent(body,url,ext,name){
     body.innerHTML='<img src="'+url+'" alt="'+escHtml(name)+'" draggable="false" oncontextmenu="return false" style="max-width:100%;height:auto;object-fit:contain;border-radius:8px;-webkit-user-select:none;user-select:none;pointer-events:none">';
   } else if(ext==='pdf'){
     // Use PDF.js with pinch-to-zoom support
-    body.innerHTML='<div id="pdfWrapper" style="width:100%;overflow:hidden;touch-action:none"><div id="pdfContainer" style="width:100%;padding:8px 0;transform-origin:top center;transition:transform .1s"></div></div>';
+    body.innerHTML='<div id="pdfWrapper" style="width:100%;overflow:auto;-webkit-overflow-scrolling:touch"><div id="pdfContainer" style="width:100%;padding:8px 0"></div></div>';
     const container=document.getElementById('pdfContainer');
     const wrapper=document.getElementById('pdfWrapper');
 
-    // Pinch-to-zoom state
-    let scale=1, minScale=0.5, maxScale=4;
-    let startDist=0, startScale=1;
-    let lastTap=0;
-
-    function applyScale(s){
-      scale=Math.min(maxScale,Math.max(minScale,s));
-      container.style.transform='scale('+scale+')';
-      container.style.transformOrigin='top center';
-      // Adjust wrapper height
-      wrapper.style.height=(container.offsetHeight*scale)+'px';
-    }
-
-    // Pinch zoom
-    wrapper.addEventListener('touchstart',e=>{
-      if(e.touches.length===2){
-        startDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-        startScale=scale;
-        e.preventDefault();
-      }
-      // Double tap to zoom
-      if(e.touches.length===1){
-        const now=Date.now();
-        if(now-lastTap<300){
-          applyScale(scale>1.5?1:2.5);
-          e.preventDefault();
-        }
-        lastTap=now;
-      }
-    },{passive:false});
-
-    wrapper.addEventListener('touchmove',e=>{
-      if(e.touches.length===2){
-        const dist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-        applyScale(startScale*(dist/startDist));
-        e.preventDefault();
-      }
-    },{passive:false});
-
-    // Zoom buttons
+    // Zoom buttons only (safe for iOS Safari - no touch event overrides)
+    let pdfScale=1;
     const zoomBar=document.createElement('div');
-    zoomBar.style.cssText='position:sticky;top:0;z-index:10;display:flex;justify-content:center;gap:12px;padding:8px;background:rgba(0,0,0,.5);border-radius:12px;margin-bottom:8px';
+    zoomBar.style.cssText='display:flex;justify-content:center;align-items:center;gap:12px;padding:8px;background:rgba(0,0,0,.4);border-radius:12px;margin-bottom:8px';
     const zminus=document.createElement('button');
     zminus.textContent='−';
-    zminus.style.cssText='background:rgba(255,255,255,.2);border:none;color:#fff;width:36px;height:36px;border-radius:50%;font-size:20px;cursor:pointer';
-    zminus.onclick=()=>applyScale(scale-0.25);
+    zminus.style.cssText='background:rgba(255,255,255,.2);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:22px;cursor:pointer;flex-shrink:0';
     const zlbl=document.createElement('span');
-    zlbl.id='zoomLbl';
-    zlbl.style.cssText='color:#fff;font-size:13px;line-height:36px;min-width:44px;text-align:center';
+    zlbl.style.cssText='color:#fff;font-size:13px;min-width:48px;text-align:center';
     zlbl.textContent='100%';
     const zplus=document.createElement('button');
     zplus.textContent='+';
-    zplus.style.cssText='background:rgba(255,255,255,.2);border:none;color:#fff;width:36px;height:36px;border-radius:50%;font-size:20px;cursor:pointer';
-    zplus.onclick=()=>applyScale(scale+0.25);
+    zplus.style.cssText='background:rgba(255,255,255,.2);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:22px;cursor:pointer;flex-shrink:0';
     zoomBar.appendChild(zminus);
     zoomBar.appendChild(zlbl);
     zoomBar.appendChild(zplus);
-    // Update label on scale change
-    const origApply=applyScale;
-    applyScale=(s)=>{origApply(s);if(zlbl)zlbl.textContent=Math.round(scale*100)+'%';};
     body.insertBefore(zoomBar,body.firstChild);
+
+    function setZoom(s){
+      pdfScale=Math.min(4,Math.max(0.5,s));
+      container.style.transformOrigin='top left';
+      container.style.transform='scale('+pdfScale+')';
+      container.style.width=(100/pdfScale)+'%';
+      zlbl.textContent=Math.round(pdfScale*100)+'%';
+    }
+    zminus.onclick=()=>setZoom(pdfScale-0.25);
+    zplus.onclick=()=>setZoom(pdfScale+0.25);
+    // iOS native pinch zoom works on the scroll container naturally - no override needed
 
     try{
       if(!window.pdfjsLib){
