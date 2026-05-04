@@ -839,6 +839,74 @@ function navBack(){
   goTab(prev,false); // false = don't push to history
 }
 let _pendingPartUpdates={};
+
+// ── OFFLINE QUEUE ──
+let _offlineQueue=JSON.parse(localStorage.getItem('zeo_offline_queue')||'[]');
+
+function saveOfflineQueue(){
+  try{localStorage.setItem('zeo_offline_queue',JSON.stringify(_offlineQueue));}catch(e){}
+}
+
+function addToOfflineQueue(action){
+  _offlineQueue.push({...action,ts:Date.now()});
+  saveOfflineQueue();
+  console.log('[offline queue] added:',action.type,'total:',_offlineQueue.length);
+}
+
+function updateOfflineBadge(){
+  const cnt=_offlineQueue.length;
+  const banner=document.getElementById('offlineBanner');
+  if(banner){
+    if(cnt>0){
+      banner.textContent='📥 '+cnt+' zmien čaká na synchronizáciu';
+      banner.classList.add('show');
+    } else if(!navigator.onLine){
+      banner.textContent='📵 Offline režim — zmeny sa uložia lokálne';
+      banner.classList.add('show');
+    }
+  }
+}
+
+async function processOfflineQueue(){
+  if(!navigator.onLine||!_offlineQueue.length)return;
+  console.log('[offline queue] processing',_offlineQueue.length,'items...');
+  const toProcess=[..._offlineQueue];
+  _offlineQueue=[];
+  saveOfflineQueue();
+  let success=0,failed=0;
+  for(const action of toProcess){
+    try{
+      if(action.type==='UPDATE_PART_QTY'){
+        await sb.from('parts').update({quantity:action.quantity,stock_status:action.stock_status,stock_label:action.stock_label}).eq('id',action.partId);
+        success++;
+      } else if(action.type==='TOGGLE_TASK'){
+        await sb.from('tasks').update({is_done:action.is_done,completed_at:action.completed_at,completed_by:action.completed_by}).eq('id',action.taskId);
+        success++;
+      } else if(action.type==='INSERT_NOTIFICATION'){
+        await sb.from('notifications').insert(action.data);
+        success++;
+      }
+    }catch(e){
+      console.warn('[offline queue] failed:',action.type,e);
+      _offlineQueue.push(action); // re-add failed
+      failed++;
+    }
+  }
+  saveOfflineQueue();
+  if(success>0){
+    showToast('🔄 Synchronizované: '+success+' zmien');
+    await loadData();
+    renderDashNotifications();
+  }
+  if(failed>0)showToast('⚠️ '+failed+' zmien sa nepodarilo synchronizovať');
+}
+
+// Auto-sync when back online
+window.addEventListener('online',async()=>{
+  document.getElementById('offlineBanner')?.classList.remove('show');
+  showToast('✅ Pripojené');
+  await processOfflineQueue();
+});
 let NOTIFICATIONS=[];
 let SKLAD_TAB='all';
 let MACHINES=[],TASKS=[],RECENT=[],LOCATIONS={};
@@ -879,8 +947,16 @@ function setupPullToRefresh(){
 }
 
 // Online/offline detection
-window.addEventListener('online',()=>{document.getElementById('offlineBanner')?.classList.remove('show');showToast('✅ Pripojené');});
-window.addEventListener('offline',()=>{document.getElementById('offlineBanner')?.classList.add('show');});
+window.addEventListener('online',async()=>{
+  document.getElementById('offlineBanner')?.classList.remove('show');
+  showToast('✅ Pripojené');
+  await processOfflineQueue();
+});
+window.addEventListener('offline',()=>{
+  const banner=document.getElementById('offlineBanner');
+  if(banner){banner.textContent='📵 Offline režim — zmeny sa uložia lokálne';banner.classList.add('show');}
+  updateOfflineBadge();
+});
 
 window.addEventListener('load',async()=>{
   if(!navigator.onLine)document.getElementById('offlineBanner')?.classList.add('show');
@@ -938,6 +1014,10 @@ async function doLogout(){
 
 async function bootApp(){
   NAV_HISTORY=['dash'];
+  // Process any pending offline queue on startup
+  if(navigator.onLine&&_offlineQueue.length>0){
+    setTimeout(processOfflineQueue, 2000);
+  }
   if(booting)return;booting=true;
   try{
     // Primary: profiles.role; Fallback: hardcoded email list
@@ -1103,6 +1183,24 @@ async function refreshAllData(){
 }
 
 async function loadData(){
+  // If offline, load from localStorage cache
+  if(!navigator.onLine){
+    try{
+      const machines=JSON.parse(localStorage.getItem('zeo_machines')||'[]');
+      const docs=JSON.parse(localStorage.getItem('zeo_docs')||'[]');
+      const parts=JSON.parse(localStorage.getItem('zeo_parts')||'[]');
+      const tasks=JSON.parse(localStorage.getItem('zeo_tasks')||'[]');
+      const locs=JSON.parse(localStorage.getItem('zeo_locs')||'[]');
+      NOTIFICATIONS=JSON.parse(localStorage.getItem('zeo_notifications')||'[]');
+      TASKS=tasks;
+      LOCATIONS={};
+      locs.forEach(l=>{LOCATIONS[l.id]=l;});
+      MACHINES=machines.map(m=>({...m,docs:docs.filter(d=>d.machine_id===m.id),parts:parts.filter(p=>p.machine_id===m.id),tasks:TASKS.filter(t=>t.machine_id===m.id)}));
+      renderMapPins();
+      console.log('[offline] loaded from localStorage cache');
+      return;
+    }catch(e){console.warn('offline cache failed:',e);}
+  }
   const[{data:machines,error:mErr},{data:docs},{data:parts},{data:tasks}]=await Promise.all([
     sb.from('machines').select('*').order('name'),
     sb.from('documents').select('*'),
@@ -1129,6 +1227,16 @@ async function loadData(){
   MACHINES=(machines||[]).map(m=>{
     return{...m,docs:(docs||[]).filter(d=>d.machine_id===m.id),parts:(parts||[]).filter(p=>p.machine_id===m.id),tasks:TASKS.filter(t=>t.machine_id===m.id)};
   });
+  // Save to localStorage for offline use
+  try{
+    localStorage.setItem('zeo_machines', JSON.stringify(machines||[]));
+    localStorage.setItem('zeo_parts', JSON.stringify(parts||[]));
+    localStorage.setItem('zeo_tasks', JSON.stringify(tasks||[]));
+    localStorage.setItem('zeo_docs', JSON.stringify(docs||[]));
+    localStorage.setItem('zeo_notifications', JSON.stringify(NOTIFICATIONS||[]));
+    localStorage.setItem('zeo_locs', JSON.stringify(locs||[]));
+    localStorage.setItem('zeo_cache_time', Date.now().toString());
+  }catch(e){}
   // Render map pins after data loaded
   renderMapPins();
 }
@@ -1188,6 +1296,8 @@ function setupDashboard(name){
   document.getElementById('st-parts').textContent=totalParts;
   startClock();
   try{renderDashNotifications();}catch(e){console.warn('notifications:',e);}
+  // Show offline queue badge if pending
+  updateOfflineBadge();
   const recent=RECENT.length?MACHINES.filter(m=>RECENT.includes(m.id)).slice(0,3):MACHINES.slice(0,3);
   document.getElementById('dashRecent').innerHTML=recent.length?recent.map(m=>`
     <div class="recent-card" onclick="openDetail('${m.id}')">
@@ -1869,7 +1979,6 @@ async function togTK(taskId,machineId){
   const isDone=cb.classList.contains('ck');
   cb.classList.toggle('ck',!isDone);
   const updateData={is_done:!isDone};
-  // Track completion details
   if(!isDone){
     updateData.completed_at=new Date().toISOString();
     updateData.completed_by=CU?.id||null;
@@ -1877,17 +1986,32 @@ async function togTK(taskId,machineId){
     updateData.completed_at=null;
     updateData.completed_by=null;
   }
-  const{error}=await sb.from('tasks').update(updateData).eq('id',taskId);
-  if(error){
-    // Revert UI on error
-    cb.classList.toggle('ck',isDone);
-    showToast('❌ '+error.message);
-    return;
-  }
+  // Update local cache immediately
   const t=MACHINES.find(m=>m.id===machineId)?.tasks.find(t=>t.id===taskId);
   if(t){t.is_done=!isDone;t.completed_at=updateData.completed_at;t.completed_by=updateData.completed_by;}
   const gt=TASKS.find(t=>t.id===taskId);
-  if(gt){gt.is_done=!isDone;gt.completed_at=updateData.completed_at;gt.completed_by=updateData.completed_by;}
+  if(gt){gt.is_done=!isDone;}
+  // If offline - queue it
+  if(!navigator.onLine){
+    addToOfflineQueue({type:'TOGGLE_TASK',taskId,machineId,is_done:!isDone,completed_at:updateData.completed_at||null,completed_by:updateData.completed_by||null});
+    try{
+      const tasks=JSON.parse(localStorage.getItem('zeo_tasks')||'[]');
+      const lt=tasks.find(t=>t.id===taskId);
+      if(lt){lt.is_done=!isDone;lt.completed_at=updateData.completed_at;lt.completed_by=updateData.completed_by;}
+      localStorage.setItem('zeo_tasks',JSON.stringify(tasks));
+    }catch(e){}
+    showToast('📥 Uložené offline — synchronizuje sa po pripojení');
+    updateOfflineBadge();
+    return;
+  }
+  const{error}=await sb.from('tasks').update(updateData).eq('id',taskId);
+  if(error){
+    cb.classList.toggle('ck',isDone);
+    if(t){t.is_done=isDone;}
+    if(gt){gt.is_done=isDone;}
+    showToast('❌ '+error.message);
+    return;
+  }
   if(!isDone)showToast('✅ Úloha označená ako dokončená');
 }
 
