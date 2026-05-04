@@ -2646,7 +2646,7 @@ async function renderDocContent(body,url,ext,name){
     body.innerHTML='<img src="'+url+'" alt="'+escHtml(name)+'" draggable="false" oncontextmenu="return false" style="max-width:100%;height:auto;object-fit:contain;border-radius:8px;-webkit-user-select:none;user-select:none;pointer-events:none">';
   } else if(ext==='pdf'){
     body.innerHTML='';
-    body.style.cssText='flex:1;overflow:scroll;-webkit-overflow-scrolling:touch;display:block;padding:0;background:#111';
+    body.style.cssText='flex:1;overflow:scroll;overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch;display:block;padding:0;background:#111';
 
     // Zoom bar
     const zBar=document.createElement('div');
@@ -2685,8 +2685,11 @@ async function renderDocContent(body,url,ext,name){
       if(!canvas){canvas=document.createElement('canvas');canvas.oncontextmenu=()=>false;canvas.style.cssText='-webkit-touch-callout:none;user-select:none;display:block';wrap.innerHTML='';wrap.appendChild(canvas);}
       canvas.width=vp.width;
       canvas.height=vp.height;
-      canvas.style.width=Math.round(W*pdfScale)+'px';
+      const cssW=Math.round(W*pdfScale);
+      canvas.style.width=cssW+'px';
       canvas.style.height='auto';
+      // Make container wide enough to hold zoomed canvas
+      pagesEl.style.width=cssW+'px';
       await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
       wrap.dataset.rendering='0';
     }
