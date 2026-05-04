@@ -2645,66 +2645,93 @@ async function renderDocContent(body,url,ext,name){
   if(['jpg','jpeg','png','gif','webp'].includes(ext)){
     body.innerHTML='<img src="'+url+'" alt="'+escHtml(name)+'" draggable="false" oncontextmenu="return false" style="max-width:100%;height:auto;object-fit:contain;border-radius:8px;-webkit-user-select:none;user-select:none;pointer-events:none">';
   } else if(ext==='pdf'){
-    // PDF.js - proper zoom by re-rendering at new scale
+    // PDF viewer - lazy render (only visible pages) to avoid iOS RAM crash
     body.style.cssText='flex:1;overflow:auto;-webkit-overflow-scrolling:touch;display:block;padding:0;background:#222';
-    body.innerHTML='<div id="pdfZoomBar" style="position:sticky;top:0;z-index:10;display:flex;justify-content:center;align-items:center;gap:10px;padding:8px 12px;background:rgba(0,0,0,.7);backdrop-filter:blur(8px)"></div><div id="pdfPages" style="padding:8px"></div>';
+    body.innerHTML='<div id="pdfZoomBar" style="position:sticky;top:0;z-index:10;display:flex;justify-content:center;align-items:center;gap:10px;padding:8px 12px;background:rgba(0,0,0,.8)"></div><div id="pdfPages" style="padding:6px"></div>';
     const zBar=document.getElementById('pdfZoomBar');
-    const pages=document.getElementById('pdfPages');
+    const pagesEl=document.getElementById('pdfPages');
+    let pdfDoc=null, pdfScale=1.2, rendering=false;
 
-    let pdfDoc=null, pdfScale=1.2;
-    const screenW=window.screen.width*window.devicePixelRatio;
+    // Build zoom bar
+    const zminus=document.createElement('button');zminus.textContent='−';zminus.style.cssText='background:rgba(255,255,255,.15);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:22px;cursor:pointer';
+    const zlbl=document.createElement('span');zlbl.style.cssText='color:#fff;font-size:13px;min-width:50px;text-align:center;font-weight:600';zlbl.textContent='120%';
+    const zplus=document.createElement('button');zplus.textContent='+';zplus.style.cssText='background:rgba(255,255,255,.15);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:22px;cursor:pointer';
+    const zcnt=document.createElement('span');zcnt.style.cssText='color:rgba(255,255,255,.4);font-size:11px;margin-left:6px';
+    zBar.appendChild(zminus);zBar.appendChild(zlbl);zBar.appendChild(zplus);zBar.appendChild(zcnt);
 
-    async function renderAllPages(){
-      pages.innerHTML='<div style="color:rgba(255,255,255,.5);text-align:center;padding:20px;font-size:13px">Vykresľujem...</div>';
-      pages.innerHTML='';
-      for(let p=1;p<=pdfDoc.numPages;p++){
-        const page=await pdfDoc.getPage(p);
-        const vp=page.getViewport({scale:pdfScale*window.devicePixelRatio});
-        const canvas=document.createElement('canvas');
-        canvas.width=vp.width; canvas.height=vp.height;
-        canvas.style.cssText='width:100%;display:block;margin-bottom:6px;border-radius:6px;background:#fff;-webkit-touch-callout:none;user-select:none';
-        canvas.oncontextmenu=()=>false;
-        pages.appendChild(canvas);
-        await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
-      }
+    // Render ONE page at given scale
+    async function renderPage(pageNum, canvas){
+      if(!pdfDoc)return;
+      const page=await pdfDoc.getPage(pageNum);
+      const vp=page.getViewport({scale:pdfScale*(window.devicePixelRatio||1)});
+      canvas.width=vp.width; canvas.height=vp.height;
+      canvas.style.width='100%';
+      await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
     }
 
-    // Zoom bar buttons
-    const zminus=document.createElement('button');
-    zminus.textContent='−';
-    zminus.style.cssText='background:rgba(255,255,255,.15);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:22px;cursor:pointer';
-    const zlbl=document.createElement('span');
-    zlbl.style.cssText='color:#fff;font-size:13px;min-width:50px;text-align:center;font-weight:600';
-    zlbl.textContent='120%';
-    const zplus=document.createElement('button');
-    zplus.textContent='+';
-    zplus.style.cssText='background:rgba(255,255,255,.15);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:22px;cursor:pointer';
-    const zcnt=document.createElement('span');
-    zcnt.style.cssText='color:rgba(255,255,255,.4);font-size:11px;margin-left:8px';
+    // Build page placeholders + lazy load on scroll
+    function buildPages(){
+      pagesEl.innerHTML='';
+      if(!pdfDoc)return;
+      for(let p=1;p<=pdfDoc.numPages;p++){
+        const wrap=document.createElement('div');
+        wrap.style.cssText='margin-bottom:6px;min-height:200px;background:#333;border-radius:6px;overflow:hidden';
+        wrap.dataset.page=p;
+        wrap.dataset.rendered='0';
+        const canvas=document.createElement('canvas');
+        canvas.style.cssText='width:100%;display:block;-webkit-touch-callout:none;user-select:none';
+        canvas.oncontextmenu=()=>false;
+        wrap.appendChild(canvas);
+        pagesEl.appendChild(wrap);
+      }
+      lazyRender();
+    }
 
-    zminus.onclick=async()=>{
-      if(pdfScale<=0.5)return;
-      pdfScale=Math.max(0.5,pdfScale-0.25);
+    // Render pages that are near viewport
+    let lazyTimer=null;
+    function lazyRender(){
+      clearTimeout(lazyTimer);
+      lazyTimer=setTimeout(async()=>{
+        const bodyRect=body.getBoundingClientRect();
+        const wraps=pagesEl.querySelectorAll('[data-page]');
+        for(const wrap of wraps){
+          const r=wrap.getBoundingClientRect();
+          const visible=r.top<bodyRect.bottom+800&&r.bottom>bodyRect.top-400;
+          if(visible&&wrap.dataset.rendered==='0'){
+            wrap.dataset.rendered='1';
+            await renderPage(parseInt(wrap.dataset.page),wrap.querySelector('canvas'));
+          }
+        }
+      },80);
+    }
+
+    body.addEventListener('scroll',lazyRender,{passive:true});
+
+    async function changeZoom(delta){
+      if(rendering)return;
+      const ns=Math.min(3,Math.max(0.5,pdfScale+delta));
+      if(ns===pdfScale)return;
+      rendering=true;
+      pdfScale=ns;
       zlbl.textContent=Math.round(pdfScale*100)+'%';
-      await renderAllPages();
-    };
-    zplus.onclick=async()=>{
-      if(pdfScale>=3)return;
-      pdfScale=Math.min(3,pdfScale+0.25);
-      zlbl.textContent=Math.round(pdfScale*100)+'%';
-      await renderAllPages();
-    };
-    zBar.appendChild(zminus);
-    zBar.appendChild(zlbl);
-    zBar.appendChild(zplus);
-    zBar.appendChild(zcnt);
+      // Reset all to unrendered
+      pagesEl.querySelectorAll('[data-page]').forEach(w=>{
+        w.dataset.rendered='0';
+        const c=w.querySelector('canvas');
+        if(c){c.width=0;c.height=0;}
+      });
+      await lazyRender();
+      rendering=false;
+    }
+    zminus.onclick=()=>changeZoom(-0.25);
+    zplus.onclick=()=>changeZoom(0.25);
 
     try{
       if(!window.pdfjsLib){
         await new Promise((res,rej)=>{
           const s=document.createElement('script');
           s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-          s.onload=res; s.onerror=rej;
+          s.onload=res;s.onerror=rej;
           document.head.appendChild(s);
         });
         pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -2712,9 +2739,9 @@ async function renderDocContent(body,url,ext,name){
       const data=await (await fetch(url)).arrayBuffer();
       pdfDoc=await pdfjsLib.getDocument({data}).promise;
       zcnt.textContent=pdfDoc.numPages+' strán';
-      await renderAllPages();
+      buildPages();
     }catch(e){
-      body.innerHTML='<div style="color:rgba(255,255,255,.7);text-align:center;padding:30px"><div style="font-size:48px;margin-bottom:12px">📄</div><div>Chyba načítania PDF</div><div style="font-size:12px;margin-top:8px;opacity:.6">'+e.message+'</div></div>';
+      body.innerHTML='<div style="color:rgba(255,255,255,.7);text-align:center;padding:40px"><div style="font-size:48px;margin-bottom:12px">📄</div><div style="font-size:15px">Chyba načítania PDF</div><div style="font-size:11px;margin-top:8px;opacity:.5">'+e.message+'</div></div>';
     }
   } else {
     body.innerHTML='<div style="text-align:center;padding:40px 20px"><div style="font-size:64px;margin-bottom:16px">📄</div><div style="color:#fff;font-size:16px;font-weight:700;margin-bottom:8px">'+escHtml(name)+'</div><div style="color:rgba(255,255,255,.5);font-size:13px">'+ext.toUpperCase()+' — formát nie je podporovaný na zobrazenie</div></div>';
