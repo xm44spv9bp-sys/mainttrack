@@ -234,6 +234,31 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
 .prlbl{flex:1;font-size:15px;font-weight:500;color:var(--text)}
 .lout-btn{display:block;margin:12px 16px 32px;padding:15px;background:var(--rl);color:var(--red);border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;width:calc(100% - 32px)}
 
+/* ══ FILE UPLOAD ══ */
+.upload-zone{border:2px dashed var(--g1);border-radius:14px;padding:28px 16px;text-align:center;cursor:pointer;transition:background .15s;background:var(--gray3);margin-bottom:10px}
+.upload-zone:active,.upload-zone.drag{background:#E8F5E9;border-color:var(--gd)}
+.upload-zone-ic{font-size:36px;margin-bottom:8px}
+.upload-zone-txt{font-size:14px;font-weight:600;color:var(--g1)}
+.upload-zone-sub{font-size:12px;color:var(--gray);margin-top:4px}
+.upload-progress{height:6px;background:var(--gray3);border-radius:3px;margin:8px 0;overflow:hidden;display:none}
+.upload-progress-bar{height:100%;background:var(--g1);border-radius:3px;transition:width .3s;width:0%}
+.upload-file-name{font-size:12px;color:var(--g1);font-weight:600;margin-top:6px;display:none;padding:6px 10px;background:#E8F5E9;border-radius:8px}
+
+/* ══ DOC VIEWER ══ */
+.doc-viewer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .2s}
+.doc-viewer-overlay.open{opacity:1;pointer-events:all}
+.doc-viewer-header{background:rgba(0,0,0,.8);padding:16px 16px calc(16px + var(--stop));display:flex;align-items:center;gap:12px;flex-shrink:0}
+.doc-viewer-title{flex:1;font-size:15px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doc-viewer-close{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:50%;width:36px;height:36px;font-size:20px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.doc-viewer-body{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:16px}
+.doc-viewer-body img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;-webkit-user-select:none;user-select:none;pointer-events:none}
+.doc-viewer-body iframe{width:100%;height:100%;border:none;border-radius:8px}
+.doc-viewer-unsupported{color:#fff;text-align:center;padding:40px}
+.doc-viewer-unsupported .doc-ic{font-size:64px;margin-bottom:16px}
+.docrow{display:flex;align-items:center;padding:14px 16px;border-bottom:.5px solid var(--border);cursor:pointer;transition:background .1s}
+.docrow:last-child{border-bottom:none}
+.docrow:active{background:var(--gray3)}
+
 /* ══ SKLAD TABS ══ */
 .sklad-tabs{display:flex;gap:6px;padding:8px 16px;background:var(--white);border-bottom:.5px solid var(--border);flex-shrink:0}
 .sklad-tab{flex:1;padding:8px 4px;border-radius:10px;font-size:13px;font-weight:600;text-align:center;cursor:pointer;border:1.5px solid var(--border);color:var(--gray);background:var(--white);transition:all .15s}
@@ -339,6 +364,22 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
 .modal-cancel{width:100%;padding:14px;background:var(--gray3);color:var(--gray);border:none;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer}
 .offline-banner{position:fixed;top:0;left:50%;transform:translateX(-50%);background:#FF9800;color:#fff;padding:8px 20px;border-radius:0 0 12px 12px;font-size:13px;font-weight:600;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,.2);display:none;max-width:90%;text-align:center}
 .offline-banner.show{display:block}
+/* DOC VIEWER */
+.doc-viewer-bg{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:999;display:flex;flex-direction:column;-webkit-user-select:none;user-select:none}
+.doc-viewer-hdr{display:flex;align-items:center;padding:12px 16px;gap:12px;background:rgba(0,0,0,.6);flex-shrink:0;padding-top:calc(12px + env(safe-area-inset-top))}
+.doc-viewer-title{flex:1;font-size:15px;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.doc-viewer-close{background:rgba(255,255,255,.15);border:none;border-radius:50%;width:36px;height:36px;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.doc-viewer-body{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:12px;-webkit-overflow-scrolling:touch}
+.doc-viewer-body img{max-width:100%;height:auto;border-radius:8px;pointer-events:none;-webkit-touch-callout:none}
+.doc-viewer-body iframe{width:100%;height:100%;min-height:calc(100vh - 80px);border:none;border-radius:8px}
+.doc-viewer-body canvas{max-width:100%;border-radius:8px}
+.doc-viewer-loading{color:rgba(255,255,255,.7);font-size:14px;text-align:center;padding:40px}
+.doc-viewer-cached{position:absolute;bottom:20px;right:16px;background:rgba(46,125,50,.8);color:#fff;font-size:11px;padding:4px 10px;border-radius:20px;font-weight:600}
+/* UPLOAD */
+.upload-file-name{font-size:13px;color:var(--g1);font-weight:600;margin-bottom:8px;min-height:20px;text-align:center}
+.upload-progress{height:6px;background:var(--gray3);border-radius:3px;overflow:hidden;margin-bottom:10px;display:none}
+.upload-progress.show{display:block}
+.upload-progress-bar{height:100%;background:var(--g1);border-radius:3px;transition:width .2s;width:0%}
 .toast{position:fixed;bottom:calc(90px + var(--sbot));left:50%;transform:translateX(-50%);background:#1C2B1A;color:#C8E6C9;padding:12px 24px;border-radius:30px;font-size:14px;font-weight:600;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1}
 </style>
@@ -742,11 +783,16 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
     <div class="modal-title">Pridať dokumentáciu</div>
     <div class="mf"><div class="ml">Stroj</div><select class="mi" id="dMachine"></select></div>
     <div class="mf"><div class="ml">Názov dokumentu *</div><input class="mi" id="dName" placeholder="napr. Technický manuál"></div>
-    <div class="mr">
-      <div class="mf"><div class="ml">Ikona</div><input class="mi" id="dIcon" placeholder="📄" style="text-align:center;font-size:24px"></div>
-      <div class="mf"><div class="ml">Veľkosť/typ</div><input class="mi" id="dSize" placeholder="PDF · 4,2 MB"></div>
+    <div class="mf"><div class="ml">Ikona</div><input class="mi" id="dIcon" placeholder="📄" style="text-align:center;font-size:24px"></div>
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+      <div class="upload-zone-ic">📁</div>
+      <div class="upload-zone-txt">Kliknite pre výber súboru</div>
+      <div class="upload-zone-sub">PDF, obrázky, Word, Excel...</div>
     </div>
-    <button class="modal-save" onclick="withLoading(this,saveDoc)">Uložiť dokument</button>
+    <input type="file" id="fileInput" style="display:none" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.xls,.xlsx,.txt" onchange="onFileSelected(this)">
+    <div class="upload-file-name" id="uploadFileName"></div>
+    <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadProgressBar"></div></div>
+    <button class="modal-save" id="docSaveBtn" onclick="saveDoc()">Uložiť dokument</button>
     <button class="modal-cancel" onclick="closeModal('modalDoc')">Zrušiť</button>
   </div>
 </div>
@@ -809,6 +855,32 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
     <div class="mf"><div class="ml">Popis (voliteľné)</div><input class="mi" id="locDesc" placeholder="napr. Hlavná výrobná budova"></div>
     <button class="modal-save" onclick="withLoading(this,saveLocation)">Uložiť názov</button>
     <button class="modal-cancel" onclick="closeModal('modalLocation')">Zrušiť</button>
+  </div>
+</div>
+
+<!-- DOC VIEWER -->
+<div class="doc-viewer-overlay" id="docViewer">
+  <div class="doc-viewer-header">
+    <button class="doc-viewer-close" onclick="closeDocViewer()">✕</button>
+    <div class="doc-viewer-title" id="docViewerTitle">Dokument</div>
+  </div>
+  <div class="doc-viewer-body" id="docViewerBody">
+    <div class="doc-viewer-unsupported">
+      <div class="doc-ic">📄</div>
+      <div>Načítavanie...</div>
+    </div>
+  </div>
+</div>
+
+<!-- DOC VIEWER -->
+<div class="doc-viewer-bg" id="docViewer" style="display:none">
+  <div class="doc-viewer-hdr">
+    <button class="doc-viewer-close" onclick="closeDocViewer()">✕</button>
+    <div class="doc-viewer-title" id="docViewerTitle">Dokument</div>
+    <div id="docCachedBadge" class="doc-viewer-cached" style="display:none">📥 Offline</div>
+  </div>
+  <div class="doc-viewer-body" id="docViewerBody">
+    <div class="doc-viewer-loading">⏳ Načítavam...</div>
   </div>
 </div>
 
@@ -1345,6 +1417,17 @@ async function deleteAllNotifications(){
 }
 
 function openMachinesFromNotif(){goTab('machines');}
+function renderProfile(){
+  // Show/hide admin sections based on current role
+  const adminRows=document.getElementById('profAdminRows');
+  if(adminRows){
+    adminRows.style.display=userRole==='admin'?'block':'none';
+  }
+  const profEmail=document.getElementById('profEmail');
+  if(profEmail)profEmail.textContent=CU?.email||'—';
+  updateProfileOfflineStatus();
+}
+
 function updateProfileOfflineStatus(){
   const onlineEl=document.getElementById('profOnlineStatus');
   const queueRow=document.getElementById('profOfflineQueueRow');
@@ -1884,6 +1967,8 @@ function goTab(t,pushHistory=true){
     document.getElementById('mapOv')?.classList.remove('on');
     document.getElementById('mapSheet')?.classList.remove('on');
   }
+  // Render profile dynamically when opened
+  if(t==='profile')renderProfile();
   // Reset machines filter when navigating to machines tab via navbar
   if(t==='machines'){
     const si=document.getElementById('srchInp');
@@ -1958,7 +2043,7 @@ function openDetail(id){
         <div class="dsb">${specs.map(r=>`<div class="drow"><div class="drk">${r[0]}</div><div class="drv">${r[1]}</div></div>`).join('')}</div>
       </div>
       <div class="dsec"><div class="dsh" onclick="togSec(this)"><div class="dsh-title">Dokumentácia</div><div class="dsh-arr op">▾</div></div>
-        <div class="dsb">${m.docs.length?m.docs.map(d=>`<div class="docrow"><div class="docic">${d.icon}</div><div style="flex:1"><div style="font-size:14px;font-weight:600">${escHtml(d.name)}</div><div style="font-size:12px;color:var(--gray)">${escHtml(d.meta||'')}</div></div><span style="color:var(--gray2);font-size:18px">›</span></div>`).join(''):'<div style="padding:14px 16px;font-size:13px;color:var(--gray)">Žiadna dokumentácia</div>'}</div>
+        <div class="dsb">${m.docs.length?m.docs.map(d=>`<div class="docrow" onclick="openDoc('${d.id}','${d.machine_id}')"><div class="docic">${d.icon||'📄'}</div><div style="flex:1"><div style="font-size:14px;font-weight:600">${escHtml(d.name)}</div><div style="font-size:12px;color:var(--gray)">${escHtml(d.meta||'')}</div></div><span style="color:var(--g1);font-size:18px">›</span></div>`).join(''):'<div style="padding:14px 16px;font-size:13px;color:var(--gray)">Žiadna dokumentácia</div>'}</div>
       </div>
       <div style="height:16px"></div>
     </div>
@@ -2454,13 +2539,126 @@ async function saveMachine(){
   showToast(editId?'✅ Stroj upravený':'✅ Stroj pridaný');
 }
 async function delMachine(id){if(!confirm('Odstrániť stroj?'))return;await sb.from('machines').delete().eq('id',id);await loadData();renderAdminMachines();renderAdminDocs();renderAdminParts();renderAdminTasks();renderAdminStats();renderDemos();renderML(MACHINES);showToast('🗑 Stroj odstránený');}
-function openAddDoc(mid){fillSelects();document.getElementById('dMachine').value=mid;['dName','dIcon','dSize'].forEach(id=>document.getElementById(id).value='');document.getElementById('dIcon').value='📄';openModal('modalDoc');}
-async function saveDoc(){const mid=document.getElementById('dMachine').value,name=document.getElementById('dName').value.trim();if(!name){alert('Zadajte názov');return;}const btn=document.querySelector('#modalDoc .modal-save');if(btn){btn.disabled=true;btn.textContent='Ukladám...';}
+function openAddDoc(mid){
+  fillSelects();document.getElementById('dMachine').value=mid;
+  _selectedFile=null;
+  const fn=document.getElementById('uploadFileName');if(fn){fn.textContent='';fn.style.display='none';}
+  const zone=document.getElementById('uploadZone');if(zone){zone.style.background='';zone.querySelector('.upload-zone-txt').textContent='Kliknite pre výber súboru';}
+  const fi=document.getElementById('fileInput');if(fi)fi.value='';
+  document.getElementById('dName').value='';
+  document.getElementById('dIcon').value='';
+  openModal('modalDoc');
+}
+let _selectedFile=null;
+
+function onFileSelected(input){
+  const file=input.files[0];if(!file)return;
+  _selectedFile=file;
+  const nameEl=document.getElementById('uploadFileName');
+  if(nameEl){nameEl.textContent='📎 '+file.name+' ('+formatFileSize(file.size)+')';nameEl.style.display='block';}
+  const iconInput=document.getElementById('dIcon');
+  if(iconInput&&!iconInput.value){
+    const ext=file.name.split('.').pop().toLowerCase();
+    const icons={pdf:'📄',jpg:'🖼️',jpeg:'🖼️',png:'🖼️',gif:'🖼️',webp:'🖼️',doc:'📝',docx:'📝',xls:'📊',xlsx:'📊',txt:'📃'};
+    iconInput.value=icons[ext]||'📄';
+  }
+  const nameInput=document.getElementById('dName');
+  if(nameInput&&!nameInput.value)nameInput.value=file.name.replace(/\.[^/.]+$/,'');
+  const zone=document.getElementById('uploadZone');
+  if(zone){zone.style.background='#E8F5E9';zone.querySelector('.upload-zone-txt').textContent=file.name;}
+}
+
+function formatFileSize(bytes){
+  if(bytes<1024)return bytes+' B';
+  if(bytes<1048576)return(bytes/1024).toFixed(1)+' KB';
+  return(bytes/1048576).toFixed(1)+' MB';
+}
+
+async function saveDoc(){
+  const mid=document.getElementById('dMachine').value;
+  const name=document.getElementById('dName').value.trim();
+  if(!name){alert('Zadajte názov dokumentu');return;}
+  if(!_selectedFile){alert('Vyberte súbor');return;}
+  const btn=document.getElementById('docSaveBtn');
+  if(btn){btn.disabled=true;btn.textContent='Nahrávam...';}
+  const progress=document.getElementById('uploadProgress');
+  const bar=document.getElementById('uploadProgressBar');
+  if(progress)progress.style.display='block';
   try{
-    const{error:de}=await sb.from('documents').insert({machine_id:mid,name,icon:document.getElementById('dIcon').value||'📄',meta:document.getElementById('dSize').value});
-    if(de){alert('Chyba: '+de.message);return;}
-    await loadData();closeModal('modalDoc');renderAdminDocs();showToast('✅ Dokument pridaný');
-  }finally{if(btn){btn.disabled=false;btn.textContent='Uložiť dokument';}}}
+    const ext=_selectedFile.name.split('.').pop();
+    const fileName=mid+'/'+Date.now()+'.'+ext;
+    const{data:upData,error:upErr}=await sb.storage.from('documents').upload(fileName,_selectedFile,{cacheControl:'3600',upsert:false});
+    if(upErr){alert('Chyba nahrávania: '+upErr.message);return;}
+    if(bar)bar.style.width='70%';
+    const{error:de}=await sb.from('documents').insert({
+      machine_id:mid,name,
+      icon:document.getElementById('dIcon').value||'📄',
+      meta:formatFileSize(_selectedFile.size)+' · '+ext.toUpperCase(),
+      file_url:upData.path
+    });
+    if(de){alert('Chyba uloženia: '+de.message);return;}
+    if(bar)bar.style.width='100%';
+    _selectedFile=null;
+    await loadData();closeModal('modalDoc');renderAdminDocs();showToast('✅ Dokument nahraný');
+  }catch(e){alert('Chyba: '+e.message);}
+  finally{
+    if(btn){btn.disabled=false;btn.textContent='Uložiť dokument';}
+    if(progress)progress.style.display='none';
+    if(bar)bar.style.width='0';
+  }
+}
+
+const DOC_CACHE={};
+
+async function openDoc(docId,machineId){
+  const m=MACHINES.find(m=>m.id===machineId);
+  const d=m?.docs?.find(d=>String(d.id)===String(docId));
+  if(!d){showToast('❌ Dokument nenájdený');return;}
+  const viewer=document.getElementById('docViewer');
+  const title=document.getElementById('docViewerTitle');
+  const body=document.getElementById('docViewerBody');
+  if(!viewer)return;
+  title.textContent=d.name;
+  body.innerHTML='<div class="doc-viewer-unsupported"><div class="doc-ic">⏳</div><div style="color:#fff">Načítavanie...</div></div>';
+  viewer.classList.add('open');
+  if(!d.file_url){
+    body.innerHTML='<div class="doc-viewer-unsupported"><div class="doc-ic">📄</div><div style="color:#fff">'+escHtml(d.name)+'</div><div style="color:rgba(255,255,255,.5);margin-top:8px;font-size:12px">Súbor nebol nahraný k tomuto dokumentu</div></div>';
+    return;
+  }
+  if(DOC_CACHE[docId]){renderDocContent(body,DOC_CACHE[docId].url,DOC_CACHE[docId].ext,d.name);return;}
+  if(!navigator.onLine){
+    body.innerHTML='<div class="doc-viewer-unsupported"><div class="doc-ic">📵</div><div style="color:#fff">Offline</div><div style="color:rgba(255,255,255,.5);font-size:12px;margin-top:8px">Dokument nie je dostupný bez internetu</div></div>';
+    return;
+  }
+  try{
+    const{data,error}=await sb.storage.from('documents').createSignedUrl(d.file_url,3600);
+    if(error||!data?.signedUrl)throw new Error(error?.message||'Chyba URL');
+    const ext=d.file_url.split('.').pop().toLowerCase();
+    DOC_CACHE[docId]={url:data.signedUrl,ext};
+    renderDocContent(body,data.signedUrl,ext,d.name);
+  }catch(e){
+    body.innerHTML='<div class="doc-viewer-unsupported"><div class="doc-ic">❌</div><div style="color:#fff">Chyba načítania</div></div>';
+  }
+}
+
+function renderDocContent(body,url,ext,name){
+  if(['jpg','jpeg','png','gif','webp'].includes(ext)){
+    body.innerHTML='<img src="'+url+'" alt="'+escHtml(name)+'" draggable="false" oncontextmenu="return false" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;-webkit-user-select:none;user-select:none;pointer-events:none">';
+  }else if(ext==='pdf'){
+    body.innerHTML='<iframe src="'+url+'#toolbar=0&navpanes=0" style="width:100%;height:100%;border:none;border-radius:8px"></iframe>';
+  }else{
+    const btn=document.createElement('button');
+    btn.textContent='Otvoriť →';
+    btn.style.cssText='background:#2E7D32;color:#fff;border:none;border-radius:12px;padding:12px 24px;font-size:14px;font-weight:700;cursor:pointer';
+    btn.onclick=()=>window.open(url,'_blank');
+    body.innerHTML='<div class="doc-viewer-unsupported"><div class="doc-ic">📄</div><div style="color:#fff;font-size:15px;font-weight:700;margin-bottom:8px">'+escHtml(name)+'</div><div style="color:rgba(255,255,255,.5);font-size:12px;margin-bottom:20px">'+ext.toUpperCase()+' súbor</div></div>';
+    body.firstChild.appendChild(btn);
+  }
+}
+
+function closeDocViewer(){
+  document.getElementById('docViewer')?.classList.remove('open');
+}
 async function delDoc(id){if(!confirm('Odstrániť?'))return;await sb.from('documents').delete().eq('id',id);await loadData();renderAdminDocs();showToast('🗑 Odstránené');}
 function openAddPart(mid){fillSelects();document.getElementById('ptMachine').value=mid;['ptName','ptPN'].forEach(id=>document.getElementById(id).value='');document.getElementById('ptIcon').value='🔩';document.getElementById('ptQty').value='0';document.getElementById('ptMinQty').value='0';openModal('modalPart');}
 async function savePart(){

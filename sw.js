@@ -1,4 +1,4 @@
-const CACHE = 'zeo-udrzba-v9';
+const CACHE = 'zeo-udrzba-v10';
 const ASSETS = [
   '/',
   '/index.html',
