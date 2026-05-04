@@ -1,35 +1,51 @@
-const CACHE = 'zeo-udrzba-v7';
-const ASSETS = ['/manifest.json', '/logo.png', '/icon-192.png', '/icon-512.png'];
+const CACHE = 'zeo-udrzba-v9';
+const ASSETS = [
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/logo.png',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/areal.png',
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())
+    caches.open(CACHE)
+      .then(c => c.addAll(ASSETS))
+      .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
-  
-  // NEVER cache Supabase API requests
+
+  // Supabase API - network first, no cache (live data)
   if (url.hostname.includes('supabase.co')) {
-    return; // let browser handle directly
+    e.respondWith(
+      fetch(e.request, { cache: 'no-store' })
+        .catch(() => new Response(JSON.stringify([]), {
+          headers: { 'Content-Type': 'application/json' }
+        }))
+    );
+    return;
   }
-  
+
+  // HTML - network first, fallback to cache
   const isHTML = e.request.mode === 'navigate' ||
                  (e.request.headers.get('accept') || '').includes('text/html') ||
                  url.pathname === '/' ||
                  url.pathname.endsWith('.html');
 
-  // NETWORK-ONLY for HTML (always fresh app)
   if (isHTML) {
     e.respondWith(
       fetch(e.request, { cache: 'no-store' })
@@ -40,12 +56,14 @@ self.addEventListener('fetch', e => {
           }
           return res;
         })
-        .catch(() => caches.match(e.request).then(c => c || caches.match('/index.html')))
+        .catch(() =>
+          caches.match('/index.html').then(c => c || caches.match('/'))
+        )
     );
     return;
   }
 
-  // CACHE-FIRST for static assets only (icons, manifest)
+  // Static assets (images, icons) - cache first, then network
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
@@ -55,7 +73,7 @@ self.addEventListener('fetch', e => {
           caches.open(CACHE).then(c => c.put(e.request, clone));
         }
         return res;
-      });
+      }).catch(() => cached);
     })
   );
 });
