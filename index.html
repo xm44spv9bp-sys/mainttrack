@@ -2646,11 +2646,12 @@ async function renderDocContent(body,url,ext,name){
     body.innerHTML='<img src="'+url+'" alt="'+escHtml(name)+'" draggable="false" oncontextmenu="return false" style="max-width:100%;height:auto;object-fit:contain;border-radius:8px;-webkit-user-select:none;user-select:none;pointer-events:none">';
   } else if(ext==='pdf'){
     // PDF viewer - render at 2x quality, CSS zoom for responsiveness
+    body.innerHTML=''; // Clear loading spinner
     body.style.cssText='flex:1;overflow:scroll;-webkit-overflow-scrolling:touch;display:block;padding:0;background:#111';
 
     // Zoom bar
     const zBar=document.createElement('div');
-    zBar.style.cssText='position:sticky;top:0;z-index:10;display:flex;justify-content:center;align-items:center;gap:12px;padding:8px 16px;background:rgba(0,0,0,.85);backdrop-filter:blur(10px)';
+    zBar.style.cssText='position:sticky;top:0;left:0;z-index:10;display:flex;justify-content:center;align-items:center;gap:12px;padding:8px 16px;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);width:100%;box-sizing:border-box';
     const zminus=document.createElement('button');zminus.textContent='−';
     zminus.style.cssText='background:rgba(255,255,255,.2);border:none;color:#fff;width:42px;height:42px;border-radius:50%;font-size:24px;cursor:pointer;line-height:1';
     const zlbl=document.createElement('span');
@@ -2666,23 +2667,20 @@ async function renderDocContent(body,url,ext,name){
     // Pages container - zoom applied here via CSS
     const pagesEl=document.createElement('div');
     pagesEl.id='pdfPages';
-    pagesEl.style.cssText='padding:8px;transform-origin:top center;transition:transform .15s';
+    pagesEl.style.cssText='padding:8px;transform-origin:top left;transition:transform .15s;display:inline-block;min-width:100%';
     body.appendChild(pagesEl);
 
     let cssZoom=1.0;
 
-    zminus.onclick=()=>{
-      cssZoom=Math.max(0.5,parseFloat((cssZoom-0.2).toFixed(2)));
+    function applyZoom(){
+      pagesEl.style.transformOrigin='top left';
       pagesEl.style.transform='scale('+cssZoom+')';
-      pagesEl.style.marginBottom=(cssZoom<1?(cssZoom-1)*pagesEl.scrollHeight:0)+'px';
+      // Adjust container so scroll area is correct
+      pagesEl.style.width=(100/cssZoom)+'%';
       zlbl.textContent=Math.round(cssZoom*100)+'%';
-    };
-    zplus.onclick=()=>{
-      cssZoom=Math.min(4.0,parseFloat((cssZoom+0.2).toFixed(2)));
-      pagesEl.style.transform='scale('+cssZoom+')';
-      pagesEl.style.transformOrigin='top center';
-      zlbl.textContent=Math.round(cssZoom*100)+'%';
-    };
+    }
+    zminus.onclick=()=>{cssZoom=Math.max(0.5,parseFloat((cssZoom-0.2).toFixed(2)));applyZoom();};
+    zplus.onclick=()=>{cssZoom=Math.min(4.0,parseFloat((cssZoom+0.2).toFixed(2)));applyZoom();};
 
     try{
       if(!window.pdfjsLib){
