@@ -2706,13 +2706,21 @@ async function renderDocContent(body,url,ext,name){
       },50);
     }
 
-    // On zoom - mark all as needing re-render, then render visible
+    // On zoom - re-render visible pages at new scale
     async function setZoom(delta){
       pdfScale=Math.min(4,Math.max(0.5,parseFloat((pdfScale+delta).toFixed(2))));
       zlbl.textContent=Math.round(pdfScale*100)+'%';
-      // Mark all pages as needing re-render
-      pagesEl.querySelectorAll('[data-page]').forEach(w=>w.dataset.rendering='0');
-      renderVisible();
+      // Force re-render all (reset rendering flag)
+      pagesEl.querySelectorAll('[data-page]').forEach(w=>{w.dataset.rendering='0';});
+      // Immediately render visible pages
+      clearTimeout(scrollTimer);
+      const wraps=pagesEl.querySelectorAll('[data-page]');
+      for(const w of wraps){
+        const r=w.getBoundingClientRect();
+        if(r.top<window.innerHeight+800&&r.bottom>-400){
+          await renderOnePage(w);
+        }
+      }
     }
     zminus.onclick=()=>setZoom(-0.25);
     zplus.onclick=()=>setZoom(0.25);
