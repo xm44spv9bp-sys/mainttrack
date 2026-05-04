@@ -551,11 +551,15 @@ html,body{height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-syst
         <div class="phero-role" id="profRole">Strojný údržbár</div>
       </div>
       <div class="pbody">
-        <div class="pgrp">
+        <div class="pgrp" id="profAdminRows" style="display:none">
           <div class="prow" style="cursor:pointer" onclick="openEditProfile()"><div class="pric prg">✏️</div><div class="prlbl">Upraviť meno</div><span style="color:var(--gray2);font-size:18px">›</span></div>
           <div class="prow" style="cursor:pointer" onclick="openChangePassword()"><div class="pric prb">🔑</div><div class="prlbl">Zmeniť heslo</div><span style="color:var(--gray2);font-size:18px">›</span></div>
+        </div>
+        <div class="pgrp">
+          <div class="prow"><div class="pric" style="background:#E3F2FD">📧</div><div class="prlbl">Email</div><span id="profEmail" style="font-size:12px;color:var(--gray);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</span></div>
           <div class="prow"><div class="pric prb">📱</div><div class="prlbl">Verzia aplikácie</div><span style="font-size:13px;color:var(--gray)">3.0.0</span></div>
-          <div class="prow"><div class="pric prg">🔐</div><div class="prlbl">Auth</div><span style="font-size:13px;color:var(--g1);font-weight:700">Aktívne ✅</span></div>
+          <div class="prow"><div class="pric prg">🔐</div><div class="prlbl">Stav pripojenia</div><span id="profOnlineStatus" style="font-size:13px;color:var(--g1);font-weight:700">Online ✅</span></div>
+          <div class="prow" id="profOfflineQueueRow" style="display:none"><div class="pric" style="background:#FFF3E0">📥</div><div class="prlbl">Čakajúce zmeny</div><span id="profOfflineCount" style="font-size:13px;color:var(--ora);font-weight:700">0</span></div>
         </div>
         <button class="lout-btn" onclick="doLogout()">Odhlásiť sa</button>
       </div>
@@ -1290,6 +1294,11 @@ function setupDashboard(name){
   document.getElementById('profAvatar').textContent=init;
   document.getElementById('profName').textContent=name;
   document.getElementById('profRole').textContent=userRole==='admin'?'⚙️ Administrátor':'👷 Strojný údržbár';
+  const adminRows=document.getElementById('profAdminRows');
+  if(adminRows)adminRows.style.display=userRole==='admin'?'block':'none';
+  const profEmail=document.getElementById('profEmail');
+  if(profEmail)profEmail.textContent=CU?.email||'—';
+  updateProfileOfflineStatus();
   document.getElementById('st-machines').textContent=MACHINES.length;
   document.getElementById('st-tasks').textContent=TASKS.filter(t=>!t.is_done).length;
   const totalParts=MACHINES.reduce((s,m)=>s+m.parts.length,0);
@@ -1336,6 +1345,19 @@ async function deleteAllNotifications(){
 }
 
 function openMachinesFromNotif(){goTab('machines');}
+function updateProfileOfflineStatus(){
+  const onlineEl=document.getElementById('profOnlineStatus');
+  const queueRow=document.getElementById('profOfflineQueueRow');
+  const queueCnt=document.getElementById('profOfflineCount');
+  if(onlineEl){
+    if(navigator.onLine){onlineEl.textContent='Online ✅';onlineEl.style.color='var(--g1)';}
+    else{onlineEl.textContent='Offline 📵';onlineEl.style.color='var(--ora)';}
+  }
+  const cnt=_offlineQueue?.length||0;
+  if(queueRow)queueRow.style.display=cnt>0?'flex':'none';
+  if(queueCnt)queueCnt.textContent=cnt;
+}
+
 function openMachinesTab(){goTab('machines');}
 
 // ── CLOCK ──
