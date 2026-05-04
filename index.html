@@ -2712,10 +2712,19 @@ async function renderDocContent(body,url,ext,name){
           if(r.top<window.innerHeight+600&&r.bottom>-200){
             w.dataset.done='1';
             const page=await pdfDoc.getPage(parseInt(w.dataset.page));
-            const vp=page.getViewport({scale:(W/(page.getViewport({scale:1}).width))*2});
+            // Render at high fixed resolution for sharp text
+            const naturalVp=page.getViewport({scale:1});
+            const targetW=Math.max(1200, W*2); // at least 1200px wide
+            const renderScale=targetW/naturalVp.width;
+            const vp=page.getViewport({scale:renderScale});
             const cv=document.createElement('canvas');
             cv.width=vp.width;cv.height=vp.height;
-            cv.style.cssText='width:100%;display:block;-webkit-touch-callout:none;user-select:none';
+            // CSS width = screen width so image-pixels map to screen pixels
+            cv.style.width=W+'px';
+            cv.style.height='auto';
+            cv.style.display='block';
+            cv.style.webkitTouchCallout='none';
+            cv.style.userSelect='none';
             cv.oncontextmenu=()=>false;
             w.appendChild(cv);
             await page.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
