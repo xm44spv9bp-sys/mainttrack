@@ -2019,26 +2019,36 @@ function renderML(list){
   });
   const multiLoc=Object.keys(grouped).length>1;
   let out='';
+  let locIdx=0;
   Object.entries(grouped).forEach(([loc,subs])=>{
-    if(multiLoc) out+=`<div style="padding:10px 16px 4px;font-size:11px;font-weight:700;color:var(--g1);text-transform:uppercase;letter-spacing:.07em">📍 ${escHtml(loc)}</div>`;
-    const multiSub=Object.keys(subs).filter(s=>s!=='—').length>0;
-    Object.entries(subs).forEach(([sub,machines],si)=>{
-      const subId='sub_'+si+'_'+Math.random().toString(36).slice(2,6);
-      // Sublocation header - clickable to expand/collapse
-      if(multiSub&&sub!=='—'){
-        out+=`<div onclick="toggleSub('${subId}')" style="padding:10px 16px;font-size:13px;font-weight:600;color:var(--text);background:var(--white);border:.5px solid var(--border);border-radius:12px;margin:4px 12px;cursor:pointer;display:flex;align-items:center;gap:8px">
-          <span style="font-size:16px">🔹</span>
+    const locId='loc_'+locIdx++;
+    const totalInLoc=Object.values(subs).reduce((s,a)=>s+a.length,0);
+    const hasSubs=Object.keys(subs).some(s=>s!=='—');
+    // Location header - always collapsible, starts COLLAPSED
+    out+=`<div onclick="toggleGroup('${locId}')" style="padding:11px 16px;font-size:13px;font-weight:700;color:var(--white);background:var(--g1);border-radius:12px;margin:4px 12px 2px;cursor:pointer;display:flex;align-items:center;gap:8px">
+      <span>📍</span>
+      <span style="flex:1">${escHtml(loc)}</span>
+      <span style="opacity:.8;font-size:12px;font-weight:500">${totalInLoc}</span>
+      <span id="${locId}_arr" style="transition:transform .2s;transform:rotate(-90deg)">▾</span>
+    </div>
+    <div id="${locId}" style="display:none">`;
+    let subIdx=0;
+    Object.entries(subs).forEach(([sub,machines])=>{
+      const subId=locId+'_sub_'+subIdx++;
+      if(hasSubs&&sub!=='—'){
+        // Sublocation header - collapsible, starts COLLAPSED
+        out+=`<div onclick="toggleGroup('${subId}')" style="padding:9px 16px 9px 24px;font-size:13px;font-weight:600;color:var(--text);background:var(--white);border:.5px solid var(--border);border-radius:10px;margin:3px 12px 2px;cursor:pointer;display:flex;align-items:center;gap:8px">
+          <span style="color:var(--g1)">🔹</span>
           <span style="flex:1">${escHtml(sub)}</span>
           <span style="color:var(--gray);font-size:12px">${machines.length}</span>
-          <span id="${subId}_arr" style="color:var(--gray);transition:transform .2s">▾</span>
+          <span id="${subId}_arr" style="transition:transform .2s;transform:rotate(-90deg)">▾</span>
         </div>
-        <div id="${subId}" style="margin:0 12px 4px">`;
+        <div id="${subId}" style="display:none;padding:0 4px">`;
       } else {
-        out+=`<div style="margin:0 12px 4px">`;
+        out+='<div style="padding:0 4px">';
       }
-      // Machine rows
-      machines.forEach((m)=>{
-        out+=`<div class="mc" onclick="openDetail('${m.id}')" style="margin-bottom:6px">
+      machines.forEach(m=>{
+        out+=`<div class="mc" onclick="openDetail('${m.id}')" style="margin:3px 8px 3px">
           <div class="mc-icon" style="background:${m.status==='e'?'#FFEBEE':m.status==='m'?'#FFF3E0':'#E8F5E9'}">${m.icon||'⚙️'}</div>
           <div style="flex:1;min-width:0">
             <div class="mc-name">${escHtml(m.name)}</div>
@@ -2049,18 +2059,20 @@ function renderML(list){
       });
       out+='</div>';
     });
+    out+='</div>';
   });
   document.getElementById('mList').innerHTML=out;
 }
 
-function toggleSub(id){
+function toggleGroup(id){
   const el=document.getElementById(id);
   const arr=document.getElementById(id+'_arr');
   if(!el)return;
-  const hidden=el.style.display==='none';
+  const hidden=el.style.display==='none'||el.style.display==='';
   el.style.display=hidden?'block':'none';
-  if(arr)arr.style.transform=hidden?'':'rotate(-90deg)';
+  if(arr)arr.style.transform=hidden?'rotate(0deg)':'rotate(-90deg)';
 }
+
 
 function filterM(q){renderML(MACHINES.filter(m=>m.name.toLowerCase().includes(q.toLowerCase())||m.model.toLowerCase().includes(q.toLowerCase())||m.location.toLowerCase().includes(q.toLowerCase())));}
 
