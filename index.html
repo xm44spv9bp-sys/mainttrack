@@ -2279,16 +2279,49 @@ function showAllMachinesForLocation(locName){
   mList.innerHTML='';
   mList.appendChild(banner);
 
-  const div=document.createElement('div');
-  div.innerHTML=filtered.length
-    ?filtered.map(m=>`
-      <div class="mc" onclick="openDetail('${m.id}')">
-        <div class="mc-icon" style="background:${m.status==='e'?'#FFEBEE':m.status==='m'?'#FFF3E0':'#E8F5E9'}">${m.icon||'⚙️'}</div>
-        <div style="flex:1;min-width:0"><div class="mc-name">${escHtml(m.name)}</div><div class="mc-sub">${escHtml(m.sublocation||m.location)}${m.sublocation?" · "+escHtml(m.location):""}</div></div>
-        <span class="badge ${bc(m.status)}">${m.status_label}</span>
-      </div>`).join('')
-    :'<div class="empty-state">Žiadne stroje v tejto lokácii</div>';
-  mList.appendChild(div);
+  // Use renderML grouped output directly into mList after banner
+  if(!filtered.length){
+    const empty=document.createElement('div');
+    empty.className='empty-state';
+    empty.textContent='Žiadne stroje v tejto lokácii';
+    mList.appendChild(empty);
+  } else {
+    // Group by sublocation
+    const subs={};
+    filtered.forEach(m=>{
+      const sub=m.sublocation||'—';
+      if(!subs[sub])subs[sub]=[];
+      subs[sub].push(m);
+    });
+    const hasSubs=Object.keys(subs).some(s=>s!=='—');
+    let locIdx=0;
+    Object.entries(subs).forEach(([sub,machines])=>{
+      const subId='mapSub_'+locIdx++;
+      const wrap=document.createElement('div');
+      if(hasSubs&&sub!=='—'){
+        wrap.innerHTML=`<div onclick="toggleGroup('${subId}')" style="padding:9px 16px;font-size:13px;font-weight:600;color:var(--text);background:var(--white);border:.5px solid var(--border);border-radius:10px;margin:3px 0 2px;cursor:pointer;display:flex;align-items:center;gap:8px">
+          <span style="color:var(--g1)">🔹</span>
+          <span style="flex:1">${escHtml(sub)}</span>
+          <span style="color:var(--gray);font-size:12px">${machines.length}</span>
+          <span id="${subId}_arr" style="transition:transform .2s;transform:rotate(-90deg)">▾</span>
+        </div>
+        <div id="${subId}" style="display:none">
+          ${machines.map(m=>`<div class="mc" onclick="openDetail('${m.id}')" style="margin:3px 0">
+            <div class="mc-icon" style="background:${m.status==='e'?'#FFEBEE':m.status==='m'?'#FFF3E0':'#E8F5E9'}">${m.icon||'⚙️'}</div>
+            <div style="flex:1;min-width:0"><div class="mc-name">${escHtml(m.name)}</div></div>
+            <span class="badge ${bc(m.status)}">${m.status_label}</span>
+          </div>`).join('')}
+        </div>`;
+      } else {
+        wrap.innerHTML=machines.map(m=>`<div class="mc" onclick="openDetail('${m.id}')" style="margin:3px 0">
+          <div class="mc-icon" style="background:${m.status==='e'?'#FFEBEE':m.status==='m'?'#FFF3E0':'#E8F5E9'}">${m.icon||'⚙️'}</div>
+          <div style="flex:1;min-width:0"><div class="mc-name">${escHtml(m.name)}</div></div>
+          <span class="badge ${bc(m.status)}">${m.status_label}</span>
+        </div>`).join('');
+      }
+      mList.appendChild(wrap);
+    });
+  }
 
   // Clear search input
   const si=document.getElementById('srchInp');
