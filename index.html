@@ -2008,13 +2008,34 @@ function stopScan(){if(SA){cancelAnimationFrame(SA);SA=null;}if(SS){SS.getTracks
 
 // ── MACHINES ──
 function renderML(list){
-  document.getElementById('mList').innerHTML=list.length?list.map(m=>
-    `<div class="mc" onclick="openDetail('${m.id}')">
-      <div class="mc-icon" style="background:${m.status==='e'?'#FFEBEE':m.status==='m'?'#FFF3E0':'#E8F5E9'}">${m.icon||'⚙️'}</div>
-      <div style="flex:1;min-width:0"><div class="mc-name">${escHtml(m.name)}</div><div class="mc-sub">${escHtml(m.model)} · ${escHtml(m.location)}</div></div>
-      <span class="badge ${bc(m.status)}">${m.status_label}</span>
-    </div>`).join('')
-  :'<div class="empty-state">Žiadne stroje. Admin musí pridať stroje.</div>';
+  if(!list.length){document.getElementById('mList').innerHTML='<div class="empty-state">Žiadne stroje. Admin musí pridať stroje.</div>';return;}
+  // Group by location → sublocation
+  const grouped={};
+  list.forEach(m=>{
+    const loc=m.location||'Ostatné';
+    const sub=m.sublocation||'';
+    if(!grouped[loc])grouped[loc]={};
+    if(!grouped[loc][sub])grouped[loc][sub]=[];
+    grouped[loc][sub].push(m);
+  });
+  const multiLoc=Object.keys(grouped).length>1;
+  let out='';
+  Object.entries(grouped).forEach(([loc,subs])=>{
+    if(multiLoc) out+=`<div style="padding:10px 16px 4px;font-size:11px;font-weight:700;color:var(--g1);text-transform:uppercase;letter-spacing:.07em">📍 ${escHtml(loc)}</div>`;
+    Object.entries(subs).forEach(([sub,machines])=>{
+      if(sub) out+=`<div style="padding:5px 16px 3px;font-size:12px;font-weight:600;color:var(--gray);border-left:3px solid var(--g1);margin:4px 12px 2px">🔹 ${escHtml(sub)}</div>`;
+      out+='<div style="margin:0 12px 8px;background:var(--white);border-radius:14px;border:.5px solid var(--border);overflow:hidden">';
+      machines.forEach((m,i)=>{
+        out+=`<div class="mc" onclick="openDetail('${m.id}')" style="${i>0?'border-top:.5px solid var(--border)':''}">
+          <div class="mc-icon" style="background:${m.status==='e'?'#FFEBEE':m.status==='m'?'#FFF3E0':'#E8F5E9'}">${m.icon||'⚙️'}</div>
+          <div style="flex:1;min-width:0"><div class="mc-name">${escHtml(m.name)}</div>${m.sublocation?`<div class="mc-sub">${escHtml(m.sublocation)}</div>`:''}</div>
+          <span class="badge ${bc(m.status)}">${m.status_label}</span>
+        </div>`;
+      });
+      out+='</div>';
+    });
+  });
+  document.getElementById('mList').innerHTML=out;
 }
 function filterM(q){renderML(MACHINES.filter(m=>m.name.toLowerCase().includes(q.toLowerCase())||m.model.toLowerCase().includes(q.toLowerCase())||m.location.toLowerCase().includes(q.toLowerCase())));}
 
@@ -2034,7 +2055,7 @@ function openDetail(id){
       <div style="width:64px;height:64px;border-radius:14px;background:${m.status==='e'?'#FFEBEE':m.status==='m'?'#FFF3E0':'#E8F5E9'};display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0">${m.icon||'⚙️'}</div>
       <div style="flex:1;min-width:0">
         <div class="dmc-name">${escHtml(m.name)}</div><div class="dmc-model">${escHtml(m.model)}</div>
-        <div class="dmc-loc">${escHtml(m.location)}</div><span class="badge ${bc(m.status)}">${m.status_label}</span>
+        <div class="dmc-loc">${m.sublocation?escHtml(m.sublocation)+" · ":""} ${escHtml(m.location)}</div><span class="badge ${bc(m.status)}">${m.status_label}</span>
       </div>
     </div>
     <div class="seg"><button class="seg-b on" id="segSpec" onclick="swSeg('spec')">Špecifikácie</button><button class="seg-b" id="segParts" onclick="swSeg('parts')">Diely & Úlohy</button></div>
@@ -2226,7 +2247,7 @@ function showAllMachinesForLocation(locName){
     ?filtered.map(m=>`
       <div class="mc" onclick="openDetail('${m.id}')">
         <div class="mc-icon" style="background:${m.status==='e'?'#FFEBEE':m.status==='m'?'#FFF3E0':'#E8F5E9'}">${m.icon||'⚙️'}</div>
-        <div style="flex:1;min-width:0"><div class="mc-name">${escHtml(m.name)}</div><div class="mc-sub">${escHtml(m.model)} · ${escHtml(m.location)}</div></div>
+        <div style="flex:1;min-width:0"><div class="mc-name">${escHtml(m.name)}</div><div class="mc-sub">${escHtml(m.sublocation||m.location)}${m.sublocation?" · "+escHtml(m.location):""}</div></div>
         <span class="badge ${bc(m.status)}">${m.status_label}</span>
       </div>`).join('')
     :'<div class="empty-state">Žiadne stroje v tejto lokácii</div>';
