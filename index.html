@@ -2009,11 +2009,10 @@ function stopScan(){if(SA){cancelAnimationFrame(SA);SA=null;}if(SS){SS.getTracks
 // ── MACHINES ──
 function renderML(list){
   if(!list.length){document.getElementById('mList').innerHTML='<div class="empty-state">Žiadne stroje. Admin musí pridať stroje.</div>';return;}
-  // Group by location → sublocation
   const grouped={};
   list.forEach(m=>{
     const loc=m.location||'Ostatné';
-    const sub=m.sublocation||'';
+    const sub=m.sublocation||'—';
     if(!grouped[loc])grouped[loc]={};
     if(!grouped[loc][sub])grouped[loc][sub]=[];
     grouped[loc][sub].push(m);
@@ -2022,13 +2021,29 @@ function renderML(list){
   let out='';
   Object.entries(grouped).forEach(([loc,subs])=>{
     if(multiLoc) out+=`<div style="padding:10px 16px 4px;font-size:11px;font-weight:700;color:var(--g1);text-transform:uppercase;letter-spacing:.07em">📍 ${escHtml(loc)}</div>`;
-    Object.entries(subs).forEach(([sub,machines])=>{
-      if(sub) out+=`<div style="padding:5px 16px 3px;font-size:12px;font-weight:600;color:var(--gray);border-left:3px solid var(--g1);margin:4px 12px 2px">🔹 ${escHtml(sub)}</div>`;
-      out+='<div style="margin:0 12px 8px;background:var(--white);border-radius:14px;border:.5px solid var(--border);overflow:hidden">';
-      machines.forEach((m,i)=>{
-        out+=`<div class="mc" onclick="openDetail('${m.id}')" style="${i>0?'border-top:.5px solid var(--border)':''}">
+    const multiSub=Object.keys(subs).filter(s=>s!=='—').length>0;
+    Object.entries(subs).forEach(([sub,machines],si)=>{
+      const subId='sub_'+si+'_'+Math.random().toString(36).slice(2,6);
+      // Sublocation header - clickable to expand/collapse
+      if(multiSub&&sub!=='—'){
+        out+=`<div onclick="toggleSub('${subId}')" style="padding:10px 16px;font-size:13px;font-weight:600;color:var(--text);background:var(--white);border:.5px solid var(--border);border-radius:12px;margin:4px 12px;cursor:pointer;display:flex;align-items:center;gap:8px">
+          <span style="font-size:16px">🔹</span>
+          <span style="flex:1">${escHtml(sub)}</span>
+          <span style="color:var(--gray);font-size:12px">${machines.length}</span>
+          <span id="${subId}_arr" style="color:var(--gray);transition:transform .2s">▾</span>
+        </div>
+        <div id="${subId}" style="margin:0 12px 4px">`;
+      } else {
+        out+=`<div style="margin:0 12px 4px">`;
+      }
+      // Machine rows
+      machines.forEach((m)=>{
+        out+=`<div class="mc" onclick="openDetail('${m.id}')" style="margin-bottom:6px">
           <div class="mc-icon" style="background:${m.status==='e'?'#FFEBEE':m.status==='m'?'#FFF3E0':'#E8F5E9'}">${m.icon||'⚙️'}</div>
-          <div style="flex:1;min-width:0"><div class="mc-name">${escHtml(m.name)}</div>${m.sublocation?`<div class="mc-sub">${escHtml(m.sublocation)}</div>`:''}</div>
+          <div style="flex:1;min-width:0">
+            <div class="mc-name">${escHtml(m.name)}</div>
+            ${m.sublocation&&m.sublocation!=='—'?`<div class="mc-sub">${escHtml(m.sublocation)}</div>`:''}
+          </div>
           <span class="badge ${bc(m.status)}">${m.status_label}</span>
         </div>`;
       });
@@ -2037,6 +2052,16 @@ function renderML(list){
   });
   document.getElementById('mList').innerHTML=out;
 }
+
+function toggleSub(id){
+  const el=document.getElementById(id);
+  const arr=document.getElementById(id+'_arr');
+  if(!el)return;
+  const hidden=el.style.display==='none';
+  el.style.display=hidden?'block':'none';
+  if(arr)arr.style.transform=hidden?'':'rotate(-90deg)';
+}
+
 function filterM(q){renderML(MACHINES.filter(m=>m.name.toLowerCase().includes(q.toLowerCase())||m.model.toLowerCase().includes(q.toLowerCase())||m.location.toLowerCase().includes(q.toLowerCase())));}
 
 // ── DETAIL ──
